@@ -63,6 +63,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CsvExportService.cs" />
     <Compile Include="Services\ForceControlLoop.cs" />
+    <Compile Include="Services\HandGuidingLoop.cs" />
     <Compile Include="Services\SerialForceSensorService.cs" />
     <Compile Include="Services\XArmRobotService.cs" />
     <Compile Include="Interop\Robot.cs" />

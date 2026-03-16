@@ -16,7 +16,8 @@ namespace RS232_PC
         {
             Idle,
             MechanicalTest,
-            ForceControl
+            ForceControl,
+            HandGuiding
         }
 
         private const int MeasurementTimeoutMilliseconds = 800;
@@ -26,9 +27,11 @@ namespace RS232_PC
         private readonly MeasurementSession _session;
         private readonly CsvExportService _csvExportService;
         private readonly ForceControlLoop _forceControlLoop;
+        private readonly HandGuidingLoop _handGuidingLoop;
 
         private RunMode _runMode;
         private bool _tickInProgress;
+        private bool _runSetupInProgress;
         private string _csvFilePath = string.Empty;
         private double _sessionStartZ;
         private string _activeUnit = "Kg";
@@ -76,11 +79,20 @@ namespace RS232_PC
         private NumericUpDown numericAlpha;
         private NumericUpDown numericMaxDeltaZ;
         private CheckBox checkBoxInvertControl;
+        private NumericUpDown numericHandGuidingTimerInterval;
+        private NumericUpDown numericHandGuidingDeadband;
+        private NumericUpDown numericHandGuidingGain;
+        private NumericUpDown numericHandGuidingMaxDeltaZ;
+        private NumericUpDown numericHandGuidingForceThreshold;
+        private NumericUpDown numericHandGuidingZWindow;
+        private CheckBox checkBoxHandGuidingAutoTare;
+        private CheckBox checkBoxHandGuidingInvertControl;
         private TextBox textBoxCsvPath;
         private Button buttonBrowseCsv;
         private Button buttonExportCsv;
         private Button buttonStartMechanical;
         private Button buttonStartForceControl;
+        private Button buttonStartHandGuiding;
         private Button buttonStopRun;
         private Button buttonClearSession;
         private Label labelRunState;
@@ -122,6 +134,7 @@ namespace RS232_PC
             _session = new MeasurementSession();
             _csvExportService = new CsvExportService();
             _forceControlLoop = new ForceControlLoop();
+            _handGuidingLoop = new HandGuidingLoop();
 
             BuildUi();
             WireServices();
@@ -187,6 +200,11 @@ namespace RS232_PC
                 Value = initialValue,
                 Width = 120
             };
+        }
+
+        private static bool IsKilogramUnit(string unit)
+        {
+            return string.Equals((unit ?? string.Empty).Trim(), "Kg", StringComparison.OrdinalIgnoreCase);
         }
 
         private static GroupBox CreateGroupSection(string title, Control content)

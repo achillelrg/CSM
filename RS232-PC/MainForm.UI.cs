@@ -729,20 +729,22 @@ namespace RS232_PC
             {
                 Dock = DockStyle.Fill,
                 Orientation = Orientation.Horizontal,
-                SplitterDistance = 290
+                SplitterDistance = 400
             };
 
             var configLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 3
+                ColumnCount = 4
             };
-            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33F));
-            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.34F));
+            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.0F));
+            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.0F));
+            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.0F));
+            configLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25.0F));
             configLayout.Controls.Add(BuildMechanicalTestGroup(), 0, 0);
             configLayout.Controls.Add(BuildForceControlGroup(), 1, 0);
-            configLayout.Controls.Add(BuildSessionGroup(), 2, 0);
+            configLayout.Controls.Add(BuildHandGuidingGroup(), 2, 0);
+            configLayout.Controls.Add(BuildSessionGroup(), 3, 0);
             split.Panel1.Controls.Add(configLayout);
 
             dataGridViewSamples = new DataGridView
@@ -895,6 +897,99 @@ namespace RS232_PC
             };
             buttonStartForceControl.Click += ButtonStartForceControl_Click;
             AddSettingRow(layout, 7, "Run", buttonStartForceControl);
+
+            groupBox.Controls.Add(layout);
+            return groupBox;
+        }
+
+        private GroupBox BuildHandGuidingGroup()
+        {
+            var groupBox = new GroupBox
+            {
+                Text = "Guidage manuel (effort nul sur Z)",
+                Dock = DockStyle.Fill
+            };
+
+            var layout = CreateSettingsTable(9);
+            numericHandGuidingTimerInterval = new NumericUpDown
+            {
+                Minimum = 50,
+                Maximum = 2000,
+                Increment = 50,
+                Value = 100,
+                Width = 120
+            };
+            AddSettingRow(layout, 0, "Timer (ms)", numericHandGuidingTimerInterval);
+
+            numericHandGuidingDeadband = new NumericUpDown
+            {
+                DecimalPlaces = 2,
+                Minimum = 0.00M,
+                Maximum = 10.0M,
+                Increment = 0.01M,
+                Value = 0.10M,
+                Width = 120
+            };
+            AddSettingRow(layout, 1, "Deadband", numericHandGuidingDeadband);
+
+            numericHandGuidingGain = CreateGainNumeric(0.80M);
+            AddSettingRow(layout, 2, "Gain", numericHandGuidingGain);
+
+            numericHandGuidingMaxDeltaZ = new NumericUpDown
+            {
+                DecimalPlaces = 2,
+                Minimum = 0.01M,
+                Maximum = 10.0M,
+                Increment = 0.05M,
+                Value = 0.50M,
+                Width = 120
+            };
+            AddSettingRow(layout, 3, "Max Delta Z", numericHandGuidingMaxDeltaZ);
+
+            numericHandGuidingForceThreshold = new NumericUpDown
+            {
+                DecimalPlaces = 2,
+                Minimum = 0.10M,
+                Maximum = 500.0M,
+                Increment = 0.50M,
+                Value = 5.00M,
+                Width = 120
+            };
+            AddSettingRow(layout, 4, "Force threshold", numericHandGuidingForceThreshold);
+
+            numericHandGuidingZWindow = new NumericUpDown
+            {
+                DecimalPlaces = 2,
+                Minimum = 0.10M,
+                Maximum = 200.0M,
+                Increment = 0.50M,
+                Value = 20.0M,
+                Width = 120
+            };
+            AddSettingRow(layout, 5, "Z safety window", numericHandGuidingZWindow);
+
+            checkBoxHandGuidingAutoTare = new CheckBox
+            {
+                Text = "Auto tare before start",
+                AutoSize = true,
+                Checked = true
+            };
+            AddSettingRow(layout, 6, "Preparation", checkBoxHandGuidingAutoTare);
+
+            checkBoxHandGuidingInvertControl = new CheckBox
+            {
+                Text = "Invert Z command",
+                AutoSize = true
+            };
+            AddSettingRow(layout, 7, "Direction", checkBoxHandGuidingInvertControl);
+
+            buttonStartHandGuiding = new Button
+            {
+                Text = "Start hand guiding",
+                AutoSize = true
+            };
+            buttonStartHandGuiding.Click += ButtonStartHandGuiding_Click;
+            AddSettingRow(layout, 8, "Run", buttonStartHandGuiding);
 
             groupBox.Controls.Add(layout);
             return groupBox;

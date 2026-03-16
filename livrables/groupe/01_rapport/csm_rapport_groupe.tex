@@ -64,6 +64,7 @@ L'application WinForms regroupe:
     \item la gestion du port serie du capteur
     \item la gestion du reseau xArm
     \item l'IHM de test et de supervision
+    \item un mode de guidage manuel a effort nul sur Z
     \item un mode de test mecanique avec export CSV
     \item un asservissement externe approche en force sur Z
     \item la reprise des commandes principales de l'interface xArm d'origine
@@ -140,6 +141,7 @@ L'onglet regroupe:
     \item les reglages du timer
     \item les seuils de securite
     \item le chemin de sortie CSV
+    \item le guidage manuel a effort nul
     \item le test mecanique
     \item l'asservissement en force
 \end{itemize}
@@ -171,7 +173,22 @@ La logique d'integration suit la sequence suivante:
     \item journalisation de la mesure dans la session
 \end{enumerate}
 
-Ce couplage est exploite a la fois dans le mode \texttt{Mechanical test} et dans le mode \texttt{Force control}.
+Ce couplage est exploite dans les modes \texttt{Guidage manuel}, \texttt{Mechanical test} et \texttt{Force control}.
+
+\section{Guidage manuel a effort nul}
+
+Le mode de guidage manuel permet au robot de ceder sur l'axe outil Z quand un operateur pousse ou tire sur le capteur.
+La logique retenue est simple et robuste:
+
+\begin{itemize}
+    \item tare avant demarrage
+    \item consigne d'effort fixe a zero
+    \item filtrage exponentiel
+    \item zone morte autour de zero
+    \item correction relative \texttt{MoveTool} sur Z
+\end{itemize}
+
+Ce mode ne constitue pas un freedrive 6 axes. Il s'agit d'un guidage manuel 1 axe, coherent avec le capteur scalaire utilise dans le projet.
 
 \section{Application de test mecanique}
 
@@ -210,6 +227,7 @@ Les gains et parametres sont a ajuster en seance selon le capteur et la directio
     \item test capteur reel
     \item connexion robot
     \item jog TOOL
+    \item guidage manuel
     \item test mecanique
     \item asservissement en force
 \end{itemize}

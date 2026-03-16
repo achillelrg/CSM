@@ -28,9 +28,14 @@ Fonctions et fichiers principaux a exploiter dans les annexes du rendu:
 4. Asservissement
 - RS232-PC/Services/ForceControlLoop.cs
   - Reset
-  - Update
+  - Compute
 
-5. Export et mesures
+5. Guidage manuel
+- RS232-PC/Services/HandGuidingLoop.cs
+  - Reset
+  - Compute
+
+6. Export et mesures
 - RS232-PC/Models/MeasurementSample.cs
 - RS232-PC/Models/MeasurementSession.cs
 - RS232-PC/Services/CsvExportService.cs

@@ -278,6 +278,11 @@ namespace RS232_PC
             StartRun(RunMode.ForceControl);
         }
 
+        private async void ButtonStartHandGuiding_Click(object sender, EventArgs e)
+        {
+            await StartHandGuidingAsync();
+        }
+
         private void ButtonStopRun_Click(object sender, EventArgs e)
         {
             StopRun("Run stopped by the user.");
@@ -328,8 +333,12 @@ namespace RS232_PC
 
             var pose = _robotService.GetCurrentPosition();
             var currentZ = pose.Length > 2 ? pose[2] : 0.0;
-            var zWindow = (double)numericZWindow.Value;
-            var threshold = (double)numericForceThreshold.Value;
+            var zWindow = _runMode == RunMode.HandGuiding
+                ? _handGuidingLoop.ZWindow
+                : (_runMode == RunMode.ForceControl ? _forceControlLoop.ZWindow : (double)numericZWindow.Value);
+            var threshold = _runMode == RunMode.HandGuiding
+                ? _handGuidingLoop.HardForceThreshold
+                : (_runMode == RunMode.ForceControl ? _forceControlLoop.HardForceThreshold : (double)numericForceThreshold.Value);
             var plannedDeltaZ = _runMode == RunMode.MechanicalTest
                 ? (double)numericMechanicalStepZ.Value
                 : 0.0;
@@ -360,6 +369,25 @@ namespace RS232_PC
                     stopReason = controlResult.StopReason;
                 }
             }
+            else if (_runMode == RunMode.HandGuiding)
+            {
+                if (!IsKilogramUnit(reading.Unit))
+                {
+                    stopReason = "Hand guiding requires the sensor unit Kg.";
+                }
+                else
+                {
+                    var controlResult = _handGuidingLoop.Compute(reading.Force, currentZ);
+                    filteredForce = controlResult.FilteredForce;
+                    setpoint = 0.0;
+                    error = controlResult.Error;
+                    plannedDeltaZ = controlResult.DeltaZ;
+                    if (string.IsNullOrEmpty(stopReason) && !string.IsNullOrEmpty(controlResult.StopReason))
+                    {
+                        stopReason = controlResult.StopReason;
+                    }
+                }
+            }
 
             if (string.IsNullOrEmpty(stopReason) && Math.Abs((currentZ + plannedDeltaZ) - _sessionStartZ) > zWindow)
             {
@@ -371,7 +399,9 @@ namespace RS232_PC
             _session.Add(new MeasurementSample
             {
                 Timestamp = reading.Timestamp,
-                Mode = _runMode == RunMode.MechanicalTest ? "MechanicalTest" : "ForceControl",
+                Mode = _runMode == RunMode.MechanicalTest
+                    ? "MechanicalTest"
+                    : (_runMode == RunMode.ForceControl ? "ForceControl" : "HandGuiding"),
                 Force = reading.Force,
                 Unit = reading.Unit,
                 FilteredForce = filteredForce,
@@ -403,33 +433,13 @@ namespace RS232_PC
 
         private void StartRun(RunMode mode)
         {
-            if (_runMode != RunMode.Idle)
+            if (mode == RunMode.HandGuiding)
             {
-                ShowWarning("A run is already active.");
                 return;
             }
 
-            if (legacyRobotTimer.Enabled)
+            if (!EnsureRunCanStart())
             {
-                legacyRobotTimer.Stop();
-                buttonLegacyTimer.Text = "Start Timer";
-            }
-
-            if (!_sensorService.IsOpen)
-            {
-                ShowWarning("Open the sensor serial port before starting a run.");
-                return;
-            }
-
-            if (!_robotService.IsConnected)
-            {
-                ShowWarning("Connect the robot before starting a run.");
-                return;
-            }
-
-            if (!_robotService.MotionEnabled)
-            {
-                ShowWarning("Enable robot motion before starting a run.");
                 return;
             }
 
@@ -462,6 +472,98 @@ namespace RS232_PC
             runTimer.Start();
         }
 
+        private async Task StartHandGuidingAsync()
+        {
+            if (!EnsureRunCanStart())
+            {
+                return;
+            }
+
+            _runSetupInProgress = true;
+            UpdateUiState();
+
+            try
+            {
+                ForceReading initialReading;
+                try
+                {
+                    initialReading = await _sensorService.RequestMeasurementAsync(MeasurementTimeoutMilliseconds);
+                }
+                catch (Exception ex)
+                {
+                    ShowWarning("Unable to validate the sensor unit before hand guiding.\r\n" + ex.Message);
+                    return;
+                }
+
+                if (!IsKilogramUnit(initialReading.Unit))
+                {
+                    ShowWarning("Hand guiding requires the sensor unit Kg.\r\nUse Change unit (U) until the sensor replies in Kg.");
+                    return;
+                }
+
+                if (checkBoxHandGuidingAutoTare.Checked)
+                {
+                    try
+                    {
+                        _sensorService.SendCommand("T");
+                        AppendSystemLog("Sensor tare command sent before hand guiding.");
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowWarning("Unable to tare the sensor before hand guiding.\r\n" + ex.Message);
+                        return;
+                    }
+
+                    await Task.Delay(300);
+                }
+
+                ForceReading validationReading;
+                try
+                {
+                    validationReading = await _sensorService.RequestMeasurementAsync(MeasurementTimeoutMilliseconds);
+                }
+                catch (Exception ex)
+                {
+                    ShowWarning("Unable to validate the sensor reading before hand guiding.\r\n" + ex.Message);
+                    return;
+                }
+
+                if (!IsKilogramUnit(validationReading.Unit))
+                {
+                    ShowWarning("Hand guiding requires the sensor unit Kg.\r\nUse Change unit (U) until the sensor replies in Kg.");
+                    return;
+                }
+
+                var pose = _robotService.GetCurrentPosition();
+                _sessionStartZ = pose.Length > 2 ? pose[2] : 0.0;
+                _session.Begin("HandGuiding");
+
+                _handGuidingLoop.Reset(_sessionStartZ);
+                _handGuidingLoop.Alpha = 0.35;
+                _handGuidingLoop.Deadband = (double)numericHandGuidingDeadband.Value;
+                _handGuidingLoop.Gain = (double)numericHandGuidingGain.Value;
+                _handGuidingLoop.MaxDeltaZPerTick = (double)numericHandGuidingMaxDeltaZ.Value;
+                _handGuidingLoop.ZWindow = (double)numericHandGuidingZWindow.Value;
+                _handGuidingLoop.HardForceThreshold = (double)numericHandGuidingForceThreshold.Value;
+                _handGuidingLoop.OutputSign = checkBoxHandGuidingInvertControl.Checked ? -1.0 : 1.0;
+
+                runTimer.Interval = (int)numericHandGuidingTimerInterval.Value;
+                _runMode = RunMode.HandGuiding;
+                _tickInProgress = false;
+                UpdateSessionSummary();
+
+                AppendSystemLog("Hand guiding started from Z=" +
+                    _sessionStartZ.ToString("F3", CultureInfo.InvariantCulture) +
+                    " with a zero-force target on TOOL Z.");
+                runTimer.Start();
+            }
+            finally
+            {
+                _runSetupInProgress = false;
+                UpdateUiState();
+            }
+        }
+
         private void StopRun(string reason)
         {
             if (_runMode == RunMode.Idle)
@@ -475,6 +577,41 @@ namespace RS232_PC
             UpdateUiState();
             AppendSystemLog(reason);
             ShowInformation(reason, "Run stopped");
+        }
+
+        private bool EnsureRunCanStart()
+        {
+            if (_runMode != RunMode.Idle || _runSetupInProgress)
+            {
+                ShowWarning("A run is already active or starting.");
+                return false;
+            }
+
+            if (legacyRobotTimer.Enabled)
+            {
+                legacyRobotTimer.Stop();
+                buttonLegacyTimer.Text = "Start Timer";
+            }
+
+            if (!_sensorService.IsOpen)
+            {
+                ShowWarning("Open the sensor serial port before starting a run.");
+                return false;
+            }
+
+            if (!_robotService.IsConnected)
+            {
+                ShowWarning("Connect the robot before starting a run.");
+                return false;
+            }
+
+            if (!_robotService.MotionEnabled)
+            {
+                ShowWarning("Enable robot motion before starting a run.");
+                return false;
+            }
+
+            return true;
         }
 
         private void RefreshSerialPortList()
@@ -594,60 +731,71 @@ namespace RS232_PC
             var robotConnected = _robotService.IsConnected;
             var motionEnabled = _robotService.MotionEnabled;
             var runActive = _runMode != RunMode.Idle;
+            var runBusy = runActive || _runSetupInProgress;
 
             labelSerialState.Text = serialOpen ? "Open" : "Closed";
             toolStripSerialStatus.Text = "Serial: " + (serialOpen ? "open" : "closed");
             UpdateRobotStateDisplay();
 
-            buttonOpenSerial.Enabled = !serialOpen && !runActive;
-            buttonCloseSerial.Enabled = serialOpen && !runActive;
-            buttonRefreshPorts.Enabled = !runActive;
-            comboSerialPorts.Enabled = !runActive && !serialOpen;
+            buttonOpenSerial.Enabled = !serialOpen && !runBusy;
+            buttonCloseSerial.Enabled = serialOpen && !runBusy;
+            buttonRefreshPorts.Enabled = !runBusy;
+            comboSerialPorts.Enabled = !runBusy && !serialOpen;
 
-            buttonMeasure.Enabled = serialOpen && !runActive;
-            buttonCalibrationStart.Enabled = serialOpen && !runActive;
-            buttonCalibrationStop.Enabled = serialOpen && !runActive;
-            buttonTare.Enabled = serialOpen && !runActive;
-            buttonUnitToggle.Enabled = serialOpen && !runActive;
-            buttonSendCustomSensorCommand.Enabled = serialOpen && !runActive;
-            textBoxCustomSensorCommand.Enabled = serialOpen && !runActive;
+            buttonMeasure.Enabled = serialOpen && !runBusy;
+            buttonCalibrationStart.Enabled = serialOpen && !runBusy;
+            buttonCalibrationStop.Enabled = serialOpen && !runBusy;
+            buttonTare.Enabled = serialOpen && !runBusy;
+            buttonUnitToggle.Enabled = serialOpen && !runBusy;
+            buttonSendCustomSensorCommand.Enabled = serialOpen && !runBusy;
+            textBoxCustomSensorCommand.Enabled = serialOpen && !runBusy;
 
-            buttonConnectRobot.Enabled = !robotConnected && !runActive;
-            buttonDisconnectRobot.Enabled = robotConnected && !runActive;
-            buttonEnableMotion.Enabled = robotConnected && !motionEnabled && !runActive;
-            buttonDisableMotion.Enabled = robotConnected && motionEnabled && !runActive;
-            buttonRefreshRobotState.Enabled = robotConnected && !runActive;
-            buttonMoveHome.Enabled = robotConnected && motionEnabled && !runActive;
-            buttonResetRobot.Enabled = robotConnected && !runActive;
+            buttonConnectRobot.Enabled = !robotConnected && !runBusy;
+            buttonDisconnectRobot.Enabled = robotConnected && !runBusy;
+            buttonEnableMotion.Enabled = robotConnected && !motionEnabled && !runBusy;
+            buttonDisableMotion.Enabled = robotConnected && motionEnabled && !runBusy;
+            buttonRefreshRobotState.Enabled = robotConnected && !runBusy;
+            buttonMoveHome.Enabled = robotConnected && motionEnabled && !runBusy;
+            buttonResetRobot.Enabled = robotConnected && !runBusy;
             buttonEmergencyStop.Enabled = robotConnected;
 
-            buttonStartMechanical.Enabled = serialOpen && robotConnected && motionEnabled && !runActive;
-            buttonStartForceControl.Enabled = serialOpen && robotConnected && motionEnabled && !runActive;
+            buttonStartMechanical.Enabled = serialOpen && robotConnected && motionEnabled && !runBusy;
+            buttonStartForceControl.Enabled = serialOpen && robotConnected && motionEnabled && !runBusy;
+            buttonStartHandGuiding.Enabled = serialOpen && robotConnected && motionEnabled && !runBusy;
             buttonStopRun.Enabled = runActive;
-            buttonBrowseCsv.Enabled = !runActive;
-            buttonClearSession.Enabled = !runActive;
-            buttonExportCsv.Enabled = !runActive && _session.Count > 0;
+            buttonBrowseCsv.Enabled = !runBusy;
+            buttonClearSession.Enabled = !runBusy;
+            buttonExportCsv.Enabled = !runBusy && _session.Count > 0;
+
+            numericHandGuidingTimerInterval.Enabled = !runBusy;
+            numericHandGuidingDeadband.Enabled = !runBusy;
+            numericHandGuidingGain.Enabled = !runBusy;
+            numericHandGuidingMaxDeltaZ.Enabled = !runBusy;
+            numericHandGuidingForceThreshold.Enabled = !runBusy;
+            numericHandGuidingZWindow.Enabled = !runBusy;
+            checkBoxHandGuidingAutoTare.Enabled = !runBusy;
+            checkBoxHandGuidingInvertControl.Enabled = !runBusy;
 
             if (buttonLegacyCreateArm != null)
             {
-                buttonLegacyCreateArm.Enabled = !robotConnected && !runActive;
-                buttonLegacyMotionArm.Enabled = robotConnected && !runActive;
-                buttonLegacyResetArm.Enabled = robotConnected && !runActive;
-                buttonLegacyGetJoint.Enabled = robotConnected && !runActive;
-                buttonLegacyGetPosition.Enabled = robotConnected && !runActive;
-                buttonLegacyGetBase.Enabled = robotConnected && !runActive;
-                buttonLegacyGetTcp.Enabled = robotConnected && !runActive;
-                buttonLegacyMoveHome.Enabled = robotConnected && motionEnabled && !runActive;
-                buttonLegacyMoveBase.Enabled = robotConnected && motionEnabled && !runActive;
-                buttonLegacyMoveTcp.Enabled = robotConnected && motionEnabled && !runActive;
-                buttonLegacyMoveAngle.Enabled = robotConnected && motionEnabled && !runActive;
-                buttonLegacyGetCollisionSensitivity.Enabled = robotConnected && !runActive;
-                buttonLegacySetCollisionSensitivity.Enabled = robotConnected && !runActive;
-                comboBoxLegacyCollisionSensitivity.Enabled = robotConnected && !runActive;
-                buttonLegacySelfCollision.Enabled = robotConnected && !runActive;
-                checkBoxLegacySelfCollision.Enabled = robotConnected && !runActive;
-                buttonLegacyTimer.Enabled = robotConnected && motionEnabled && !runActive;
-                textBoxLegacyRobotIp.Enabled = !robotConnected && !runActive;
+                buttonLegacyCreateArm.Enabled = !robotConnected && !runBusy;
+                buttonLegacyMotionArm.Enabled = robotConnected && !runBusy;
+                buttonLegacyResetArm.Enabled = robotConnected && !runBusy;
+                buttonLegacyGetJoint.Enabled = robotConnected && !runBusy;
+                buttonLegacyGetPosition.Enabled = robotConnected && !runBusy;
+                buttonLegacyGetBase.Enabled = robotConnected && !runBusy;
+                buttonLegacyGetTcp.Enabled = robotConnected && !runBusy;
+                buttonLegacyMoveHome.Enabled = robotConnected && motionEnabled && !runBusy;
+                buttonLegacyMoveBase.Enabled = robotConnected && motionEnabled && !runBusy;
+                buttonLegacyMoveTcp.Enabled = robotConnected && motionEnabled && !runBusy;
+                buttonLegacyMoveAngle.Enabled = robotConnected && motionEnabled && !runBusy;
+                buttonLegacyGetCollisionSensitivity.Enabled = robotConnected && !runBusy;
+                buttonLegacySetCollisionSensitivity.Enabled = robotConnected && !runBusy;
+                comboBoxLegacyCollisionSensitivity.Enabled = robotConnected && !runBusy;
+                buttonLegacySelfCollision.Enabled = robotConnected && !runBusy;
+                checkBoxLegacySelfCollision.Enabled = robotConnected && !runBusy;
+                buttonLegacyTimer.Enabled = robotConnected && motionEnabled && !runBusy;
+                textBoxLegacyRobotIp.Enabled = !robotConnected && !runBusy;
                 buttonLegacyMotionArm.Text = motionEnabled ? "Stop Motion xARM" : "Motion xARM";
                 if (!robotConnected && legacyRobotTimer.Enabled)
                 {
@@ -656,7 +804,7 @@ namespace RS232_PC
                 }
             }
 
-            labelRunState.Text = runActive ? _runMode.ToString() : "Idle";
+            labelRunState.Text = runActive ? _runMode.ToString() : (_runSetupInProgress ? "Starting" : "Idle");
             toolStripRunStatus.Text = "Run: " + labelRunState.Text;
             UpdateCurrentUnitLabel();
         }

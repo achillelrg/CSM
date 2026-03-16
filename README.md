@@ -6,6 +6,7 @@ Application WinForms C# pour le TP CSM:
 - connexion robot xArm sur le reseau
 - reprise des commandes principales de l'interface xARM d'origine dans l'onglet `xARM Base`
 - jog manuel en repere TOOL
+- mode `guidage manuel` a effort nul sur TOOL Z
 - mode `test mecanique` avec timer et export CSV
 - mode `asservissement en force Z` avec PID externe
 
@@ -59,7 +60,11 @@ L'application n'implemente pas de modele inverse externe. Elle pilote le robot v
    - choisir un fichier CSV
    - lancer `Mechanical test`
    - verifier remplissage du tableau
-4. Asservissement:
+4. Guidage manuel:
+   - lancer `Start hand guiding`
+   - pousser ou tirer legerement sur le capteur
+   - verifier que le robot suit sur Z pour reduire l'effort
+5. Asservissement:
    - regler seuil, fenetre Z, setpoint et gains
    - lancer `Force control`
 

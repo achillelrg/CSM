@@ -10,7 +10,7 @@ Ce document explique comment:
 - lancer l'application
 - tester le capteur de force avec l'application
 - tester la connexion robot xArm
-- executer les deux modes d'essai (`Mechanical test` et `Force control`)
+- executer les trois modes d'essai (`Guidage manuel`, `Mechanical test` et `Force control`)
 
 Le projet est prevu pour le **TP CSM Robot + Force** avec un **xArm6 (6 axes)**.
 
@@ -29,6 +29,7 @@ Le projet principal contient:
 - la gestion de la liaison serie du capteur
 - la gestion de la connexion reseau robot
 - le jog manuel en repere TOOL
+- le mode `Guidage manuel`
 - le mode `Mechanical test`
 - le mode `Force control`
 - l'export CSV
@@ -204,6 +205,7 @@ Il permet:
 - de regler les seuils de securite
 - de choisir le fichier CSV
 - de lancer:
+  - `Guidage manuel`
   - `Mechanical test`
   - `Force control`
 - de visualiser les echantillons en tableau
@@ -397,6 +399,53 @@ Elle fonctionne avec une logique d'asservissement externe approchee:
 - verifier qu'un arret manuel est toujours possible
 - utiliser `Emergency stop` en cas de doute
 
+## 12bis. Procedure de test `Guidage manuel`
+
+Objectif:
+
+- permettre au robot de ceder sur `Z` quand on pousse ou tire sur le capteur
+- ramener l'effort vers `0 Kg`
+- obtenir un guidage manuel 1 axe
+
+### 12bis.1 Principe
+
+Le mode `Guidage manuel` repose sur:
+
+- une tare avant demarrage
+- une consigne fixe a `0`
+- un filtrage exponentiel
+- une zone morte autour de zero
+- des petits deplacements relatifs `MoveTool` sur `Z`
+
+### 12bis.2 Procedure
+
+1. Ouvrir la liaison serie capteur.
+2. Verifier que le capteur repond en `Kg`.
+3. Connecter le robot.
+4. Activer le mouvement robot.
+5. Aller dans `Essais`.
+6. Regler:
+   - `Timer (ms)`
+   - `Deadband`
+   - `Gain`
+   - `Max Delta Z`
+   - `Force threshold`
+   - `Z safety window`
+7. Laisser `Auto tare before start` coche pour le premier essai.
+8. Cliquer sur `Start hand guiding`.
+9. Pousser legerement sur le capteur.
+10. Verifier que le robot se deplace dans le bon sens pour reduire l'effort.
+11. Tirer legerement sur le capteur.
+12. Verifier la reponse opposee.
+13. Si le sens est mauvais, arreter puis cocher `Invert Z command`.
+
+### 12bis.3 Precautions
+
+- commencer avec de petits efforts
+- conserver un `Max Delta Z` faible au debut
+- verifier que le capteur reste aligne avec l'axe `TOOL Z`
+- utiliser `Emergency stop` en cas de doute
+
 ## 13. Format du CSV
 
 Le CSV exporte reprend directement les colonnes du modele `MeasurementSample`:
@@ -469,8 +518,9 @@ Avant d'aller sur le robot reel, valider dans cet ordre:
 4. test du capteur reel
 5. connexion robot seule
 6. jog manuel TOOL
-7. test mecanique
-8. asservissement en force
+7. guidage manuel
+8. test mecanique
+9. asservissement en force
 
 ## 16. Fichiers importants a connaitre
 
@@ -484,6 +534,7 @@ Avant d'aller sur le robot reel, valider dans cet ordre:
 - `RS232-PC/Services/SerialForceSensorService.cs`
 - `RS232-PC/Services/XArmRobotService.cs`
 - `RS232-PC/Services/ForceControlLoop.cs`
+- `RS232-PC/Services/HandGuidingLoop.cs`
 - `RS232-PC/Models/MeasurementSample.cs`
 
 ## 17. Organisation des livrables
