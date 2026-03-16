@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
-namespace xARMForm
+namespace RobotForceIntegration
 {
     internal class Robot
     {
@@ -32,6 +32,8 @@ namespace xARMForm
         public
             float JointSpeed;
             float JointAcceleration;
+            float LinearSpeed;
+            float LinearAcceleration;
             float[] CurrentPosition = new float[6];
             float[] OriginePosition = new float[6];
             float[] HomeJoint = new float[7];
@@ -39,8 +41,8 @@ namespace xARMForm
             float[] BASE = new float[6];
             int[] TCPBoundary = new int[6];
             float[] CurrentJoint = new float[7];
-            float[] MinJoint = new float[7];
-            float[] MaxJoint = new float[7];
+            public float[] MinJoint = new float[7];
+            public float[] MaxJoint = new float[7];
 
         public Robot()
         {
@@ -55,6 +57,8 @@ namespace xARMForm
             // Init Motion
             JointSpeed = 9.0F;
             JointAcceleration = 1000.0F;
+            LinearSpeed = 100.0F;
+            LinearAcceleration = 1000.0F;
             // Init Arrays
             int i;
             for (i = 0; i < 6; i++)
@@ -445,6 +449,15 @@ namespace xARMForm
             return ret;
         }
 
+        public void SetMotionScale(int percent)
+        {
+            int clampedPercent = Math.Max(1, Math.Min(100, percent));
+            JointSpeed = clampedPercent;
+            JointAcceleration = clampedPercent * 10.0F;
+            LinearSpeed = clampedPercent * 2.0F;
+            LinearAcceleration = clampedPercent * 20.0F;
+        }
+
         // world_offset Get Set
         public float[] GetBase()
         {
@@ -512,31 +525,61 @@ namespace xARMForm
         // set_servo_angle(float[] angles, float speed = 0, float acc = 0, float mvtime = 0, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, bool relative = false);
         public int MoveJointValues(float[] angles, float speed = 0, float acc = 0, float mvtime = 0, bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, bool relative = false)
         {
+            if (speed <= 0)
+                speed = JointSpeed;
+            if (acc <= 0)
+                acc = JointAcceleration;
             return SafeApiCall(() => XArmAPI.set_servo_angle(angles, speed, acc, mvtime, wait, timeout, radius, relative));
         }
         
         // move_gohome(float speed = 0, float acc = 0, float mvtime = 0, bool wait = false, float timeout = NO_TIMEOUT);
         public int MoveHome(float speed = 0.0F, float acc = 0.0F, float mvtime = 0.0F, bool wait = false, float timeout = NO_TIMEOUT)
         {
+            if (speed <= 0)
+                speed = JointSpeed;
+            if (acc <= 0)
+                acc = JointAcceleration;
             return SafeApiCall(() => XArmAPI.move_gohome(speed, acc, mvtime, wait, timeout));
         }
 
         //public static int set_position(float[] pose, float radius = -1, bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         public int MoveBase(float[] pose, float radius = -1, bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {
-            return SafeApiCall(() => XArmAPI.set_position(pose, radius, wait, timeout, relative));
+            return SafeApiCall(() => XArmAPI.set_position(
+                pose,
+                radius,
+                LinearSpeed,
+                LinearAcceleration,
+                0.0F,
+                wait,
+                timeout,
+                relative));
         }
 
         //public static int set_position(float[] pose, bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         public int MoveBase(float[] pose, bool wait = false, float timeout = NO_TIMEOUT, bool relative = false)
         {
-            return SafeApiCall(() => XArmAPI.set_position(pose, wait, timeout, relative));
+            return SafeApiCall(() => XArmAPI.set_position(
+                pose,
+                -1.0F,
+                LinearSpeed,
+                LinearAcceleration,
+                0.0F,
+                wait,
+                timeout,
+                relative));
         }
 
         //public static int set_tool_position(float[] pose, bool wait = false, float timeout = NO_TIMEOUT)
         public int MoveTool(float[] pose, bool wait = false, float timeout = NO_TIMEOUT)
         {
-            return SafeApiCall(() => XArmAPI.set_tool_position(pose, wait, timeout));
+            return SafeApiCall(() => XArmAPI.set_tool_position(
+                pose,
+                LinearSpeed,
+                LinearAcceleration,
+                0.0F,
+                wait,
+                timeout));
         }
 
         public int MoveToolRelative(float dx, float dy, float dz, bool wait = true, float timeout = NO_TIMEOUT)

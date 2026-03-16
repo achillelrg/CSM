@@ -32,21 +32,20 @@
             this.textBoxIPAdress = new System.Windows.Forms.TextBox();
             this.labelIPAdress = new System.Windows.Forms.Label();
             this.buttonCreateARM = new System.Windows.Forms.Button();
-            this.buttonGetJoint = new System.Windows.Forms.Button();
+            this.labelJoint = new System.Windows.Forms.Label();
             this.textBoxJoint = new System.Windows.Forms.TextBox();
             this.buttonResetARM = new System.Windows.Forms.Button();
             this.textBoxPosition = new System.Windows.Forms.TextBox();
-            this.buttonGetPosition = new System.Windows.Forms.Button();
+            this.labelPosition = new System.Windows.Forms.Label();
             this.textBoxBase = new System.Windows.Forms.TextBox();
-            this.buttonGetBase = new System.Windows.Forms.Button();
+            this.labelBase = new System.Windows.Forms.Label();
             this.textBoxTCP = new System.Windows.Forms.TextBox();
-            this.buttonGetTCP = new System.Windows.Forms.Button();
+            this.labelTCP = new System.Windows.Forms.Label();
             this.buttonMoveBase = new System.Windows.Forms.Button();
-            this.buttonMoveTCP = new System.Windows.Forms.Button();
             this.buttonMoveAngle = new System.Windows.Forms.Button();
             this.buttonMoveHome = new System.Windows.Forms.Button();
             this.buttonMotionARM = new System.Windows.Forms.Button();
-            this.buttonGetCollisionSensitivity = new System.Windows.Forms.Button();
+            this.labelCollisionSensitivity = new System.Windows.Forms.Label();
             this.textBoxCollitionSensitivity = new System.Windows.Forms.TextBox();
             this.timerCMD = new System.Windows.Forms.Timer(this.components);
             this.buttonTimer = new System.Windows.Forms.Button();
@@ -54,6 +53,22 @@
             this.checkBoxSelfCollision = new System.Windows.Forms.CheckBox();
             this.buttonSetCollisionSensitivity = new System.Windows.Forms.Button();
             this.comboBoxSetCollisionSensitivity = new System.Windows.Forms.ComboBox();
+            this.groupBoxMoveTool = new System.Windows.Forms.GroupBox();
+            this.buttonMoveToolZMinus = new System.Windows.Forms.Button();
+            this.buttonMoveToolZPlus = new System.Windows.Forms.Button();
+            this.buttonMoveToolYMinus = new System.Windows.Forms.Button();
+            this.buttonMoveToolYPlus = new System.Windows.Forms.Button();
+            this.buttonMoveToolXMinus = new System.Windows.Forms.Button();
+            this.buttonMoveToolXPlus = new System.Windows.Forms.Button();
+            this.labelToolStep = new System.Windows.Forms.Label();
+            this.numericUpDownToolStep = new System.Windows.Forms.NumericUpDown();
+            this.statusStripMain = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabelTitle = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabelConnection = new System.Windows.Forms.ToolStripStatusLabel();
+            this.timerConnection = new System.Windows.Forms.Timer(this.components);
+            this.groupBoxMoveTool.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownToolStep)).BeginInit();
+            this.statusStripMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBoxIPAdress
@@ -79,20 +94,18 @@
             this.buttonCreateARM.Name = "buttonCreateARM";
             this.buttonCreateARM.Size = new System.Drawing.Size(103, 23);
             this.buttonCreateARM.TabIndex = 2;
-            this.buttonCreateARM.Text = "Create xARM";
+            this.buttonCreateARM.Text = "Connect Robot";
             this.buttonCreateARM.UseVisualStyleBackColor = true;
             this.buttonCreateARM.Click += new System.EventHandler(this.ButtonCreateARM_Click);
             // 
-            // buttonGetJoint
+            // labelJoint
             // 
-            this.buttonGetJoint.Enabled = false;
-            this.buttonGetJoint.Location = new System.Drawing.Point(282, 46);
-            this.buttonGetJoint.Name = "buttonGetJoint";
-            this.buttonGetJoint.Size = new System.Drawing.Size(75, 23);
-            this.buttonGetJoint.TabIndex = 3;
-            this.buttonGetJoint.Text = "Get Joint";
-            this.buttonGetJoint.UseVisualStyleBackColor = true;
-            this.buttonGetJoint.Click += new System.EventHandler(this.ButtonGetJoint_Click);
+            this.labelJoint.AutoSize = true;
+            this.labelJoint.Location = new System.Drawing.Point(282, 51);
+            this.labelJoint.Name = "labelJoint";
+            this.labelJoint.Size = new System.Drawing.Size(61, 13);
+            this.labelJoint.TabIndex = 3;
+            this.labelJoint.Text = "Joint Angles";
             // 
             // textBoxJoint
             // 
@@ -109,7 +122,7 @@
             this.buttonResetARM.Name = "buttonResetARM";
             this.buttonResetARM.Size = new System.Drawing.Size(103, 23);
             this.buttonResetARM.TabIndex = 5;
-            this.buttonResetARM.Text = "Reset xARM";
+            this.buttonResetARM.Text = "Reset / Re-arm";
             this.buttonResetARM.UseVisualStyleBackColor = true;
             this.buttonResetARM.Click += new System.EventHandler(this.ButtonResetARM_Click);
             // 
@@ -121,16 +134,14 @@
             this.textBoxPosition.Size = new System.Drawing.Size(235, 20);
             this.textBoxPosition.TabIndex = 7;
             // 
-            // buttonGetPosition
+            // labelPosition
             // 
-            this.buttonGetPosition.Enabled = false;
-            this.buttonGetPosition.Location = new System.Drawing.Point(282, 75);
-            this.buttonGetPosition.Name = "buttonGetPosition";
-            this.buttonGetPosition.Size = new System.Drawing.Size(75, 23);
-            this.buttonGetPosition.TabIndex = 6;
-            this.buttonGetPosition.Text = "Get Position";
-            this.buttonGetPosition.UseVisualStyleBackColor = true;
-            this.buttonGetPosition.Click += new System.EventHandler(this.ButtonGetPosition_Click);
+            this.labelPosition.AutoSize = true;
+            this.labelPosition.Location = new System.Drawing.Point(282, 80);
+            this.labelPosition.Name = "labelPosition";
+            this.labelPosition.Size = new System.Drawing.Size(79, 13);
+            this.labelPosition.TabIndex = 6;
+            this.labelPosition.Text = "Current Position";
             // 
             // textBoxBase
             // 
@@ -140,16 +151,14 @@
             this.textBoxBase.Size = new System.Drawing.Size(235, 20);
             this.textBoxBase.TabIndex = 9;
             // 
-            // buttonGetBase
+            // labelBase
             // 
-            this.buttonGetBase.Enabled = false;
-            this.buttonGetBase.Location = new System.Drawing.Point(282, 104);
-            this.buttonGetBase.Name = "buttonGetBase";
-            this.buttonGetBase.Size = new System.Drawing.Size(75, 23);
-            this.buttonGetBase.TabIndex = 8;
-            this.buttonGetBase.Text = "Get Base";
-            this.buttonGetBase.UseVisualStyleBackColor = true;
-            this.buttonGetBase.Click += new System.EventHandler(this.ButtonGetBase_Click);
+            this.labelBase.AutoSize = true;
+            this.labelBase.Location = new System.Drawing.Point(282, 109);
+            this.labelBase.Name = "labelBase";
+            this.labelBase.Size = new System.Drawing.Size(59, 13);
+            this.labelBase.TabIndex = 8;
+            this.labelBase.Text = "Base Offset";
             // 
             // textBoxTCP
             // 
@@ -159,47 +168,34 @@
             this.textBoxTCP.Size = new System.Drawing.Size(235, 20);
             this.textBoxTCP.TabIndex = 11;
             // 
-            // buttonGetTCP
+            // labelTCP
             // 
-            this.buttonGetTCP.Enabled = false;
-            this.buttonGetTCP.Location = new System.Drawing.Point(282, 133);
-            this.buttonGetTCP.Name = "buttonGetTCP";
-            this.buttonGetTCP.Size = new System.Drawing.Size(75, 23);
-            this.buttonGetTCP.TabIndex = 10;
-            this.buttonGetTCP.Text = "Get TCP";
-            this.buttonGetTCP.UseVisualStyleBackColor = true;
-            this.buttonGetTCP.Click += new System.EventHandler(this.ButtonGetTCP_Click);
+            this.labelTCP.AutoSize = true;
+            this.labelTCP.Location = new System.Drawing.Point(282, 138);
+            this.labelTCP.Name = "labelTCP";
+            this.labelTCP.Size = new System.Drawing.Size(57, 13);
+            this.labelTCP.TabIndex = 10;
+            this.labelTCP.Text = "TCP Offset";
             // 
             // buttonMoveBase
             // 
             this.buttonMoveBase.Enabled = false;
             this.buttonMoveBase.Location = new System.Drawing.Point(282, 201);
             this.buttonMoveBase.Name = "buttonMoveBase";
-            this.buttonMoveBase.Size = new System.Drawing.Size(75, 23);
+            this.buttonMoveBase.Size = new System.Drawing.Size(103, 23);
             this.buttonMoveBase.TabIndex = 12;
-            this.buttonMoveBase.Text = "Move Base";
+            this.buttonMoveBase.Text = "Move To Preset";
             this.buttonMoveBase.UseVisualStyleBackColor = true;
             this.buttonMoveBase.Click += new System.EventHandler(this.ButtonMoveBase_Click);
-            // 
-            // buttonMoveTCP
-            // 
-            this.buttonMoveTCP.Enabled = false;
-            this.buttonMoveTCP.Location = new System.Drawing.Point(282, 230);
-            this.buttonMoveTCP.Name = "buttonMoveTCP";
-            this.buttonMoveTCP.Size = new System.Drawing.Size(75, 23);
-            this.buttonMoveTCP.TabIndex = 13;
-            this.buttonMoveTCP.Text = "Move TCP";
-            this.buttonMoveTCP.UseVisualStyleBackColor = true;
-            this.buttonMoveTCP.Click += new System.EventHandler(this.ButtonMoveTCP_Click);
             // 
             // buttonMoveAngle
             // 
             this.buttonMoveAngle.Enabled = false;
-            this.buttonMoveAngle.Location = new System.Drawing.Point(282, 259);
+            this.buttonMoveAngle.Location = new System.Drawing.Point(282, 230);
             this.buttonMoveAngle.Name = "buttonMoveAngle";
-            this.buttonMoveAngle.Size = new System.Drawing.Size(75, 23);
-            this.buttonMoveAngle.TabIndex = 14;
-            this.buttonMoveAngle.Text = "Move Angle";
+            this.buttonMoveAngle.Size = new System.Drawing.Size(103, 23);
+            this.buttonMoveAngle.TabIndex = 13;
+            this.buttonMoveAngle.Text = "Joint 1 +10 deg";
             this.buttonMoveAngle.UseVisualStyleBackColor = true;
             this.buttonMoveAngle.Click += new System.EventHandler(this.ButtonMoveAngle_Click);
             // 
@@ -208,9 +204,9 @@
             this.buttonMoveHome.Enabled = false;
             this.buttonMoveHome.Location = new System.Drawing.Point(282, 172);
             this.buttonMoveHome.Name = "buttonMoveHome";
-            this.buttonMoveHome.Size = new System.Drawing.Size(75, 23);
+            this.buttonMoveHome.Size = new System.Drawing.Size(103, 23);
             this.buttonMoveHome.TabIndex = 15;
-            this.buttonMoveHome.Text = "Move Home";
+            this.buttonMoveHome.Text = "Go Home";
             this.buttonMoveHome.UseVisualStyleBackColor = true;
             this.buttonMoveHome.Click += new System.EventHandler(this.ButtonMoveHome_Click);
             // 
@@ -221,20 +217,18 @@
             this.buttonMotionARM.Name = "buttonMotionARM";
             this.buttonMotionARM.Size = new System.Drawing.Size(103, 23);
             this.buttonMotionARM.TabIndex = 16;
-            this.buttonMotionARM.Text = "Motion xARM";
+            this.buttonMotionARM.Text = "Enable Motion";
             this.buttonMotionARM.UseVisualStyleBackColor = true;
             this.buttonMotionARM.Click += new System.EventHandler(this.ButtonMotionARM_Click);
             // 
-            // buttonGetCollisionSensitivity
+            // labelCollisionSensitivity
             // 
-            this.buttonGetCollisionSensitivity.Enabled = false;
-            this.buttonGetCollisionSensitivity.Location = new System.Drawing.Point(44, 172);
-            this.buttonGetCollisionSensitivity.Name = "buttonGetCollisionSensitivity";
-            this.buttonGetCollisionSensitivity.Size = new System.Drawing.Size(128, 23);
-            this.buttonGetCollisionSensitivity.TabIndex = 17;
-            this.buttonGetCollisionSensitivity.Text = "Get Collision Sensitivity";
-            this.buttonGetCollisionSensitivity.UseVisualStyleBackColor = true;
-            this.buttonGetCollisionSensitivity.Click += new System.EventHandler(this.ButtonGetCollisionSensitivity_Click);
+            this.labelCollisionSensitivity.AutoSize = true;
+            this.labelCollisionSensitivity.Location = new System.Drawing.Point(41, 179);
+            this.labelCollisionSensitivity.Name = "labelCollisionSensitivity";
+            this.labelCollisionSensitivity.Size = new System.Drawing.Size(95, 13);
+            this.labelCollisionSensitivity.TabIndex = 17;
+            this.labelCollisionSensitivity.Text = "Current Sensitivity";
             // 
             // textBoxCollitionSensitivity
             // 
@@ -250,6 +244,7 @@
             // 
             // buttonTimer
             // 
+            this.buttonTimer.Enabled = false;
             this.buttonTimer.Location = new System.Drawing.Point(630, 48);
             this.buttonTimer.Name = "buttonTimer";
             this.buttonTimer.Size = new System.Drawing.Size(75, 23);
@@ -265,7 +260,7 @@
             this.buttonSelfCollision.Name = "buttonSelfCollision";
             this.buttonSelfCollision.Size = new System.Drawing.Size(128, 23);
             this.buttonSelfCollision.TabIndex = 20;
-            this.buttonSelfCollision.Text = "Self Collision Detection";
+            this.buttonSelfCollision.Text = "Toggle Self Collision";
             this.buttonSelfCollision.UseVisualStyleBackColor = true;
             this.buttonSelfCollision.Click += new System.EventHandler(this.ButtonSelfCollision_Click);
             // 
@@ -286,7 +281,7 @@
             this.buttonSetCollisionSensitivity.Name = "buttonSetCollisionSensitivity";
             this.buttonSetCollisionSensitivity.Size = new System.Drawing.Size(128, 23);
             this.buttonSetCollisionSensitivity.TabIndex = 22;
-            this.buttonSetCollisionSensitivity.Text = "Set Collision Sensitivity";
+            this.buttonSetCollisionSensitivity.Text = "Apply Sensitivity";
             this.buttonSetCollisionSensitivity.UseVisualStyleBackColor = true;
             this.buttonSetCollisionSensitivity.Click += new System.EventHandler(this.ButtonSetCollisionSensitivity_Click);
             // 
@@ -305,38 +300,188 @@
             this.comboBoxSetCollisionSensitivity.Size = new System.Drawing.Size(68, 21);
             this.comboBoxSetCollisionSensitivity.TabIndex = 23;
             // 
+            // groupBoxMoveTool
+            // 
+            this.groupBoxMoveTool.Controls.Add(this.buttonMoveToolZMinus);
+            this.groupBoxMoveTool.Controls.Add(this.buttonMoveToolZPlus);
+            this.groupBoxMoveTool.Controls.Add(this.buttonMoveToolYMinus);
+            this.groupBoxMoveTool.Controls.Add(this.buttonMoveToolYPlus);
+            this.groupBoxMoveTool.Controls.Add(this.buttonMoveToolXMinus);
+            this.groupBoxMoveTool.Controls.Add(this.buttonMoveToolXPlus);
+            this.groupBoxMoveTool.Controls.Add(this.labelToolStep);
+            this.groupBoxMoveTool.Controls.Add(this.numericUpDownToolStep);
+            this.groupBoxMoveTool.Location = new System.Drawing.Point(378, 172);
+            this.groupBoxMoveTool.Name = "groupBoxMoveTool";
+            this.groupBoxMoveTool.Size = new System.Drawing.Size(235, 145);
+            this.groupBoxMoveTool.TabIndex = 24;
+            this.groupBoxMoveTool.TabStop = false;
+            this.groupBoxMoveTool.Text = "Move Tool";
+            // 
+            // buttonMoveToolZMinus
+            // 
+            this.buttonMoveToolZMinus.Enabled = false;
+            this.buttonMoveToolZMinus.Location = new System.Drawing.Point(16, 108);
+            this.buttonMoveToolZMinus.Name = "buttonMoveToolZMinus";
+            this.buttonMoveToolZMinus.Size = new System.Drawing.Size(60, 23);
+            this.buttonMoveToolZMinus.TabIndex = 7;
+            this.buttonMoveToolZMinus.Text = "-Z";
+            this.buttonMoveToolZMinus.UseVisualStyleBackColor = true;
+            this.buttonMoveToolZMinus.Click += new System.EventHandler(this.ButtonMoveToolZMinus_Click);
+            // 
+            // buttonMoveToolZPlus
+            // 
+            this.buttonMoveToolZPlus.Enabled = false;
+            this.buttonMoveToolZPlus.Location = new System.Drawing.Point(92, 108);
+            this.buttonMoveToolZPlus.Name = "buttonMoveToolZPlus";
+            this.buttonMoveToolZPlus.Size = new System.Drawing.Size(60, 23);
+            this.buttonMoveToolZPlus.TabIndex = 6;
+            this.buttonMoveToolZPlus.Text = "+Z";
+            this.buttonMoveToolZPlus.UseVisualStyleBackColor = true;
+            this.buttonMoveToolZPlus.Click += new System.EventHandler(this.ButtonMoveToolZPlus_Click);
+            // 
+            // buttonMoveToolYMinus
+            // 
+            this.buttonMoveToolYMinus.Enabled = false;
+            this.buttonMoveToolYMinus.Location = new System.Drawing.Point(16, 79);
+            this.buttonMoveToolYMinus.Name = "buttonMoveToolYMinus";
+            this.buttonMoveToolYMinus.Size = new System.Drawing.Size(60, 23);
+            this.buttonMoveToolYMinus.TabIndex = 5;
+            this.buttonMoveToolYMinus.Text = "-Y";
+            this.buttonMoveToolYMinus.UseVisualStyleBackColor = true;
+            this.buttonMoveToolYMinus.Click += new System.EventHandler(this.ButtonMoveToolYMinus_Click);
+            // 
+            // buttonMoveToolYPlus
+            // 
+            this.buttonMoveToolYPlus.Enabled = false;
+            this.buttonMoveToolYPlus.Location = new System.Drawing.Point(92, 79);
+            this.buttonMoveToolYPlus.Name = "buttonMoveToolYPlus";
+            this.buttonMoveToolYPlus.Size = new System.Drawing.Size(60, 23);
+            this.buttonMoveToolYPlus.TabIndex = 4;
+            this.buttonMoveToolYPlus.Text = "+Y";
+            this.buttonMoveToolYPlus.UseVisualStyleBackColor = true;
+            this.buttonMoveToolYPlus.Click += new System.EventHandler(this.ButtonMoveToolYPlus_Click);
+            // 
+            // buttonMoveToolXMinus
+            // 
+            this.buttonMoveToolXMinus.Enabled = false;
+            this.buttonMoveToolXMinus.Location = new System.Drawing.Point(16, 50);
+            this.buttonMoveToolXMinus.Name = "buttonMoveToolXMinus";
+            this.buttonMoveToolXMinus.Size = new System.Drawing.Size(60, 23);
+            this.buttonMoveToolXMinus.TabIndex = 3;
+            this.buttonMoveToolXMinus.Text = "-X";
+            this.buttonMoveToolXMinus.UseVisualStyleBackColor = true;
+            this.buttonMoveToolXMinus.Click += new System.EventHandler(this.ButtonMoveToolXMinus_Click);
+            // 
+            // buttonMoveToolXPlus
+            // 
+            this.buttonMoveToolXPlus.Enabled = false;
+            this.buttonMoveToolXPlus.Location = new System.Drawing.Point(92, 50);
+            this.buttonMoveToolXPlus.Name = "buttonMoveToolXPlus";
+            this.buttonMoveToolXPlus.Size = new System.Drawing.Size(60, 23);
+            this.buttonMoveToolXPlus.TabIndex = 2;
+            this.buttonMoveToolXPlus.Text = "+X";
+            this.buttonMoveToolXPlus.UseVisualStyleBackColor = true;
+            this.buttonMoveToolXPlus.Click += new System.EventHandler(this.ButtonMoveToolXPlus_Click);
+            // 
+            // labelToolStep
+            // 
+            this.labelToolStep.AutoSize = true;
+            this.labelToolStep.Location = new System.Drawing.Point(13, 28);
+            this.labelToolStep.Name = "labelToolStep";
+            this.labelToolStep.Size = new System.Drawing.Size(54, 13);
+            this.labelToolStep.TabIndex = 1;
+            this.labelToolStep.Text = "Step (mm)";
+            // 
+            // numericUpDownToolStep
+            // 
+            this.numericUpDownToolStep.Enabled = false;
+            this.numericUpDownToolStep.Location = new System.Drawing.Point(92, 24);
+            this.numericUpDownToolStep.Maximum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.numericUpDownToolStep.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDownToolStep.Name = "numericUpDownToolStep";
+            this.numericUpDownToolStep.Size = new System.Drawing.Size(60, 20);
+            this.numericUpDownToolStep.TabIndex = 0;
+            this.numericUpDownToolStep.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            // 
+            // statusStripMain
+            // 
+            this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelTitle,
+            this.toolStripStatusLabelConnection});
+            this.statusStripMain.Location = new System.Drawing.Point(0, 428);
+            this.statusStripMain.Name = "statusStripMain";
+            this.statusStripMain.Size = new System.Drawing.Size(736, 22);
+            this.statusStripMain.TabIndex = 25;
+            this.statusStripMain.Text = "statusStripMain";
+            // 
+            // toolStripStatusLabelTitle
+            // 
+            this.toolStripStatusLabelTitle.Name = "toolStripStatusLabelTitle";
+            this.toolStripStatusLabelTitle.Size = new System.Drawing.Size(69, 17);
+            this.toolStripStatusLabelTitle.Text = "Robot status:";
+            // 
+            // toolStripStatusLabelConnection
+            // 
+            this.toolStripStatusLabelConnection.Name = "toolStripStatusLabelConnection";
+            this.toolStripStatusLabelConnection.Size = new System.Drawing.Size(88, 17);
+            this.toolStripStatusLabelConnection.Text = "Not connected";
+            // 
+            // timerConnection
+            // 
+            this.timerConnection.Enabled = true;
+            this.timerConnection.Interval = 1000;
+            this.timerConnection.Tick += new System.EventHandler(this.timerConnection_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(736, 450);
+            this.Controls.Add(this.statusStripMain);
+            this.Controls.Add(this.groupBoxMoveTool);
             this.Controls.Add(this.comboBoxSetCollisionSensitivity);
             this.Controls.Add(this.buttonSetCollisionSensitivity);
             this.Controls.Add(this.checkBoxSelfCollision);
             this.Controls.Add(this.buttonSelfCollision);
             this.Controls.Add(this.buttonTimer);
             this.Controls.Add(this.textBoxCollitionSensitivity);
-            this.Controls.Add(this.buttonGetCollisionSensitivity);
+            this.Controls.Add(this.labelCollisionSensitivity);
             this.Controls.Add(this.buttonMotionARM);
             this.Controls.Add(this.buttonMoveHome);
             this.Controls.Add(this.buttonMoveAngle);
-            this.Controls.Add(this.buttonMoveTCP);
             this.Controls.Add(this.buttonMoveBase);
             this.Controls.Add(this.textBoxTCP);
-            this.Controls.Add(this.buttonGetTCP);
+            this.Controls.Add(this.labelTCP);
             this.Controls.Add(this.textBoxBase);
-            this.Controls.Add(this.buttonGetBase);
+            this.Controls.Add(this.labelBase);
             this.Controls.Add(this.textBoxPosition);
-            this.Controls.Add(this.buttonGetPosition);
+            this.Controls.Add(this.labelPosition);
             this.Controls.Add(this.buttonResetARM);
             this.Controls.Add(this.textBoxJoint);
-            this.Controls.Add(this.buttonGetJoint);
+            this.Controls.Add(this.labelJoint);
             this.Controls.Add(this.buttonCreateARM);
             this.Controls.Add(this.labelIPAdress);
             this.Controls.Add(this.textBoxIPAdress);
             this.Name = "Form1";
             this.Text = "xARM Application";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+            this.groupBoxMoveTool.ResumeLayout(false);
+            this.groupBoxMoveTool.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownToolStep)).EndInit();
+            this.statusStripMain.ResumeLayout(false);
+            this.statusStripMain.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -347,21 +492,20 @@
         private System.Windows.Forms.TextBox textBoxIPAdress;
         private System.Windows.Forms.Label labelIPAdress;
         private System.Windows.Forms.Button buttonCreateARM;
-        private System.Windows.Forms.Button buttonGetJoint;
+        private System.Windows.Forms.Label labelJoint;
         private System.Windows.Forms.TextBox textBoxJoint;
         private System.Windows.Forms.Button buttonResetARM;
         private System.Windows.Forms.TextBox textBoxPosition;
-        private System.Windows.Forms.Button buttonGetPosition;
+        private System.Windows.Forms.Label labelPosition;
         private System.Windows.Forms.TextBox textBoxBase;
-        private System.Windows.Forms.Button buttonGetBase;
+        private System.Windows.Forms.Label labelBase;
         private System.Windows.Forms.TextBox textBoxTCP;
-        private System.Windows.Forms.Button buttonGetTCP;
+        private System.Windows.Forms.Label labelTCP;
         private System.Windows.Forms.Button buttonMoveBase;
-        private System.Windows.Forms.Button buttonMoveTCP;
         private System.Windows.Forms.Button buttonMoveAngle;
         private System.Windows.Forms.Button buttonMoveHome;
         private System.Windows.Forms.Button buttonMotionARM;
-        private System.Windows.Forms.Button buttonGetCollisionSensitivity;
+        private System.Windows.Forms.Label labelCollisionSensitivity;
         private System.Windows.Forms.TextBox textBoxCollitionSensitivity;
         private System.Windows.Forms.Timer timerCMD;
         private System.Windows.Forms.Button buttonTimer;
@@ -369,6 +513,19 @@
         private System.Windows.Forms.CheckBox checkBoxSelfCollision;
         private System.Windows.Forms.Button buttonSetCollisionSensitivity;
         private System.Windows.Forms.ComboBox comboBoxSetCollisionSensitivity;
+        private System.Windows.Forms.GroupBox groupBoxMoveTool;
+        private System.Windows.Forms.Button buttonMoveToolZMinus;
+        private System.Windows.Forms.Button buttonMoveToolZPlus;
+        private System.Windows.Forms.Button buttonMoveToolYMinus;
+        private System.Windows.Forms.Button buttonMoveToolYPlus;
+        private System.Windows.Forms.Button buttonMoveToolXMinus;
+        private System.Windows.Forms.Button buttonMoveToolXPlus;
+        private System.Windows.Forms.Label labelToolStep;
+        private System.Windows.Forms.NumericUpDown numericUpDownToolStep;
+        private System.Windows.Forms.StatusStrip statusStripMain;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTitle;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelConnection;
+        private System.Windows.Forms.Timer timerConnection;
     }
 }
 

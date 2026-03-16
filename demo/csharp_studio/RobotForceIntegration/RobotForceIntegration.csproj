@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{968B557A-BA31-491F-85BE-C7F4A233A9D2}</ProjectGuid>
+    <ProjectGuid>{B7E55FE7-3D20-4CE7-BE7E-2D8FBE6C87C1}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>xARMForm</RootNamespace>
-    <AssemblyName>xARMForm</AssemblyName>
+    <RootNamespace>RobotForceIntegration</RootNamespace>
+    <AssemblyName>RobotForceIntegration</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

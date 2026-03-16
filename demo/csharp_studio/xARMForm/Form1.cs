@@ -20,20 +20,232 @@ namespace xARMForm
         {
             InitializeComponent();
             xARM = new Robot();
+            comboBoxSetCollisionSensitivity.SelectedIndex = 3;
+            numericUpDownToolStep.Value = 10;
+            checkBoxSelfCollision.AutoCheck = false;
+            timerCMD.Interval = 300;
+            SetRobotControlsEnabled(false);
+            StopTimer();
+            UpdateConnectionStatus(false);
+            timerConnection.Start();
+        }
+
+        private bool IsRobotReady()
+        {
+            return xARM.IsCreated() && xARM.IsConnected() && xARM.IsEnableMotion();
+        }
+
+        private void UpdateConnectionStatus(bool connected)
+        {
+            toolStripStatusLabelConnection.Text = connected ? "Connected" : "Not connected";
+        }
+
+        private void SyncRobotUiState()
+        {
+            bool connected = xARM.IsConnected();
+            buttonMotionARM.Enabled = connected;
+            buttonMotionARM.Text = xARM.IsEnableMotion() ? "Disable Motion" : "Enable Motion";
+            buttonResetARM.Enabled = IsRobotReady();
+            SetRobotControlsEnabled(IsRobotReady());
+            UpdateConnectionStatus(connected);
+            if (!connected)
+            {
+                StopTimer();
+                ClearRobotStatusDisplays();
+            }
+        }
+
+        private void RefreshConnectionState()
+        {
+            bool connected = xARM.ProbeConnection();
+            SyncRobotUiState();
+            if (connected)
+                RefreshRobotStatusDisplays();
+        }
+
+        private void SetRobotControlsEnabled(bool enabled)
+        {
+            buttonSetCollisionSensitivity.Enabled = enabled;
+            comboBoxSetCollisionSensitivity.Enabled = enabled;
+            buttonSelfCollision.Enabled = enabled;
+            buttonMoveHome.Enabled = enabled;
+            buttonMoveBase.Enabled = enabled;
+            buttonMoveAngle.Enabled = enabled;
+            buttonMoveToolXPlus.Enabled = enabled;
+            buttonMoveToolXMinus.Enabled = enabled;
+            buttonMoveToolYPlus.Enabled = enabled;
+            buttonMoveToolYMinus.Enabled = enabled;
+            buttonMoveToolZPlus.Enabled = enabled;
+            buttonMoveToolZMinus.Enabled = enabled;
+            numericUpDownToolStep.Enabled = enabled;
+            buttonTimer.Enabled = enabled;
+        }
+
+        private void StopTimer()
+        {
+            timerCMD.Stop();
+            buttonTimer.Text = "Start Timer";
+        }
+
+        private string FormatValues(float[] values, int count)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < count; i++)
+            {
+                if (i > 0)
+                    builder.Append(" | ");
+                builder.Append(values[i].ToString("F"));
+            }
+            return builder.ToString();
+        }
+
+        private void ClearRobotStatusDisplays()
+        {
+            textBoxJoint.Text = string.Empty;
+            textBoxPosition.Text = string.Empty;
+            textBoxBase.Text = string.Empty;
+            textBoxTCP.Text = string.Empty;
+            textBoxCollitionSensitivity.Text = string.Empty;
+            checkBoxSelfCollision.Checked = false;
+        }
+
+        private void UpdateJointDisplay()
+        {
+            float[] joint = xARM.GetCurrentJoint();
+            textBoxJoint.Text = FormatValues(joint, 6);
+            textBoxJoint.Update();
+        }
+
+        private void UpdatePositionDisplay()
+        {
+            float[] pose = xARM.GetCurrentPosition();
+            textBoxPosition.Text = FormatValues(pose, 6);
+            textBoxPosition.Update();
+        }
+
+        private void UpdateBaseOffsetDisplay()
+        {
+            float[] frame = xARM.GetBase();
+            textBoxBase.Text = FormatValues(frame, 6);
+            textBoxBase.Update();
+        }
+
+        private void UpdateTcpOffsetDisplay()
+        {
+            float[] frame = xARM.GetTCP();
+            textBoxTCP.Text = FormatValues(frame, 6);
+            textBoxTCP.Update();
+        }
+
+        private void UpdateCollisionSensitivityDisplay()
+        {
+            int sens = xARM.GetCollisionSensitivity();
+            textBoxCollitionSensitivity.Text = sens.ToString();
+            textBoxCollitionSensitivity.Update();
+            comboBoxSetCollisionSensitivity.SelectedIndex = sens;
+        }
+
+        private void RefreshMotionData()
+        {
+            if (!xARM.IsConnected())
+            {
+                textBoxJoint.Text = string.Empty;
+                textBoxPosition.Text = string.Empty;
+                return;
+            }
+
+            UpdateJointDisplay();
+            UpdatePositionDisplay();
+        }
+
+        private void RefreshRobotStatusDisplays()
+        {
+            if (!xARM.IsConnected())
+            {
+                ClearRobotStatusDisplays();
+                return;
+            }
+
+            RefreshMotionData();
+            UpdateBaseOffsetDisplay();
+            UpdateTcpOffsetDisplay();
+            UpdateCollisionSensitivityDisplay();
+            checkBoxSelfCollision.Checked = xARM.GetSelfCollision();
+        }
+
+        private void ShowCommandError(string action, int errorCode)
+        {
+            string message = $"{action} failed (code {errorCode}).";
+            if (errorCode == 9)
+                message = $"{action} failed: robot state is not ready to move (code 9).";
+
+            MessageBox.Show(
+                message,
+                "xARM",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            SyncRobotUiState();
+        }
+
+        private void ExecuteMoveCommand(Func<int> command, string action)
+        {
+            if (!IsRobotReady())
+                return;
+
+            int ret = command();
+            if (ret == 9)
+            {
+                int recoverRet = xARM.PrepareMotion();
+                if (recoverRet == 0)
+                    ret = command();
+                else
+                    ret = recoverRet;
+            }
+            if (ret == 0)
+                RefreshMotionData();
+            else
+                ShowCommandError(action, ret);
+
+            SyncRobotUiState();
+        }
+
+        private void MoveToolByStep(float dx, float dy, float dz, string action)
+        {
+            if (!IsRobotReady())
+                return;
+
+            int ret = xARM.MoveToolRelative(dx, dy, dz, true);
+            if (ret == 9)
+            {
+                int recoverRet = xARM.PrepareMotion();
+                if (recoverRet == 0)
+                    ret = xARM.MoveToolRelative(dx, dy, dz, true);
+                else
+                    ret = recoverRet;
+            }
+            if (ret == 0)
+                RefreshMotionData();
+            else
+                ShowCommandError(action, ret);
+
+            SyncRobotUiState();
         }
 
         private void ButtonCreateARM_Click(object sender, EventArgs e)
         {
             string IP = textBoxIPAdress.Text;
             xARM.Create(IP);
-            if (xARM.IsCreated())
+            if (xARM.IsConnected())
             {
                 // Update GUI
                 buttonMotionARM.Enabled = true;
-
-                string version;
-                version = xARM.GetVersion();
+                buttonResetARM.Enabled = false;
+                SetRobotControlsEnabled(false);
+                StopTimer();
+                _ = xARM.GetVersion();
+                RefreshRobotStatusDisplays();
             }
+            SyncRobotUiState();
         }
 
         private void ButtonMotionARM_Click(object sender, EventArgs e)
@@ -42,17 +254,14 @@ namespace xARMForm
             if (xARM.IsEnableMotion())
             {
                 ret = xARM.EnableMotion(false);
-                buttonGetCollisionSensitivity.Enabled = false;
-                buttonSetCollisionSensitivity.Enabled = false;
-                buttonSelfCollision.Enabled = false;
-                buttonGetJoint.Enabled = false;
-                buttonGetPosition.Enabled = false;
-                buttonGetBase.Enabled = false;
-                buttonGetTCP.Enabled = false;
-                buttonMoveBase.Enabled = false;
-                buttonMoveTCP.Enabled = false;
-                buttonMoveAngle.Enabled = false;
-                buttonMoveHome.Enabled = false;
+                if (ret == 0)
+                {
+                    StopTimer();
+                    SetRobotControlsEnabled(false);
+                    buttonResetARM.Enabled = false;
+                }
+                else
+                    ShowCommandError("Disable motion", ret);
             }
             else
             {
@@ -62,132 +271,51 @@ namespace xARMForm
                     xARM.SetMode(0);
                     xARM.SetState(0);
                     buttonResetARM.Enabled = true;
+                    SetRobotControlsEnabled(true);
+                    RefreshRobotStatusDisplays();
                 }
                 else
+                {
                     buttonResetARM.Enabled = false;
+                    SetRobotControlsEnabled(false);
+                    ShowCommandError("Enable motion", ret);
+                }
             }
+            SyncRobotUiState();
         }
 
         private void ButtonResetARM_Click(object sender, EventArgs e)
         {
+            if (!IsRobotReady())
+                return;
+
+            StopTimer();
             xARM.Reset();
-            
-            buttonGetCollisionSensitivity.Enabled = true;
-            buttonSetCollisionSensitivity.Enabled = true;
-            buttonSelfCollision.Enabled = true;
-            buttonGetJoint.Enabled = true;
-            buttonGetPosition.Enabled = true;
-            buttonGetBase.Enabled = true;
-            buttonGetTCP.Enabled = true;
-            buttonMoveBase.Enabled = true;
-            buttonMoveTCP.Enabled = true;
-            buttonMoveAngle.Enabled = true;
-            buttonMoveHome.Enabled = true;
-        }
-
-        private void ButtonGetJoint_Click(object sender, EventArgs e)
-        {
-            float[] joint = new float[7];
-            int i;
-            textBoxJoint.Text = "";
-            joint = xARM.GetCurrentJoint();
-            for (i = 0; i < 6; i++)
-                textBoxJoint.Text += joint[i].ToString("F") + " | ";
-            textBoxJoint.Update();
-        }
-
-        private void ButtonGetPosition_Click(object sender, EventArgs e)
-        {
-            float[] pose = new float[6];
-            int i;
-            textBoxPosition.Text = "";
-            pose = xARM.GetCurrentPosition();
-            for (i = 0; i < 6; i++)
-                textBoxPosition.Text += pose[i].ToString("F") + " | ";
-            textBoxPosition.Update();
-        }
-
-        private void ButtonGetTCP_Click(object sender, EventArgs e)
-        {
-            float[] frame = new float[6];
-            int i;
-            textBoxTCP.Text = "";
-            frame = xARM.GetTCP();
-            for (i = 0; i < 6; i++)
-                textBoxTCP.Text += frame[i].ToString("F") + " | ";
-            textBoxTCP.Update();
-        }
-
-        private void ButtonGetBase_Click(object sender, EventArgs e)
-        {
-            float[] frame = new float[6];
-            int i;
-            textBoxBase.Text = "";
-            frame = xARM.GetBase();
-            for (i = 0; i < 6; i++)
-                textBoxBase.Text += frame[i].ToString("F") + " | ";
-            textBoxBase.Update();
+            SetRobotControlsEnabled(true);
+            RefreshRobotStatusDisplays();
+            SyncRobotUiState();
         }
 
         private void ButtonMoveBase_Click(object sender, EventArgs e)
         {
             float[] pose1 = { 300, 0, 200, 180, 0, 0 };
-            if (xARM.IsCreated() && xARM.IsEnableMotion())
-            {
-                xARM.MoveBase(pose1, true);
-                // Update GUI
-                ButtonGetJoint_Click(sender, e);
-                ButtonGetPosition_Click(sender, e);
-            }
-        }
-
-        private void ButtonMoveTCP_Click(object sender, EventArgs e)
-        {
-            float[] pose2 = { 0, 0, 20, 0, 0, 0 };
-            if (xARM.IsCreated() && xARM.IsEnableMotion())
-            {
-                xARM.MoveTool(pose2, true);
-                // Update GUI
-                ButtonGetJoint_Click(sender, e);
-                ButtonGetPosition_Click(sender, e);
-            }
+            ExecuteMoveCommand(() => xARM.MoveBase(pose1, true), "Move To Preset Pose");
         }
 
         private void ButtonMoveAngle_Click(object sender, EventArgs e)
         {
+            if (!IsRobotReady())
+                return;
+
             float[] angles = new float[7];
             angles = xARM.GetCurrentJoint();
             angles[0] += 10.0F;
-            if (xARM.IsCreated() && xARM.IsEnableMotion())
-            {
-                xARM.MoveJointValues(angles);
-                // Update GUI
-                ButtonGetJoint_Click(sender, e);
-                ButtonGetPosition_Click(sender, e);
-            }
+            ExecuteMoveCommand(() => xARM.MoveJointValues(angles), "Move Angle");
         }
 
         private void ButtonMoveHome_Click(object sender, EventArgs e)
         {
-            if (xARM.IsCreated() && xARM.IsEnableMotion())
-            {
-                xARM.MoveHome(0, 0, 0, true);
-                // Update GUI
-                ButtonGetJoint_Click(sender, e);
-                ButtonGetPosition_Click(sender, e);
-            }
-        }
-
-        private void ButtonGetCollisionSensitivity_Click(object sender, EventArgs e)
-        {
-            int sens;
-            if(xARM.IsCreated())
-            {
-                sens = xARM.GetCollisionSensitivity();
-                textBoxCollitionSensitivity.Text = sens.ToString();
-                textBoxCollitionSensitivity.Update();
-                comboBoxSetCollisionSensitivity.SelectedIndex = sens;
-            }
+            ExecuteMoveCommand(() => xARM.MoveHome(0, 0, 0, true), "Move Home");
         }
 
         private void ButtonSetCollisionSensitivity_Click(object sender, EventArgs e)
@@ -200,7 +328,16 @@ namespace xARMForm
                 textBoxCollitionSensitivity.Text = sens.ToString();
                 textBoxCollitionSensitivity.Update();
                 ret = xARM.SetCollisionSensitivity(sens);
+                if (ret == 0)
+                {
+                    int prepareRet = xARM.PrepareMotion();
+                    if (prepareRet != 0)
+                        ShowCommandError("Re-arm after collision sensitivity change", prepareRet);
+                }
+                else
+                    ShowCommandError("Set Collision Sensitivity", ret);
             }
+            SyncRobotUiState();
         }
 
 
@@ -210,19 +347,33 @@ namespace xARMForm
             {
                 if (xARM.GetSelfCollision())
                 {
-                    xARM.SetSelfCollision(false);
-                    checkBoxSelfCollision.Checked = false;  
+                    int ret = xARM.SetSelfCollision(false);
+                    if (ret == 0)
+                    {
+                        xARM.PrepareMotion();
+                        checkBoxSelfCollision.Checked = false;
+                    }
+                    else
+                        ShowCommandError("Disable Self Collision", ret);
                 }
                 else
                 {
-                    xARM.SetSelfCollision(true);
-                    checkBoxSelfCollision.Checked = true;
+                    int ret = xARM.SetSelfCollision(true);
+                    if (ret == 0)
+                    {
+                        xARM.PrepareMotion();
+                        checkBoxSelfCollision.Checked = true;
+                    }
+                    else
+                        ShowCommandError("Enable Self Collision", ret);
                 }
             }
+            SyncRobotUiState();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            StopTimer();
             if (xARM.IsCreated())
             {
                 xARM.EnableMotion(false);
@@ -231,18 +382,34 @@ namespace xARMForm
 
         private void timerCMD_Tick(object sender, EventArgs e)
         {
-            float[] pose2 = { 0, 0, 0.2F, 0, 0, 0 };
-            if (xARM.IsCreated() && xARM.IsEnableMotion())
+            if (!IsRobotReady())
             {
-                xARM.MoveTool(pose2, true);
-                // Update GUI
-                ButtonGetJoint_Click(sender, e);
-                ButtonGetPosition_Click(sender, e);
+                StopTimer();
+                SyncRobotUiState();
+                return;
             }
+
+            int ret = xARM.MoveToolRelative(0.0F, 0.0F, 0.2F, true);
+            if (ret == 0)
+                RefreshMotionData();
+            else
+            {
+                StopTimer();
+                ShowCommandError("Timer Move Tool +Z", ret);
+            }
+
+            SyncRobotUiState();
         }
 
         private void ButtonTimer_Click(object sender, EventArgs e)
         {
+            if (!IsRobotReady())
+            {
+                StopTimer();
+                SyncRobotUiState();
+                return;
+            }
+
             if (buttonTimer.Text == "Start Timer")
             {
                 timerCMD.Start();
@@ -250,9 +417,48 @@ namespace xARMForm
             }
             else
             {
-                timerCMD.Stop();
-                buttonTimer.Text = "Start Timer";
+                StopTimer();
             }
+        }
+
+        private void timerConnection_Tick(object sender, EventArgs e)
+        {
+            RefreshConnectionState();
+        }
+
+        private float GetToolStep()
+        {
+            return (float)numericUpDownToolStep.Value;
+        }
+
+        private void ButtonMoveToolXPlus_Click(object sender, EventArgs e)
+        {
+            MoveToolByStep(GetToolStep(), 0.0F, 0.0F, "Move Tool +X");
+        }
+
+        private void ButtonMoveToolXMinus_Click(object sender, EventArgs e)
+        {
+            MoveToolByStep(-GetToolStep(), 0.0F, 0.0F, "Move Tool -X");
+        }
+
+        private void ButtonMoveToolYPlus_Click(object sender, EventArgs e)
+        {
+            MoveToolByStep(0.0F, GetToolStep(), 0.0F, "Move Tool +Y");
+        }
+
+        private void ButtonMoveToolYMinus_Click(object sender, EventArgs e)
+        {
+            MoveToolByStep(0.0F, -GetToolStep(), 0.0F, "Move Tool -Y");
+        }
+
+        private void ButtonMoveToolZPlus_Click(object sender, EventArgs e)
+        {
+            MoveToolByStep(0.0F, 0.0F, GetToolStep(), "Move Tool +Z");
+        }
+
+        private void ButtonMoveToolZMinus_Click(object sender, EventArgs e)
+        {
+            MoveToolByStep(0.0F, 0.0F, -GetToolStep(), "Move Tool -Z");
         }
     }
 }
