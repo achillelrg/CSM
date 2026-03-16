@@ -4,10 +4,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.IO;
 using System.IO.Ports;
@@ -16,131 +14,40 @@ namespace RS232_PC
 {
     public partial class MainForm : Form
     {
-        private sealed class SerialRecord
-        {
-            public DateTime Timestamp { get; set; }
-            public double? Force { get; set; }
-            public string Unit { get; set; }
-            public string RawLine { get; set; }
-        }
-
-        private static readonly Regex ReadingRegex = new Regex(
-            @"^Reading:\s*(?<value>[+-]?\d+(?:[.,]\d+)?)\s*(?<unit>[A-Za-z]+)",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
-        private const int AcquisitionIntervalMilliseconds = 300;
-
         private string portnumber = "COM1";
         private string rs232 = "";
         private string messagetotarget = "";
-        private string logfile = "";
-        private readonly object _syncRoot = new object();
-        private readonly StringBuilder _receiveBuffer = new StringBuilder();
-        private readonly List<SerialRecord> _records = new List<SerialRecord>();
-        private Timer _acquisitionTimer;
-        private bool _acquisitionRunning;
 
         public string PortNumber { set { portnumber = value; } get { return portnumber; } }
         public string RS232 { set { rs232 = value; } get { return rs232; } }
         public string MessageToTarget { set { messagetotarget = value; } get { return messagetotarget; } }
-        public string LogFile { set { logfile = value; } get { return logfile; } }
         public System.IO.Ports.SerialPort RS232Port { set { } get { return this.SerialPort; } }
         
         public MainForm()
         {
             InitializeComponent();
             textBoxSerial.Text = PortNumber;
-            btSave.Enabled = false;
-            _acquisitionTimer = new Timer();
-            _acquisitionTimer.Interval = AcquisitionIntervalMilliseconds;
-            _acquisitionTimer.Tick += acquisitionTimer_Tick;
         }
 
         // Run the program
         private void btStart_Click(object sender, EventArgs e)
         {
-            if (_acquisitionRunning)
-            {
-                stopAcquisition();
-                return;
-            }
-
-            if (!RS232Port.IsOpen)
-            {
-                MessageBox.Show("Open the serial port first");
-                return;
-            }
-
-            lock (_syncRoot)
-            {
-                _records.Clear();
-                _receiveBuffer.Clear();
-            }
-
-            _acquisitionRunning = true;
-            btStart.Text = "Stop";
-            btSave.Enabled = false;
-            setReceived("[RUN] Acquisition started (" + AcquisitionIntervalMilliseconds.ToString(CultureInfo.InvariantCulture) + " ms)" + Environment.NewLine);
-            _acquisitionTimer.Start();
+            // TODO : Add your work here
+            MessageBox.Show("To Do");
         }
 
         // Select file to save in
         private void btSelect_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                saveFileDialog.InitialDirectory = @"C:\";
-                saveFileDialog.Title = "Save acquisition CSV";
-                saveFileDialog.CheckFileExists = false;
-                saveFileDialog.CheckPathExists = true;
-                saveFileDialog.DefaultExt = "csv";
-                saveFileDialog.Filter = "CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                saveFileDialog.FilterIndex = 1;
-                saveFileDialog.RestoreDirectory = true;
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    LogFile = saveFileDialog.FileName;
-                    btSave.Enabled = true;
-                    MessageBox.Show("Selected file:\r\n" + LogFile);
-                }
-            }
+            // TODO : Add your work here
+            MessageBox.Show("To Do");
         }
         
         // Save data to file
         private void btSave_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(LogFile))
-            {
-                MessageBox.Show("Select a file first");
-                return;
-            }
-
-            if (_acquisitionRunning)
-            {
-                MessageBox.Show("Stop the acquisition before saving");
-                return;
-            }
-
-            List<SerialRecord> records;
-            lock (_syncRoot)
-            {
-                records = _records.ToList();
-            }
-
-            using (var writer = new StreamWriter(LogFile, false, Encoding.UTF8))
-            {
-                writer.WriteLine("Timestamp,Force,Unit,RawLine");
-                foreach (var record in records)
-                {
-                    writer.WriteLine(string.Join(",",
-                        escape(record.Timestamp.ToString("O", CultureInfo.InvariantCulture)),
-                        record.Force.HasValue ? record.Force.Value.ToString("G17", CultureInfo.InvariantCulture) : string.Empty,
-                        escape(record.Unit ?? string.Empty),
-                        escape(record.RawLine ?? string.Empty)));
-                }
-            }
-
-            MessageBox.Show("Acquisition CSV saved:\r\n" + LogFile);
+            // TODO : Add your work here
+            MessageBox.Show("To Do");
         }
 
         // Open RS232 port
@@ -163,10 +70,6 @@ namespace RS232_PC
         {
             if (RS232Port.IsOpen)
             {
-                if (_acquisitionRunning)
-                {
-                    stopAcquisition();
-                }
                 RS232Port.Close();
                 btOpen.Enabled = true;
                 btClose.Enabled = false;
@@ -268,7 +171,7 @@ namespace RS232_PC
             // store in rs232 all existing bytes in the serial port buffer
             rs232 = "";
             rs232 = RS232Port.ReadExisting();
-            processReceivedChunk(rs232);
+            setReceived(rs232);
         }
 
         /// <summary>
@@ -292,109 +195,6 @@ namespace RS232_PC
                 textBoxRS232.AppendText(message);                
             }
 
-        }
-
-        private void acquisitionTimer_Tick(object sender, EventArgs e)
-        {
-            if (!_acquisitionRunning)
-            {
-                return;
-            }
-
-            if (!RS232Port.IsOpen)
-            {
-                stopAcquisition();
-                MessageBox.Show("Serial Port not opened");
-                return;
-            }
-
-            var command = string.IsNullOrWhiteSpace(MessageToTarget) ? "M" : MessageToTarget.Trim();
-            RS232Port.WriteLine(command);
-            setReceived("[TX] " + command + Environment.NewLine);
-        }
-
-        private void stopAcquisition()
-        {
-            _acquisitionTimer.Stop();
-            _acquisitionRunning = false;
-            btStart.Text = "Start";
-            btSave.Enabled = !string.IsNullOrWhiteSpace(LogFile);
-            setReceived("[RUN] Acquisition stopped" + Environment.NewLine);
-        }
-
-        private void processReceivedChunk(string chunk)
-        {
-            if (string.IsNullOrEmpty(chunk))
-            {
-                return;
-            }
-
-            setReceived(chunk);
-
-            lock (_syncRoot)
-            {
-                _receiveBuffer.Append(chunk);
-
-                while (true)
-                {
-                    var bufferContent = _receiveBuffer.ToString();
-                    var lineBreakIndex = bufferContent.IndexOf('\n');
-                    if (lineBreakIndex < 0)
-                    {
-                        break;
-                    }
-
-                    var line = bufferContent.Substring(0, lineBreakIndex).Trim('\r', '\n', '\t', ' ');
-                    _receiveBuffer.Remove(0, lineBreakIndex + 1);
-
-                    if (line.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    _records.Add(parseRecord(line));
-                }
-            }
-        }
-
-        private static SerialRecord parseRecord(string line)
-        {
-            var record = new SerialRecord
-            {
-                Timestamp = DateTime.Now,
-                Unit = string.Empty,
-                RawLine = line
-            };
-
-            var match = ReadingRegex.Match(line);
-            if (!match.Success)
-            {
-                return record;
-            }
-
-            var numericText = match.Groups["value"].Value.Replace(',', '.');
-            if (double.TryParse(numericText, NumberStyles.Float, CultureInfo.InvariantCulture, out var force))
-            {
-                record.Force = force;
-            }
-
-            record.Unit = match.Groups["unit"].Value;
-            return record;
-        }
-
-        private static string escape(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return string.Empty;
-            }
-
-            if (!value.Contains(",") && !value.Contains("\"") && !value.Contains("\r") && !value.Contains("\n"))
-            {
-                return value;
-            }
-
-            return "\"" + value.Replace("\"", "\"\"") + "\"";
         }
 
         /// <summary>
