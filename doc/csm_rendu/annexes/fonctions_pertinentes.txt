@@ -1,0 +1,46 @@
+Fonctions pertinentes a fournir ou a citer dans le rendu final
+
+1. Brique capteur - RS232-PC
+- btOpen_Click
+- btClose_Click
+- btConfiguration_Click
+- serialport_DataReceived
+- setReceived
+- acquisitionTimer_Tick
+- stopAcquisition
+- processReceivedChunk
+- btSave_Click
+- btSend_Click
+
+2. Brique robot - xARMForm / Form1
+- ButtonCreateARM_Click
+- ButtonMotionARM_Click
+- ButtonGetJoint_Click
+- ButtonGetPosition_Click
+- ButtonGetTCP_Click
+- ButtonGetBase_Click
+- ButtonMoveBase_Click
+- ButtonMoveTCP_Click
+- ButtonMoveAngle_Click
+- ButtonMoveHome_Click
+- ButtonTimer_Click
+- timerCMD_Tick
+
+3. Wrapper robot - Robot.cs
+- Create
+- GetVersion
+- IsCreated
+- IsEnableMotion
+- EnableMotion
+- GetCurrentJoint
+- GetCurrentPosition
+- MoveBase
+- MoveTool
+- MoveHome
+
+4. Fonctions d'integration future
+- acquisition de la force
+- extraction numerique de la force
+- lecture de PositionZ
+- calcul de Delta Z
+- export CSV combine
