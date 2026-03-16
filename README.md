@@ -16,6 +16,22 @@ Application WinForms C# pour le TP CSM:
 - `RS232-PC/Interop/`: wrapper C# xArm embarque dans le projet
 - `RS232-PC/Native/xarm.dll`: DLL native fournie pour le pilotage xArm
 - `TP_Utilisation_CSM.md`: guide TP complet (installation, dependances, tests, CSV)
+- `livrables/`: separation entre livrables de groupe et espaces perso locaux
+
+## Livrables
+
+- `livrables/groupe/`: contenu versionne et pousse sur GitHub
+- `livrables/groupe/01_rapport/`: source LaTeX du rapport et PDF compile
+- `livrables/groupe/02_captures/`: captures retenues
+- `livrables/groupe/03_csv_exemples/`: CSV exemples pour le rendu
+- `livrables/groupe/04_annexes/`: annexes techniques
+- `livrables/perso/`: espace local ignore par Git pour les notes, brouillons et essais personnels
+
+Pour creer votre dossier perso local:
+
+```powershell
+.\livrables\init_perso.ps1 -Name prenom_nom
+```
 
 ## Hypothese robot
 

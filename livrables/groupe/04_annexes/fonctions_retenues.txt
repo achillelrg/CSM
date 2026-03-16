@@ -1,0 +1,36 @@
+Fonctions et fichiers principaux a exploiter dans les annexes du rendu:
+
+1. Application et IHM
+- RS232-PC/MainForm.cs
+- RS232-PC/MainForm.UI.cs
+- RS232-PC/MainForm.Actions.cs
+- RS232-PC/MainForm.LegacyRobot.cs
+
+2. Capteur et liaison serie
+- RS232-PC/Services/SerialForceSensorService.cs
+  - Open
+  - Close
+  - SendCommandAsync
+  - RequestMeasurementAsync
+  - TryParseMeasurement
+
+3. Robot et liaison reseau
+- RS232-PC/Services/XArmRobotService.cs
+  - Connect
+  - Disconnect
+  - EnableMotion
+  - GetCurrentPosition
+  - GetJointAngles
+  - MoveTool
+  - MoveHome
+  - EmergencyStop
+
+4. Asservissement
+- RS232-PC/Services/ForceControlLoop.cs
+  - Reset
+  - Update
+
+5. Export et mesures
+- RS232-PC/Models/MeasurementSample.cs
+- RS232-PC/Models/MeasurementSession.cs
+- RS232-PC/Services/CsvExportService.cs

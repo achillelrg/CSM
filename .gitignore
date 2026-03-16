@@ -15,3 +15,20 @@ x64/
 *.ipch
 *.log
 *.tlog
+
+# Local-only personal deliverables
+livrables/perso/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc

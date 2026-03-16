@@ -475,6 +475,8 @@ Avant d'aller sur le robot reel, valider dans cet ordre:
 ## 16. Fichiers importants a connaitre
 
 - `README.md`
+- `livrables/README.md`
+- `livrables/groupe/01_rapport/csm_rapport_groupe.tex`
 - `TP_Utilisation_CSM.md`
 - `RS232-PC/MainForm.cs`
 - `RS232-PC/MainForm.UI.cs`
@@ -483,3 +485,22 @@ Avant d'aller sur le robot reel, valider dans cet ordre:
 - `RS232-PC/Services/XArmRobotService.cs`
 - `RS232-PC/Services/ForceControlLoop.cs`
 - `RS232-PC/Models/MeasurementSample.cs`
+
+## 17. Organisation des livrables
+
+Le depot distingue desormais:
+
+- `livrables/groupe/`: contenu versionne et pousse sur GitHub
+- `livrables/perso/`: contenu local ignore par Git
+
+Utilisation recommandee:
+
+1. stocker les notes, brouillons et essais individuels dans `livrables/perso/<prenom_nom>/`
+2. promouvoir vers `livrables/groupe/` uniquement les contenus valides pour le rendu
+3. conserver le rapport de groupe dans `livrables/groupe/01_rapport/`
+
+Pour creer votre dossier perso local:
+
+```powershell
+.\livrables\init_perso.ps1 -Name prenom_nom
+```
