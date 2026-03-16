@@ -267,3 +267,5 @@ ModelManifest.xml
 CMakeLists.txt
 *.old
 example/0000*
+doc/csm_rendu/tmp/
+doc/csm_rendu/output/pdf/*preview*.png
