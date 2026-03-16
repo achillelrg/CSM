@@ -1,58 +1,9 @@
 # Annexe - Integration Robot + Force
 
-## Objet
+Cette annexe a pour objet de decrire la cible d'integration du projet et d'expliciter l'ecart entre cette cible et l'etat reel du depot. Elle joue un role important dans le rendu, car elle permet de montrer que l'architecture technique est comprise, meme si l'application finale n'est pas encore totalement finalisee.
 
-Cette annexe decrit la cible d'integration Robot + Force et l'ecart entre cette cible et le depot actuel.
+La logique attendue par le sujet est relativement claire. Une mesure de force doit etre demandee au capteur, puis la valeur correspondante doit etre extraite du flux serie. Cette mesure doit ensuite etre rapprochee de la position courante du robot afin de calculer une correction, typiquement un `Delta Z`, qui sera appliquee par une commande de type `MoveTool`. L'ensemble des donnees utiles doit enfin etre conserve afin de pouvoir produire un fichier CSV exploitable lors de l'analyse des essais.
 
-## 1. Cible fonctionnelle
+Dans le depot actuel, cette chaine complete n'est pas encore integree dans une application unique. La base `RS232-PC` reste centree sur la liaison serie et l'acquisition, tandis que `xARMForm` reste centree sur le pilotage robot. L'integration Robot + Force est donc encore `A completer`. Il est important que le rapport le dise explicitement afin d'eviter toute ambiguite sur l'etat reel du projet.
 
-Statut: `Disponible`
-
-L'integration attendue par le sujet est:
-
-1. demander une mesure de force
-2. extraire la valeur numerique
-3. lire la position courante du robot
-4. calculer un `Delta Z`
-5. envoyer une commande `MoveTool`
-6. enregistrer les donnees
-7. exporter un CSV
-
-## 2. Etat actuel du depot
-
-Statut: `A completer`
-
-Le depot de Martin contient des briques separees:
-
-- `RS232-PC` pour la serie et l'acquisition
-- `xARMForm` pour le pilotage robot
-
-Il ne contient pas encore, a ce stade, l'application integree finale unique qui fusionne les deux.
-
-## 3. Travail restant identifie
-
-Statut: `A completer`
-
-- reprendre `Robot.cs` et `XArmAPI.cs` dans la base `RS232-PC`
-- raccorder les commandes robot a l'IHM principale
-- ajouter les deplacements dans le repere TOOL
-- coupler acquisition capteur et lecture robot
-- calculer puis appliquer un `Delta Z`
-- centraliser les donnees pour l'export CSV
-
-## 4. Positionnement dans le rapport
-
-Statut: `Disponible`
-
-Cette annexe doit rester honnete:
-
-- ne pas pretendre que l'integration finale est deja aboutie
-- documenter precisement la cible
-- expliquer ce qui manque encore
-- preparer le terrain pour les captures et preuves qui seront ajoutees plus tard
-
-## 5. Emplacements a completer plus tard
-
-- `[Schema de flux capteur -> parsing -> robot]`
-- `[Capture application integree]`
-- `[Description du Delta Z retenu]`
+Le travail restant est bien identifie. Il consiste a reprendre les classes de pilotage robot dans la base principale, a raccorder les commandes de mouvement a l'IHM commune, a synchroniser la lecture capteur et la lecture robot, puis a centraliser les donnees de force et de position dans une logique d'essai coherente. Cette annexe devra ensuite etre completee par un schema simple et, si possible, par une capture de l'application integree lorsque celle-ci sera disponible.

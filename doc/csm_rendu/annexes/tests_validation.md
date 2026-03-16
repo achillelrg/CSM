@@ -1,35 +1,10 @@
 # Annexe - Tests et validation
 
-## Objet
+Cette annexe sert de support au suivi experimental du projet. Elle ne remplace pas le commentaire redige dans le rapport principal, mais elle fournit un cadre simple pour distinguer ce qui est deja observable dans les sources, ce qui doit encore etre essaye en seance et ce qui devra etre prouve par des captures ou des fichiers de sortie.
 
-Cette annexe sert de tableau de bord de validation experimentale.
+A ce jour, plusieurs fonctions peuvent deja etre considerees comme visibles dans les briques existantes. C'est le cas de l'ouverture et de la fermeture du port serie, de l'acquisition periodique cote `RS232-PC`, de la sauvegarde CSV, de la connexion robot, de la lecture de pose et d'articulations, ainsi que des deplacements `MoveTool` et du timer de demonstration cote robot. Ces points constituent une base technique utile, mais ils ne remplacent pas une validation experimentale sur le materiel reel.
 
-## 1. Tests deja identifiables dans les sources
-
-Statut: `Disponible`
-
-- ouverture / fermeture du port serie
-- acquisition periodique RS232
-- sauvegarde CSV
-- connexion robot
-- lecture pose / joints
-- deplacements `MoveTool`
-- timer de demonstration cote robot
-
-## 2. Tests a realiser en seance
-
-Statut: `A valider`
-
-- capteur avec emulateur
-- capteur reel
-- robot reel en reseau
-- premiers deplacements en repere TOOL
-- integration force / position Z
-- export CSV d'essais reels
-- test mecanique
-- asservissement en force
-
-## 3. Tableau de suivi
+La campagne d'essais a mener en seance doit donc couvrir, au minimum, le capteur avec emulateur, le capteur reel, la connexion reseau au robot, les premiers deplacements en repere TOOL, l'integration force / position sur Z, l'export CSV d'essais reels, puis les scenarios de test mecanique et d'asservissement. Le tableau ci-dessous est prevu pour consigner ces verifications au fur et a mesure de l'avancement de l'equipe.
 
 | Test | Statut | Date | Operateur | Preuve | Commentaire |
 | --- | --- | --- | --- | --- | --- |
@@ -43,10 +18,4 @@ Statut: `A valider`
 | Test mecanique | A completer | [A completer] | [A completer] | [CSV] | |
 | Asservissement en force | A completer | [A completer] | [A completer] | [CSV / Video] | |
 
-## 4. Regle de redaction
-
-Quand un test n'est pas encore realise:
-
-- ne pas le cocher comme valide
-- indiquer `A completer` ou `A valider`
-- reserver la colonne preuve pour plus tard
+Lorsqu'un essai n'a pas encore ete realise, il est preferable de le laisser `A completer` ou `A valider` plutot que de le formuler de maniere ambigue. Cette annexe doit rester un outil de suivi sobre et factuel, pas un tableau rempli pour donner artificiellement l'impression que tout a deja ete teste.

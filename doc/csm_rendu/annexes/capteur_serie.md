@@ -1,63 +1,9 @@
 # Annexe - Capteur et liaison serie
 
-## Objet
+Cette annexe regroupe les informations utiles a la comprehension de la brique capteur et de la communication serie entre le PC et l'electronique de mesure. L'objectif n'est pas de surcharger le rendu avec un inventaire materiel, mais de rappeler clairement les elements necessaires a la lecture du projet.
 
-Cette annexe rassemble les informations utiles a la brique capteur et a la communication serie PC <-> capteur.
+Le montage decrit dans les documents du cours repose sur un capteur de force en S, un module HX711 et une carte FireBeetle ESP32-E. Le dialogue serie associe a cet ensemble est volontairement simple. Il s'appuie sur des commandes courtes telles que `C` pour la calibration, `Q` pour la fin de calibration, `M` pour la mesure, `T` pour la tare et `U` pour le changement d'unite. Le format de reponse attendu pour une mesure est du type `Reading: -20.032 Kg`, ce qui rend possible une extraction directe de la valeur numerique et de l'unite.
 
-## 1. Materiel
+Dans le depot actuel, la base `RS232-PC` montre deja les points importants de cette brique. La liaison serie est configurable, le debit de `115200` bauds est prevu, la lecture des donnees est geree de facon asynchrone et les messages recus peuvent etre affiches puis journalises. Une logique d'acquisition periodique est egalement deja visible, ce qui rend cette partie `Disponible` comme base de travail.
 
-Statut: `Disponible`
-
-Le sujet mentionne:
-
-- capteur de force en S
-- module HX711
-- carte FireBeetle ESP32-E
-
-## 2. Protocole
-
-Statut: `Disponible`
-
-Commandes mentionnees dans les documents du cours:
-
-- `C`: calibration start
-- `Q`: calibration stop
-- `M`: measurement
-- `T`: tare
-- `U`: unit toggle
-
-Format de reponse attendu:
-
-```text
-Reading: -20.032 Kg
-```
-
-## 3. Base logicielle actuelle
-
-Statut: `Disponible`
-
-Dans `demo/csharp_studio/RS232-PC`:
-
-- la liaison serie est configurable
-- le baudrate attendu est `115200`
-- la lecture des donnees est asynchrone
-- les messages recus peuvent etre affiches et journalises
-- une acquisition periodique est deja presente
-
-## 4. Points a documenter plus tard
-
-Statut: `A completer`
-
-- configuration exacte du capteur reel utilise
-- port COM retenu en seance
-- comportement en `Kg` et en `N`
-- robustesse du parsing sur le flux reel
-
-## 5. Resultats a inserer
-
-Statut: `A valider`
-
-- capture d'un message de boot
-- capture d'une sequence `M`
-- capture d'une tare `T`
-- description du comportement avec emulateur puis capteur reel
+Les elements qui restent `A completer` concernent surtout la validation sur le capteur reel. Il faudra verifier en seance le comportement exact du flux serie, la robustesse du parsing, la stabilite de la mesure apres tare et la gestion effective des unites utilisees pendant les essais. Le rendu final gagnera en credibilite si cette annexe est completee par une ou deux captures representative du flux brut, plutot que par une accumulation de sorties serie peu lisibles.
