@@ -1,5 +1,0 @@
-Timestamp,Mode,Force,Unit,FilteredForce,Setpoint,Error,DeltaZ,PositionZ,RawLine
-2026-03-16T09:42:00.0000000+01:00,MechanicalTest,0.125,Kg,0.125,0,0,-1.000,102.500,"Reading: 0.125 Kg"
-2026-03-16T09:42:00.3000000+01:00,MechanicalTest,0.420,Kg,0.228,0,0,-1.000,101.500,"Reading: 0.420 Kg"
-2026-03-16T09:42:00.6000000+01:00,MechanicalTest,0.980,Kg,0.491,0,0,-1.000,100.500,"Reading: 0.980 Kg"
-2026-03-16T09:42:00.9000000+01:00,MechanicalTest,2.150,Kg,1.072,0,0,-1.000,99.500,"Reading: 2.150 Kg"
