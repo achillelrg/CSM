@@ -21,14 +21,14 @@ cd C:\WORKSPACE\CSM\csharp_studio\doc\csm_rendu
 Le PDF est genere dans:
 
 ```text
-output/pdf/rapport_csm_groupe.pdf
+rapport_csm_groupe.pdf
 ```
 
 ## Notes
 
 - Le script combine le rapport principal et les annexes Markdown.
 - Les annexes techniques non Markdown (`.txt`, `.csv`) restent des pieces jointes separees du rendu.
-- Les fichiers temporaires de compilation sont places dans `tmp/pdfs/`.
+- Les fichiers temporaires de compilation sont crees dans le dossier temporaire systeme puis supprimes automatiquement.
 - Outils necessaires sur la machine:
   - `pandoc`
   - `pdflatex` via MiKTeX ou TeX Live

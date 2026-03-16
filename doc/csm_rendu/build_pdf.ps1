@@ -5,12 +5,11 @@ param(
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$tmpRoot = Join-Path $root "tmp\pdfs"
-$outputRoot = Join-Path $root "output\pdf"
+$tmpRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("csm_rendu_build_" + [System.Guid]::NewGuid().ToString("N"))
 $combinedMarkdown = Join-Path $tmpRoot "rapport_complet.md"
 $latexFile = Join-Path $tmpRoot "rapport_complet.tex"
 $tempPdf = Join-Path $tmpRoot "rapport_complet.pdf"
-$outputPdf = Join-Path $outputRoot $OutputName
+$outputPdf = Join-Path $root $OutputName
 
 $markdownFiles = @(
     (Join-Path $root "rapport_principal.md"),
@@ -23,7 +22,6 @@ $markdownFiles = @(
 )
 
 New-Item -ItemType Directory -Force -Path $tmpRoot | Out-Null
-New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
 
 $builder = New-Object System.Text.StringBuilder
 $builder.AppendLine('% Rapport CSM combine') | Out-Null
@@ -51,9 +49,13 @@ for ($i = 0; $i -lt $markdownFiles.Count; $i++)
 
 $builder.ToString() | Set-Content -Path $combinedMarkdown -Encoding UTF8
 
-Push-Location $tmpRoot
+$didPushLocation = $false
+$pdfCopied = $false
 try
 {
+    Push-Location $tmpRoot
+    $didPushLocation = $true
+
     & pandoc `
         $combinedMarkdown `
         "--from=markdown" `
@@ -85,17 +87,28 @@ try
     {
         throw "pdflatex failed on second pass with exit code $LASTEXITCODE."
     }
+
+    if (-not (Test-Path $tempPdf))
+    {
+        throw "Expected PDF was not generated: $tempPdf"
+    }
+
+    Copy-Item -Force -Path $tempPdf -Destination $outputPdf
+    $pdfCopied = $true
 }
 finally
 {
-    Pop-Location
+    if ($didPushLocation)
+    {
+        Pop-Location
+    }
+
+    Remove-Item -Recurse -Force -Path $tmpRoot -ErrorAction SilentlyContinue
 }
 
-if (-not (Test-Path $tempPdf))
+if (-not $pdfCopied)
 {
-    throw "Expected PDF was not generated: $tempPdf"
+    throw "Expected PDF was not copied to destination: $outputPdf"
 }
-
-Copy-Item -Force -Path $tempPdf -Destination $outputPdf
 
 Write-Host "PDF generated: $outputPdf"
