@@ -14,6 +14,7 @@ Application WinForms C# pour le TP CSM:
 - `RS232-PC/`: projet principal
 - `RS232-PC/Interop/`: wrapper C# xArm embarque dans le projet
 - `RS232-PC/Native/xarm.dll`: DLL native fournie pour le pilotage xArm
+- `TP_Utilisation_CSM.md`: guide TP complet (installation, dependances, tests, CSV)
 
 ## Hypothese robot
 
