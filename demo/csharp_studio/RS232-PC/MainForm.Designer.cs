@@ -239,7 +239,7 @@
             // SerialPort
             // 
             this.SerialPort.BaudRate = 115200;
-            this.SerialPort.PortName = "COM5";
+            this.SerialPort.PortName = "COM4";
             this.SerialPort.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialport_DataReceived);
             // 
             // groupBoxToSystem
