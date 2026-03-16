@@ -1,0 +1,17 @@
+bin/
+obj/
+.vs/
+
+xarm/
+xarm_csharp_demo/
+xARMForm/
+x64/
+
+*.user
+*.suo
+*.pdb
+*.cache
+*.ilk
+*.ipch
+*.log
+*.tlog
