@@ -26,6 +26,7 @@ namespace RS232_PC
             tabControlMain.TabPages.Add(BuildConnectionsTab());
             tabControlMain.TabPages.Add(BuildSensorTab());
             tabControlMain.TabPages.Add(BuildRobotTab());
+            tabControlMain.TabPages.Add(BuildLegacyRobotTab());
             tabControlMain.TabPages.Add(BuildExperimentsTab());
 
             Controls.Add(tabControlMain);
@@ -362,6 +363,200 @@ namespace RS232_PC
             split.Panel2.Controls.Add(BuildRobotJogGroup());
             tabPage.Controls.Add(split);
             return tabPage;
+        }
+
+        private TabPage BuildLegacyRobotTab()
+        {
+            var tabPage = new TabPage("xARM Base");
+            var split = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                Orientation = Orientation.Vertical,
+                SplitterDistance = 430
+            };
+
+            split.Panel1.Controls.Add(BuildLegacyRobotCommandGroup());
+            split.Panel2.Controls.Add(BuildLegacyRobotStateGroup());
+            tabPage.Controls.Add(split);
+            return tabPage;
+        }
+
+        private GroupBox BuildLegacyRobotCommandGroup()
+        {
+            var groupBox = new GroupBox
+            {
+                Text = "Legacy xARM interface",
+                Dock = DockStyle.Fill
+            };
+
+            var outerLayout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                RowCount = 5,
+                ColumnCount = 1,
+                Padding = new Padding(8)
+            };
+            outerLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            outerLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            outerLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+            outerLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
+            outerLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+
+            var ipPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight
+            };
+            ipPanel.Controls.Add(new Label
+            {
+                Text = "IP address",
+                AutoSize = true,
+                Margin = new Padding(0, 8, 12, 0)
+            });
+            textBoxLegacyRobotIp = new TextBox
+            {
+                Width = 180,
+                Text = "192.168.1.214"
+            };
+            ipPanel.Controls.Add(textBoxLegacyRobotIp);
+            outerLayout.Controls.Add(ipPanel, 0, 0);
+
+            var createPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight
+            };
+            buttonLegacyCreateArm = new Button { Text = "Create xARM", AutoSize = true };
+            buttonLegacyCreateArm.Click += ButtonLegacyCreateArm_Click;
+            buttonLegacyMotionArm = new Button { Text = "Motion xARM", AutoSize = true };
+            buttonLegacyMotionArm.Click += ButtonLegacyMotionArm_Click;
+            buttonLegacyResetArm = new Button { Text = "Reset xARM", AutoSize = true };
+            buttonLegacyResetArm.Click += ButtonLegacyResetArm_Click;
+            createPanel.Controls.Add(buttonLegacyCreateArm);
+            createPanel.Controls.Add(buttonLegacyMotionArm);
+            createPanel.Controls.Add(buttonLegacyResetArm);
+            outerLayout.Controls.Add(createPanel, 0, 1);
+
+            var safetyPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight
+            };
+            buttonLegacyGetCollisionSensitivity = new Button { Text = "Get Collision Sensitivity", AutoSize = true };
+            buttonLegacyGetCollisionSensitivity.Click += ButtonLegacyGetCollisionSensitivity_Click;
+            textBoxLegacyCollisionSensitivity = new TextBox
+            {
+                Width = 60,
+                ReadOnly = true
+            };
+            buttonLegacySetCollisionSensitivity = new Button { Text = "Set Collision Sensitivity", AutoSize = true };
+            buttonLegacySetCollisionSensitivity.Click += ButtonLegacySetCollisionSensitivity_Click;
+            comboBoxLegacyCollisionSensitivity = new ComboBox
+            {
+                Width = 60,
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            comboBoxLegacyCollisionSensitivity.Items.AddRange(new object[] { "0", "1", "2", "3", "4", "5" });
+            comboBoxLegacyCollisionSensitivity.SelectedIndex = 3;
+            safetyPanel.Controls.Add(buttonLegacyGetCollisionSensitivity);
+            safetyPanel.Controls.Add(textBoxLegacyCollisionSensitivity);
+            safetyPanel.Controls.Add(buttonLegacySetCollisionSensitivity);
+            safetyPanel.Controls.Add(comboBoxLegacyCollisionSensitivity);
+            outerLayout.Controls.Add(safetyPanel, 0, 2);
+
+            var selfCollisionPanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight
+            };
+            buttonLegacySelfCollision = new Button { Text = "Self Collision Detection", AutoSize = true };
+            buttonLegacySelfCollision.Click += ButtonLegacySelfCollision_Click;
+            checkBoxLegacySelfCollision = new CheckBox
+            {
+                Text = "Self Collision",
+                AutoSize = true,
+                Enabled = false,
+                Margin = new Padding(12, 6, 0, 0)
+            };
+            buttonLegacyTimer = new Button { Text = "Start Timer", AutoSize = true };
+            buttonLegacyTimer.Click += ButtonLegacyTimer_Click;
+            selfCollisionPanel.Controls.Add(buttonLegacySelfCollision);
+            selfCollisionPanel.Controls.Add(checkBoxLegacySelfCollision);
+            selfCollisionPanel.Controls.Add(buttonLegacyTimer);
+            outerLayout.Controls.Add(selfCollisionPanel, 0, 3);
+
+            var movePanel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = true
+            };
+            buttonLegacyMoveHome = new Button { Text = "Move Home", AutoSize = true };
+            buttonLegacyMoveHome.Click += ButtonLegacyMoveHome_Click;
+            buttonLegacyMoveBase = new Button { Text = "Move Base", AutoSize = true };
+            buttonLegacyMoveBase.Click += ButtonLegacyMoveBase_Click;
+            buttonLegacyMoveTcp = new Button { Text = "Move TCP", AutoSize = true };
+            buttonLegacyMoveTcp.Click += ButtonLegacyMoveTcp_Click;
+            buttonLegacyMoveAngle = new Button { Text = "Move Angle", AutoSize = true };
+            buttonLegacyMoveAngle.Click += ButtonLegacyMoveAngle_Click;
+            movePanel.Controls.Add(buttonLegacyMoveHome);
+            movePanel.Controls.Add(buttonLegacyMoveBase);
+            movePanel.Controls.Add(buttonLegacyMoveTcp);
+            movePanel.Controls.Add(buttonLegacyMoveAngle);
+            outerLayout.Controls.Add(movePanel, 0, 4);
+
+            groupBox.Controls.Add(outerLayout);
+            return groupBox;
+        }
+
+        private GroupBox BuildLegacyRobotStateGroup()
+        {
+            var groupBox = new GroupBox
+            {
+                Text = "Legacy robot state",
+                Dock = DockStyle.Fill
+            };
+
+            var layout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 4,
+                Padding = new Padding(8)
+            };
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 140F));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 52F));
+
+            buttonLegacyGetJoint = new Button { Text = "Get Joint", AutoSize = true };
+            buttonLegacyGetJoint.Click += ButtonLegacyGetJoint_Click;
+            textBoxLegacyJoint = new TextBox { ReadOnly = true, Dock = DockStyle.Fill };
+            layout.Controls.Add(buttonLegacyGetJoint, 0, 0);
+            layout.Controls.Add(textBoxLegacyJoint, 1, 0);
+
+            buttonLegacyGetPosition = new Button { Text = "Get Position", AutoSize = true };
+            buttonLegacyGetPosition.Click += ButtonLegacyGetPosition_Click;
+            textBoxLegacyPosition = new TextBox { ReadOnly = true, Dock = DockStyle.Fill };
+            layout.Controls.Add(buttonLegacyGetPosition, 0, 1);
+            layout.Controls.Add(textBoxLegacyPosition, 1, 1);
+
+            buttonLegacyGetBase = new Button { Text = "Get Base", AutoSize = true };
+            buttonLegacyGetBase.Click += ButtonLegacyGetBase_Click;
+            textBoxLegacyBase = new TextBox { ReadOnly = true, Dock = DockStyle.Fill };
+            layout.Controls.Add(buttonLegacyGetBase, 0, 2);
+            layout.Controls.Add(textBoxLegacyBase, 1, 2);
+
+            buttonLegacyGetTcp = new Button { Text = "Get TCP", AutoSize = true };
+            buttonLegacyGetTcp.Click += ButtonLegacyGetTcp_Click;
+            textBoxLegacyTcp = new TextBox { ReadOnly = true, Dock = DockStyle.Fill };
+            layout.Controls.Add(buttonLegacyGetTcp, 0, 3);
+            layout.Controls.Add(textBoxLegacyTcp, 1, 3);
+
+            groupBox.Controls.Add(layout);
+            return groupBox;
         }
 
         private GroupBox BuildRobotStateGroup()

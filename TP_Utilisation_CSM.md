@@ -117,11 +117,12 @@ L'application se lance depuis Visual Studio ou directement avec:
 
 - `RS232-PC\bin\Debug\x64\RS232-PC.exe`
 
-L'IHM contient quatre onglets:
+L'IHM contient cinq onglets:
 
 - `Connexions`
 - `Capteur`
 - `Robot`
+- `xARM Base`
 - `Essais`
 
 ## 8. Comportement general de l'application
@@ -170,7 +171,32 @@ Il permet:
   - `Reset`
   - `Emergency stop`
 
-### 8.4 Onglet `Essais`
+### 8.4 Onglet `xARM Base`
+
+Cet onglet reprend les fonctions principales de l'application xARM d'origine, afin d'eviter une regression fonctionnelle cote robot.
+
+Il permet:
+
+- de lancer `Create xARM`
+- d'activer ou couper `Motion xARM`
+- de lancer `Reset xARM`
+- de lire:
+  - `Get Joint`
+  - `Get Position`
+  - `Get Base`
+  - `Get TCP`
+- de lancer:
+  - `Move Home`
+  - `Move Base`
+  - `Move TCP`
+  - `Move Angle`
+- de gerer:
+  - `Get Collision Sensitivity`
+  - `Set Collision Sensitivity`
+  - `Self Collision Detection`
+- de tester le timer xARM historique
+
+### 8.5 Onglet `Essais`
 
 Il permet:
 
@@ -457,4 +483,3 @@ Avant d'aller sur le robot reel, valider dans cet ordre:
 - `RS232-PC/Services/XArmRobotService.cs`
 - `RS232-PC/Services/ForceControlLoop.cs`
 - `RS232-PC/Models/MeasurementSample.cs`
-

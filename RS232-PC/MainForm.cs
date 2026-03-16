@@ -89,6 +89,29 @@ namespace RS232_PC
         private ToolStripStatusLabel toolStripSerialStatus;
         private ToolStripStatusLabel toolStripRobotStatus;
         private ToolStripStatusLabel toolStripRunStatus;
+        private TextBox textBoxLegacyRobotIp;
+        private Button buttonLegacyCreateArm;
+        private Button buttonLegacyMotionArm;
+        private Button buttonLegacyResetArm;
+        private Button buttonLegacyGetJoint;
+        private TextBox textBoxLegacyJoint;
+        private Button buttonLegacyGetPosition;
+        private TextBox textBoxLegacyPosition;
+        private Button buttonLegacyGetBase;
+        private TextBox textBoxLegacyBase;
+        private Button buttonLegacyGetTcp;
+        private TextBox textBoxLegacyTcp;
+        private Button buttonLegacyMoveHome;
+        private Button buttonLegacyMoveBase;
+        private Button buttonLegacyMoveTcp;
+        private Button buttonLegacyMoveAngle;
+        private Button buttonLegacyGetCollisionSensitivity;
+        private TextBox textBoxLegacyCollisionSensitivity;
+        private Button buttonLegacySetCollisionSensitivity;
+        private ComboBox comboBoxLegacyCollisionSensitivity;
+        private Button buttonLegacySelfCollision;
+        private CheckBox checkBoxLegacySelfCollision;
+        private Button buttonLegacyTimer;
 
         public MainForm()
         {
@@ -115,6 +138,7 @@ namespace RS232_PC
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             runTimer.Stop();
+            legacyRobotTimer.Stop();
             _robotService.Dispose();
             _sensorService.Dispose();
         }

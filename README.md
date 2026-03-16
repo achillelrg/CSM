@@ -4,6 +4,7 @@ Application WinForms C# pour le TP CSM:
 
 - connexion capteur de force sur liaison serie (`115200 / 8N1`)
 - connexion robot xArm sur le reseau
+- reprise des commandes principales de l'interface xARM d'origine dans l'onglet `xARM Base`
 - jog manuel en repere TOOL
 - mode `test mecanique` avec timer et export CSV
 - mode `asservissement en force Z` avec PID externe

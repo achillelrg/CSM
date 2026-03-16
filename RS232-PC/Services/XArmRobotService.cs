@@ -159,9 +159,29 @@ namespace RS232_PC.Services
             return IsConnected ? _robot.GetCurrentPosition() : new float[6];
         }
 
+        public float[] GetBase()
+        {
+            return IsConnected ? _robot.GetBase() : new float[6];
+        }
+
+        public float[] GetTcp()
+        {
+            return IsConnected ? _robot.GetTCP() : new float[6];
+        }
+
         public float[] GetCurrentJoints()
         {
             return IsConnected ? _robot.GetCurrentJoint().Take(AxisCount).ToArray() : new float[AxisCount];
+        }
+
+        public int GetCollisionSensitivity()
+        {
+            return IsConnected ? _robot.GetCollisionSensitivity() : 0;
+        }
+
+        public bool GetSelfCollision()
+        {
+            return IsConnected && _robot.GetSelfCollision();
         }
 
         public bool MoveToolRelative(double deltaX, double deltaY, double deltaZ, bool wait, out string message)
@@ -186,6 +206,30 @@ namespace RS232_PC.Services
             return ret == 0;
         }
 
+        public bool MoveBaseAbsolute(float[] pose, bool wait, out string message)
+        {
+            if (!EnsureMotion(out message))
+            {
+                return false;
+            }
+
+            var ret = _robot.MoveBase(pose, wait);
+            message = ret == 0 ? "MoveBase command sent." : "MoveBase failed (" + ret + ").";
+            return ret == 0;
+        }
+
+        public bool MoveJointValues(float[] angles, out string message)
+        {
+            if (!EnsureMotion(out message))
+            {
+                return false;
+            }
+
+            var ret = _robot.MoveJointValues(angles);
+            message = ret == 0 ? "MoveJoint command sent." : "MoveJoint failed (" + ret + ").";
+            return ret == 0;
+        }
+
         public bool MoveHome(out string message)
         {
             if (!EnsureMotion(out message))
@@ -195,6 +239,32 @@ namespace RS232_PC.Services
 
             var ret = _robot.MoveHome(0.0f, 0.0f, 0.0f, true);
             message = ret == 0 ? "MoveHome command sent." : "MoveHome failed (" + ret + ").";
+            return ret == 0;
+        }
+
+        public bool SetCollisionSensitivity(int sensitivity, out string message)
+        {
+            if (!IsConnected)
+            {
+                message = "Robot is not connected.";
+                return false;
+            }
+
+            var applied = _robot.SetCollisionSensitivity(sensitivity);
+            message = "Collision sensitivity set to " + applied.ToString() + ".";
+            return true;
+        }
+
+        public bool SetSelfCollision(bool enabled, out string message)
+        {
+            if (!IsConnected)
+            {
+                message = "Robot is not connected.";
+                return false;
+            }
+
+            var ret = _robot.SetSelfCollision(enabled);
+            message = ret == 0 ? "Self collision set to " + enabled.ToString() + "." : "Self collision update failed (" + ret + ").";
             return ret == 0;
         }
 

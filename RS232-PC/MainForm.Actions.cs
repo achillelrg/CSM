@@ -60,6 +60,7 @@ namespace RS232_PC
             {
                 AppendSystemLog(message);
                 UpdateRobotStateDisplay();
+                RefreshLegacyRobotState();
             }
             else
             {
@@ -76,9 +77,16 @@ namespace RS232_PC
                 StopRun("Run stopped because the robot was disconnected.");
             }
 
+            if (legacyRobotTimer.Enabled)
+            {
+                legacyRobotTimer.Stop();
+                buttonLegacyTimer.Text = "Start Timer";
+            }
+
             _robotService.Disconnect();
             AppendSystemLog("Robot disconnected.");
             UpdateRobotStateDisplay();
+            RefreshLegacyRobotState();
             UpdateUiState();
         }
 
@@ -88,6 +96,7 @@ namespace RS232_PC
             {
                 AppendSystemLog(message);
                 RefreshRobotState(false);
+                RefreshLegacyRobotState();
             }
             else
             {
@@ -105,9 +114,16 @@ namespace RS232_PC
                 StopRun("Run stopped because robot motion was disabled.");
             }
 
+            if (legacyRobotTimer.Enabled)
+            {
+                legacyRobotTimer.Stop();
+                buttonLegacyTimer.Text = "Start Timer";
+            }
+
             _robotService.DisableMotion();
             AppendSystemLog("Robot motion disabled.");
             UpdateRobotStateDisplay();
+            RefreshLegacyRobotState();
             UpdateUiState();
         }
 
@@ -152,6 +168,7 @@ namespace RS232_PC
             {
                 AppendSystemLog(message);
                 RefreshRobotState(false);
+                RefreshLegacyRobotState();
             }
             else
             {
@@ -164,6 +181,7 @@ namespace RS232_PC
             if (_robotService.Reset(out var message))
             {
                 AppendSystemLog(message);
+                RefreshLegacyRobotState();
             }
             else
             {
@@ -178,6 +196,12 @@ namespace RS232_PC
                 StopRun("Run stopped by emergency stop.");
             }
 
+            if (legacyRobotTimer.Enabled)
+            {
+                legacyRobotTimer.Stop();
+                buttonLegacyTimer.Text = "Start Timer";
+            }
+
             if (_robotService.EmergencyStop(out var message))
             {
                 AppendSystemLog(message);
@@ -188,6 +212,7 @@ namespace RS232_PC
             }
 
             UpdateRobotStateDisplay();
+            RefreshLegacyRobotState();
             UpdateUiState();
         }
 
@@ -384,6 +409,12 @@ namespace RS232_PC
                 return;
             }
 
+            if (legacyRobotTimer.Enabled)
+            {
+                legacyRobotTimer.Stop();
+                buttonLegacyTimer.Text = "Start Timer";
+            }
+
             if (!_sensorService.IsOpen)
             {
                 ShowWarning("Open the sensor serial port before starting a run.");
@@ -526,6 +557,7 @@ namespace RS232_PC
                 textBoxRobotPose.Text = string.Empty;
                 textBoxRobotJoints.Text = string.Empty;
                 UpdateRobotStateDisplay();
+                RefreshLegacyRobotState();
                 return;
             }
 
@@ -536,6 +568,7 @@ namespace RS232_PC
                 textBoxRobotJoints.Text = string.Join(" | ",
                     _robotService.GetCurrentJoints().Take(XArmRobotService.AxisCount).Select(value => value.ToString("F3", CultureInfo.InvariantCulture)));
                 UpdateRobotStateDisplay();
+                RefreshLegacyRobotState();
             }
             catch (Exception ex)
             {
@@ -594,6 +627,34 @@ namespace RS232_PC
             buttonBrowseCsv.Enabled = !runActive;
             buttonClearSession.Enabled = !runActive;
             buttonExportCsv.Enabled = !runActive && _session.Count > 0;
+
+            if (buttonLegacyCreateArm != null)
+            {
+                buttonLegacyCreateArm.Enabled = !robotConnected && !runActive;
+                buttonLegacyMotionArm.Enabled = robotConnected && !runActive;
+                buttonLegacyResetArm.Enabled = robotConnected && !runActive;
+                buttonLegacyGetJoint.Enabled = robotConnected && !runActive;
+                buttonLegacyGetPosition.Enabled = robotConnected && !runActive;
+                buttonLegacyGetBase.Enabled = robotConnected && !runActive;
+                buttonLegacyGetTcp.Enabled = robotConnected && !runActive;
+                buttonLegacyMoveHome.Enabled = robotConnected && motionEnabled && !runActive;
+                buttonLegacyMoveBase.Enabled = robotConnected && motionEnabled && !runActive;
+                buttonLegacyMoveTcp.Enabled = robotConnected && motionEnabled && !runActive;
+                buttonLegacyMoveAngle.Enabled = robotConnected && motionEnabled && !runActive;
+                buttonLegacyGetCollisionSensitivity.Enabled = robotConnected && !runActive;
+                buttonLegacySetCollisionSensitivity.Enabled = robotConnected && !runActive;
+                comboBoxLegacyCollisionSensitivity.Enabled = robotConnected && !runActive;
+                buttonLegacySelfCollision.Enabled = robotConnected && !runActive;
+                checkBoxLegacySelfCollision.Enabled = robotConnected && !runActive;
+                buttonLegacyTimer.Enabled = robotConnected && motionEnabled && !runActive;
+                textBoxLegacyRobotIp.Enabled = !robotConnected && !runActive;
+                buttonLegacyMotionArm.Text = motionEnabled ? "Stop Motion xARM" : "Motion xARM";
+                if (!robotConnected && legacyRobotTimer.Enabled)
+                {
+                    legacyRobotTimer.Stop();
+                    buttonLegacyTimer.Text = "Start Timer";
+                }
+            }
 
             labelRunState.Text = runActive ? _runMode.ToString() : "Idle";
             toolStripRunStatus.Text = "Run: " + labelRunState.Text;
