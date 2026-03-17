@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -35,6 +36,7 @@ namespace RobotForceIntegration
         private const int DodgeForceWatchdogMilliseconds = 100;
         private const float DodgeStopWatchdogSeconds = 0.03F;
         private const float DodgeVelocityWatchdogSeconds = 0.08F;
+        private const float DodgeBaseLinearGainMmPerSecondPerKg = 440.0F;
         private const float DodgeVelocityGain = 4.0F;
         private const float DodgeMinimumVelocityMmPerSecond = 2.0F;
         private const int DodgeResponseGainPercent = 220;
@@ -64,6 +66,9 @@ namespace RobotForceIntegration
         private bool syncingSelfCollisionCheck;
         private bool dodgeAwaitingForceSample;
         private bool dodgeVelocityModeActive;
+        private bool robotErrorDialogVisible;
+        private bool robotDisconnectAlertShown;
+        private bool robotWasConnected;
         private DateTime lastForceSampleUtc;
         private DateTime lastDodgeRequestUtc;
         private DateTime lastManualMotionUtc;
@@ -80,7 +85,11 @@ namespace RobotForceIntegration
             csvFile = string.Empty;
             currentForce = 0.0F;
             filteredForce = 0.0F;
+            robotErrorDialogVisible = false;
+            robotDisconnectAlertShown = false;
+            robotWasConnected = false;
 
+            SetSelfCollisionCheck(true);
             comboBoxCollisionSensitivity.SelectedIndex = 3;
             comboBoxBaudRate.SelectedItem = "115200";
             comboBoxParity.SelectedItem = Parity.None.ToString();
@@ -92,7 +101,6 @@ namespace RobotForceIntegration
             trackBarJointStep.Value = 10;
             trackBarMotionSpeed.Value = 50;
             trackBarDodgeThreshold.Value = trackBarDodgeThreshold.Minimum;
-            trackBarDodgeStep.Value = 5;
 
             timerConnection.Interval = ConnectionProbeIntervalMilliseconds;
             timerCMD.Interval = AcquisitionIntervalMilliseconds;
@@ -104,7 +112,6 @@ namespace RobotForceIntegration
             UpdateToolStepDisplay();
             UpdateJointStepDisplay();
             UpdateDodgeThresholdDisplay();
-            UpdateDodgeStepDisplay();
             RefreshSerialPorts();
             UpdateRobotStatus(false);
             UpdateSerialStatus(false);
@@ -133,7 +140,6 @@ namespace RobotForceIntegration
         private void SetMotionControlsEnabled(bool enabled)
         {
             comboBoxCollisionSensitivity.Enabled = enabled;
-            buttonApplyCollisionSensitivity.Enabled = enabled;
             checkBoxSelfCollision.Enabled = enabled;
             buttonMoveHome.Enabled = enabled;
             buttonMovePreset.Enabled = enabled;
@@ -175,19 +181,13 @@ namespace RobotForceIntegration
             buttonSaveCsv.Enabled = measures.Count > 0 && !string.IsNullOrWhiteSpace(csvFile) && !acquisitionRunning;
             buttonOpenSerial.Enabled = !serialReady;
             buttonCloseSerial.Enabled = serialReady;
-            buttonRefreshPorts.Enabled = !serialReady;
-            comboBoxSerialPort.Enabled = !serialReady;
-            comboBoxBaudRate.Enabled = !serialReady;
-            comboBoxParity.Enabled = !serialReady;
-            comboBoxStopBits.Enabled = !serialReady;
-            comboBoxDataBits.Enabled = !serialReady;
+            buttonSensorConfiguration.Enabled = !serialReady;
             textBoxSensorCommand.Enabled = serialReady;
             buttonSendCommand.Enabled = serialReady;
             buttonTare.Enabled = serialReady;
             buttonStartAcquisition.Text = acquisitionRunning ? "Stop Test" : "Start Test";
             checkBoxDodgeEnabled.Enabled = dodgeAvailable;
             trackBarDodgeThreshold.Enabled = dodgeAvailable;
-            trackBarDodgeStep.Enabled = dodgeAvailable;
 
             SetMotionControlsEnabled(robotReady);
             SyncDodgeTimerState();
@@ -209,13 +209,15 @@ namespace RobotForceIntegration
             UpdateRobotStatus(connected);
             if (connected)
             {
+                robotWasConnected = true;
+                robotDisconnectAlertShown = false;
                 RefreshRobotTelemetry();
                 SetSelfCollisionCheck(xARM.GetSelfCollision());
             }
             else
             {
-                StopAcquisition(false);
-                ClearRobotTelemetry();
+                HandleRobotDisconnected("Robot disconnected.", robotWasConnected && !robotDisconnectAlertShown);
+                return;
             }
 
             SyncUiState();
@@ -231,8 +233,6 @@ namespace RobotForceIntegration
 
             textBoxJoint.Text = FormatValues(xARM.GetCurrentJoint(), 6);
             textBoxPosition.Text = FormatValues(xARM.GetCurrentPosition(), 6);
-            textBoxBase.Text = FormatValues(xARM.GetBase(), 6);
-            textBoxTcp.Text = FormatValues(xARM.GetTCP(), 6);
         }
 
         private static string FormatValues(float[] values, int count)
@@ -244,9 +244,7 @@ namespace RobotForceIntegration
         {
             textBoxJoint.Text = string.Empty;
             textBoxPosition.Text = string.Empty;
-            textBoxBase.Text = string.Empty;
-            textBoxTcp.Text = string.Empty;
-            SetSelfCollisionCheck(false);
+            SetSelfCollisionCheck(true);
         }
 
         private void SetSelfCollisionCheck(bool value)
@@ -289,11 +287,6 @@ namespace RobotForceIntegration
                 DodgeThresholdMaxKg);
         }
 
-        private float GetDodgeStepSizeMm()
-        {
-            return trackBarDodgeStep.Value;
-        }
-
         private float GetToolStep()
         {
             return Math.Max(1.0F, (float)Math.Round(MapTrackBarToLogValue(
@@ -322,11 +315,6 @@ namespace RobotForceIntegration
         private void UpdateDodgeThresholdDisplay()
         {
             labelDodgeThresholdValue.Text = GetDodgeThresholdKg().ToString("0.000", CultureInfo.InvariantCulture) + " kg";
-        }
-
-        private void UpdateDodgeStepDisplay()
-        {
-            labelDodgeStepValue.Text = GetDodgeStepSizeMm().ToString("0.0", CultureInfo.InvariantCulture) + " mm";
         }
 
         private bool IsDodgeRunning()
@@ -379,6 +367,82 @@ namespace RobotForceIntegration
             serialPortSensor.WriteTimeout = 500;
         }
 
+        private void ShowSensorConfigurationDialog()
+        {
+            RefreshSerialPorts();
+
+            using (Form dialog = new Form())
+            {
+                dialog.Text = "Sensor Configuration";
+                dialog.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dialog.StartPosition = FormStartPosition.CenterParent;
+                dialog.MinimizeBox = false;
+                dialog.MaximizeBox = false;
+                dialog.ShowInTaskbar = false;
+                dialog.ClientSize = new Size(360, 265);
+
+                Label labelSerial = new Label { Text = "Serial port", Location = new Point(16, 20), Size = new Size(100, 20) };
+                ComboBox comboSerial = new ComboBox { Location = new Point(132, 17), Size = new Size(200, 24), DropDownStyle = ComboBoxStyle.DropDown };
+                comboSerial.Items.AddRange(comboBoxSerialPort.Items.Cast<object>().ToArray());
+                comboSerial.Text = comboBoxSerialPort.Text;
+
+                Label labelBaud = new Label { Text = "Baud rate", Location = new Point(16, 56), Size = new Size(100, 20) };
+                ComboBox comboBaud = new ComboBox { Location = new Point(132, 53), Size = new Size(200, 24), DropDownStyle = ComboBoxStyle.DropDownList };
+                comboBaud.Items.AddRange(comboBoxBaudRate.Items.Cast<object>().ToArray());
+                comboBaud.Text = comboBoxBaudRate.Text;
+
+                Label labelParityDialog = new Label { Text = "Parity", Location = new Point(16, 92), Size = new Size(100, 20) };
+                ComboBox comboParityDialog = new ComboBox { Location = new Point(132, 89), Size = new Size(200, 24), DropDownStyle = ComboBoxStyle.DropDownList };
+                comboParityDialog.Items.AddRange(comboBoxParity.Items.Cast<object>().ToArray());
+                comboParityDialog.Text = comboBoxParity.Text;
+
+                Label labelStopDialog = new Label { Text = "Stop bits", Location = new Point(16, 128), Size = new Size(100, 20) };
+                ComboBox comboStopDialog = new ComboBox { Location = new Point(132, 125), Size = new Size(200, 24), DropDownStyle = ComboBoxStyle.DropDownList };
+                comboStopDialog.Items.AddRange(comboBoxStopBits.Items.Cast<object>().ToArray());
+                comboStopDialog.Text = comboBoxStopBits.Text;
+
+                Label labelDataDialog = new Label { Text = "Data bits", Location = new Point(16, 164), Size = new Size(100, 20) };
+                ComboBox comboDataDialog = new ComboBox { Location = new Point(132, 161), Size = new Size(200, 24), DropDownStyle = ComboBoxStyle.DropDownList };
+                comboDataDialog.Items.AddRange(comboBoxDataBits.Items.Cast<object>().ToArray());
+                comboDataDialog.Text = comboBoxDataBits.Text;
+
+                Label labelHint = new Label
+                {
+                    Text = "Changes apply next time the serial port is opened.",
+                    Location = new Point(16, 194),
+                    Size = new Size(316, 20)
+                };
+
+                Button buttonOk = new Button { Text = "OK", DialogResult = DialogResult.OK, Location = new Point(176, 224), Size = new Size(75, 28) };
+                Button buttonCancel = new Button { Text = "Cancel", DialogResult = DialogResult.Cancel, Location = new Point(257, 224), Size = new Size(75, 28) };
+
+                dialog.Controls.Add(labelSerial);
+                dialog.Controls.Add(comboSerial);
+                dialog.Controls.Add(labelBaud);
+                dialog.Controls.Add(comboBaud);
+                dialog.Controls.Add(labelParityDialog);
+                dialog.Controls.Add(comboParityDialog);
+                dialog.Controls.Add(labelStopDialog);
+                dialog.Controls.Add(comboStopDialog);
+                dialog.Controls.Add(labelDataDialog);
+                dialog.Controls.Add(comboDataDialog);
+                dialog.Controls.Add(labelHint);
+                dialog.Controls.Add(buttonOk);
+                dialog.Controls.Add(buttonCancel);
+                dialog.AcceptButton = buttonOk;
+                dialog.CancelButton = buttonCancel;
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                comboBoxSerialPort.Text = comboSerial.Text.Trim();
+                comboBoxBaudRate.Text = comboBaud.Text;
+                comboBoxParity.Text = comboParityDialog.Text;
+                comboBoxStopBits.Text = comboStopDialog.Text;
+                comboBoxDataBits.Text = comboDataDialog.Text;
+            }
+        }
+
         private void AppendSensorLog(string line)
         {
             textBoxSensorLog.AppendText("[" + DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture) + "] " + line + Environment.NewLine);
@@ -399,11 +463,66 @@ namespace RobotForceIntegration
 
         private void ShowRobotError(string action, int code)
         {
+            if (IsRobotDisconnectCode(code))
+            {
+                HandleRobotDisconnected(action + " failed: robot disconnected.", robotWasConnected && !robotDisconnectAlertShown);
+                return;
+            }
+
             string message = action + " failed (code " + code.ToString(CultureInfo.InvariantCulture) + ").";
             if (code == 9)
                 message = action + " failed: robot state is not ready to move (code 9).";
 
-            MessageBox.Show(message, "Robot", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            ShowRobotMessage(message);
+        }
+
+        private bool IsRobotDisconnectCode(int code)
+        {
+            if (code == Robot.API_NOT_CONNECTED || !xARM.IsConnected())
+                return true;
+
+            if (code == 1)
+                return !xARM.ProbeConnection();
+
+            return false;
+        }
+
+        private void ShowRobotMessage(string message)
+        {
+            if (robotErrorDialogVisible)
+                return;
+
+            robotErrorDialogVisible = true;
+            try
+            {
+                MessageBox.Show(message, "Robot", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            finally
+            {
+                robotErrorDialogVisible = false;
+            }
+        }
+
+        private void HandleRobotDisconnected(string message, bool showAlert)
+        {
+            bool wasConnected = robotWasConnected;
+            robotWasConnected = false;
+
+            StopAcquisition(false);
+            if (checkBoxDodgeEnabled.Checked)
+                checkBoxDodgeEnabled.Checked = false;
+            else
+                StopDodgeVelocityControl();
+
+            ClearRobotTelemetry();
+            UpdateRobotStatus(false);
+            SyncUiState();
+
+            if (!showAlert || !wasConnected || robotDisconnectAlertShown)
+                return;
+
+            robotDisconnectAlertShown = true;
+            ShowRobotMessage(message);
         }
 
         private bool ExecuteRobotCommand(Func<int> command, string action)
@@ -439,12 +558,7 @@ namespace RobotForceIntegration
         {
             bool dodgeProtected = IsManualMotionProtectedByDodge();
             if (dodgeProtected)
-            {
-                if (CancelManualMotionIfObstacle(action))
-                    return;
-
                 StopDodgeVelocityControl();
-            }
 
             bool executed = ExecuteRobotCommand(() => xARM.MoveToolRelative(dx, dy, dz, !dodgeProtected), action);
             if (!executed)
@@ -468,6 +582,12 @@ namespace RobotForceIntegration
                 dodgeVelocityModeActive = true;
                 AppendSensorLog("[DODGE] Cartesian velocity mode active");
                 return true;
+            }
+
+            if (code == 10)
+            {
+                AppendSensorLog("[DODGE] Cartesian velocity mode not ready yet (code 10), keeping dodge enabled");
+                return false;
             }
 
             ShowRobotError("Enable dodge velocity mode", code);
@@ -502,24 +622,16 @@ namespace RobotForceIntegration
         private bool EvaluateDodgeImmediateStop()
         {
             if (!checkBoxDodgeEnabled.Checked)
-            {
                 return false;
-            }
 
             if (!HasFreshDodgeForceSample())
-            {
                 return false;
-            }
 
             if (Math.Abs(currentForce) >= (float)GetDodgeThresholdKg())
-            {
                 return false;
-            }
 
-            if (Math.Abs(lastDodgeVelocityMmPerSecond) < 0.001F && !dodgeManualMotionActive)
-            {
+            if (Math.Abs(lastDodgeVelocityMmPerSecond) < 0.001F)
                 return false;
-            }
 
             if (!SendImmediateZeroDodgeVelocity())
                 return true;
@@ -529,6 +641,28 @@ namespace RobotForceIntegration
 
             AppendSensorLog("[DODGE] Immediate stop on first raw sample below threshold");
             return true;
+        }
+
+        private void EnsureDefaultSelfCollisionEnabled()
+        {
+            if (!IsRobotReady() || !checkBoxSelfCollision.Checked)
+                return;
+
+            if (xARM.GetSelfCollision())
+                return;
+
+            int code = xARM.SetSelfCollision(true);
+            if (code == 0)
+            {
+                code = xARM.PrepareMotion();
+                if (code == 0)
+                {
+                    AppendSensorLog("Self collision enabled by default");
+                    return;
+                }
+            }
+
+            ShowRobotError("Enable default self collision", code);
         }
 
         private bool SendImmediateZeroDodgeVelocity()
@@ -618,20 +752,12 @@ namespace RobotForceIntegration
             dodgeManualMotionActive = false;
         }
 
-        private bool CancelManualMotionIfObstacle(string action)
-        {
-            if (!IsDodgeObstacleDetected())
-                return false;
-
-            AppendSensorLog("[DODGE] Manual command blocked: " + action);
-            return true;
-        }
-
         private bool StopManualMotionForDodge()
         {
             if (!dodgeManualMotionActive)
                 return true;
 
+            AppendSensorLog("[DODGE] Obstacle detected, cancelling manual motion");
             int code = xARM.StopCurrentMotion();
             if (code != 0)
             {
@@ -656,7 +782,7 @@ namespace RobotForceIntegration
 
         private float GetDodgeLinearGainMmPerSecondPerKg()
         {
-            return Math.Max(5.0F, GetDodgeStepSizeMm() * 40.0F * GetDodgeResponseGain());
+            return Math.Max(5.0F, DodgeBaseLinearGainMmPerSecondPerKg * GetDodgeResponseGain());
         }
 
         private float GetDodgeFilterAlpha()
@@ -784,12 +910,7 @@ namespace RobotForceIntegration
             string action = "Move J" + (jointIndex + 1).ToString(CultureInfo.InvariantCulture);
             bool dodgeProtected = IsManualMotionProtectedByDodge();
             if (dodgeProtected)
-            {
-                if (CancelManualMotionIfObstacle(action))
-                    return;
-
                 StopDodgeVelocityControl();
-            }
 
             float[] angles = xARM.GetCurrentJoint();
             float nextValue = angles[jointIndex] + deltaDegrees;
@@ -1046,6 +1167,8 @@ namespace RobotForceIntegration
         {
             if (xARM.Create(textBoxRobotIp.Text.Trim()))
             {
+                robotWasConnected = true;
+                robotDisconnectAlertShown = false;
                 ApplyMotionSpeedProfile();
                 UpdateRobotStatus(true);
                 AppendSensorLog("Robot connected");
@@ -1054,6 +1177,7 @@ namespace RobotForceIntegration
             }
             else
             {
+                robotWasConnected = false;
                 UpdateRobotStatus(false);
                 MessageBox.Show("Unable to connect to the robot.", "Robot", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
@@ -1083,6 +1207,7 @@ namespace RobotForceIntegration
                     code = xARM.PrepareMotion();
                     if (code == 0)
                     {
+                        EnsureDefaultSelfCollisionEnabled();
                         ApplyMotionSpeedProfile();
                         RefreshRobotTelemetry();
                         AppendSensorLog("Robot motion enabled");
@@ -1101,7 +1226,7 @@ namespace RobotForceIntegration
             SyncUiState();
         }
 
-        private void ButtonApplyCollisionSensitivity_Click(object sender, EventArgs e)
+        private void ApplyCollisionSensitivitySelection()
         {
             if (!IsRobotReady())
                 return;
@@ -1120,6 +1245,11 @@ namespace RobotForceIntegration
             }
 
             SyncUiState();
+        }
+
+        private void comboBoxCollisionSensitivity_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ApplyCollisionSensitivitySelection();
         }
 
         private void checkBoxSelfCollision_CheckedChanged(object sender, EventArgs e)
@@ -1158,11 +1288,6 @@ namespace RobotForceIntegration
         private void trackBarDodgeThreshold_Scroll(object sender, EventArgs e)
         {
             UpdateDodgeThresholdDisplay();
-        }
-
-        private void trackBarDodgeStep_Scroll(object sender, EventArgs e)
-        {
-            UpdateDodgeStepDisplay();
         }
 
         private void checkBoxDodgeEnabled_CheckedChanged(object sender, EventArgs e)
@@ -1251,9 +1376,9 @@ namespace RobotForceIntegration
             UpdateJointStepDisplay();
         }
 
-        private void ButtonRefreshPorts_Click(object sender, EventArgs e)
+        private void ButtonSensorConfiguration_Click(object sender, EventArgs e)
         {
-            RefreshSerialPorts();
+            ShowSensorConfigurationDialog();
         }
 
         private void ButtonOpenSerial_Click(object sender, EventArgs e)

@@ -21,7 +21,6 @@ namespace RobotForceIntegration
             this.trackBarMotionSpeed = new System.Windows.Forms.TrackBar();
             this.labelMotionSpeed = new System.Windows.Forms.Label();
             this.checkBoxSelfCollision = new System.Windows.Forms.CheckBox();
-            this.buttonApplyCollisionSensitivity = new System.Windows.Forms.Button();
             this.comboBoxCollisionSensitivity = new System.Windows.Forms.ComboBox();
             this.labelCollisionTarget = new System.Windows.Forms.Label();
             this.buttonToggleMotion = new System.Windows.Forms.Button();
@@ -29,10 +28,6 @@ namespace RobotForceIntegration
             this.textBoxRobotIp = new System.Windows.Forms.TextBox();
             this.labelRobotIp = new System.Windows.Forms.Label();
             this.groupBoxRobotState = new System.Windows.Forms.GroupBox();
-            this.textBoxTcp = new System.Windows.Forms.TextBox();
-            this.labelTcp = new System.Windows.Forms.Label();
-            this.textBoxBase = new System.Windows.Forms.TextBox();
-            this.labelBase = new System.Windows.Forms.Label();
             this.textBoxPosition = new System.Windows.Forms.TextBox();
             this.labelPosition = new System.Windows.Forms.Label();
             this.textBoxJoint = new System.Windows.Forms.TextBox();
@@ -73,7 +68,7 @@ namespace RobotForceIntegration
             this.labelSensorCommand = new System.Windows.Forms.Label();
             this.buttonCloseSerial = new System.Windows.Forms.Button();
             this.buttonOpenSerial = new System.Windows.Forms.Button();
-            this.buttonRefreshPorts = new System.Windows.Forms.Button();
+            this.buttonSensorConfiguration = new System.Windows.Forms.Button();
             this.comboBoxDataBits = new System.Windows.Forms.ComboBox();
             this.labelDataBits = new System.Windows.Forms.Label();
             this.comboBoxStopBits = new System.Windows.Forms.ComboBox();
@@ -91,9 +86,6 @@ namespace RobotForceIntegration
             this.textBoxCsvPath = new System.Windows.Forms.TextBox();
             this.labelCsvPath = new System.Windows.Forms.Label();
             this.groupBoxDodge = new System.Windows.Forms.GroupBox();
-            this.labelDodgeStepValue = new System.Windows.Forms.Label();
-            this.trackBarDodgeStep = new System.Windows.Forms.TrackBar();
-            this.labelDodgeStep = new System.Windows.Forms.Label();
             this.labelDodgeThresholdValue = new System.Windows.Forms.Label();
             this.trackBarDodgeThreshold = new System.Windows.Forms.TrackBar();
             this.labelDodgeThreshold = new System.Windows.Forms.Label();
@@ -118,7 +110,6 @@ namespace RobotForceIntegration
             this.groupBoxSensor.SuspendLayout();
             this.groupBoxAcquisition.SuspendLayout();
             this.groupBoxDodge.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeStep)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeThreshold)).BeginInit();
             this.groupBoxLog.SuspendLayout();
             this.statusStripMain.SuspendLayout();
@@ -130,7 +121,6 @@ namespace RobotForceIntegration
             this.groupBoxRobot.Controls.Add(this.trackBarMotionSpeed);
             this.groupBoxRobot.Controls.Add(this.labelMotionSpeed);
             this.groupBoxRobot.Controls.Add(this.checkBoxSelfCollision);
-            this.groupBoxRobot.Controls.Add(this.buttonApplyCollisionSensitivity);
             this.groupBoxRobot.Controls.Add(this.comboBoxCollisionSensitivity);
             this.groupBoxRobot.Controls.Add(this.labelCollisionTarget);
             this.groupBoxRobot.Controls.Add(this.buttonToggleMotion);
@@ -141,14 +131,14 @@ namespace RobotForceIntegration
             this.groupBoxRobot.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxRobot.Name = "groupBoxRobot";
             this.groupBoxRobot.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxRobot.Size = new System.Drawing.Size(353, 307);
+            this.groupBoxRobot.Size = new System.Drawing.Size(350, 260);
             this.groupBoxRobot.TabIndex = 0;
             this.groupBoxRobot.TabStop = false;
             this.groupBoxRobot.Text = "Robot";
             // 
             // labelMotionSpeedValue
             // 
-            this.labelMotionSpeedValue.Location = new System.Drawing.Point(292, 251);
+            this.labelMotionSpeedValue.Location = new System.Drawing.Point(293, 166);
             this.labelMotionSpeedValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelMotionSpeedValue.Name = "labelMotionSpeedValue";
             this.labelMotionSpeedValue.Size = new System.Drawing.Size(40, 25);
@@ -157,7 +147,7 @@ namespace RobotForceIntegration
             // 
             // trackBarMotionSpeed
             // 
-            this.trackBarMotionSpeed.Location = new System.Drawing.Point(23, 247);
+            this.trackBarMotionSpeed.Location = new System.Drawing.Point(24, 162);
             this.trackBarMotionSpeed.Margin = new System.Windows.Forms.Padding(4);
             this.trackBarMotionSpeed.Maximum = 100;
             this.trackBarMotionSpeed.Minimum = 1;
@@ -170,7 +160,7 @@ namespace RobotForceIntegration
             // 
             // labelMotionSpeed
             // 
-            this.labelMotionSpeed.Location = new System.Drawing.Point(20, 226);
+            this.labelMotionSpeed.Location = new System.Drawing.Point(21, 141);
             this.labelMotionSpeed.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelMotionSpeed.Name = "labelMotionSpeed";
             this.labelMotionSpeed.Size = new System.Drawing.Size(120, 20);
@@ -180,7 +170,7 @@ namespace RobotForceIntegration
             // checkBoxSelfCollision
             // 
             this.checkBoxSelfCollision.AutoSize = true;
-            this.checkBoxSelfCollision.Location = new System.Drawing.Point(24, 182);
+            this.checkBoxSelfCollision.Location = new System.Drawing.Point(23, 224);
             this.checkBoxSelfCollision.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxSelfCollision.Name = "checkBoxSelfCollision";
             this.checkBoxSelfCollision.Size = new System.Drawing.Size(104, 20);
@@ -188,17 +178,6 @@ namespace RobotForceIntegration
             this.checkBoxSelfCollision.Text = "Self collision";
             this.checkBoxSelfCollision.UseVisualStyleBackColor = true;
             this.checkBoxSelfCollision.CheckedChanged += new System.EventHandler(this.checkBoxSelfCollision_CheckedChanged);
-            // 
-            // buttonApplyCollisionSensitivity
-            // 
-            this.buttonApplyCollisionSensitivity.Location = new System.Drawing.Point(205, 134);
-            this.buttonApplyCollisionSensitivity.Margin = new System.Windows.Forms.Padding(4);
-            this.buttonApplyCollisionSensitivity.Name = "buttonApplyCollisionSensitivity";
-            this.buttonApplyCollisionSensitivity.Size = new System.Drawing.Size(127, 28);
-            this.buttonApplyCollisionSensitivity.TabIndex = 6;
-            this.buttonApplyCollisionSensitivity.Text = "Apply";
-            this.buttonApplyCollisionSensitivity.UseVisualStyleBackColor = true;
-            this.buttonApplyCollisionSensitivity.Click += new System.EventHandler(this.ButtonApplyCollisionSensitivity_Click);
             // 
             // comboBoxCollisionSensitivity
             // 
@@ -211,15 +190,16 @@ namespace RobotForceIntegration
             "3",
             "4",
             "5"});
-            this.comboBoxCollisionSensitivity.Location = new System.Drawing.Point(24, 137);
+            this.comboBoxCollisionSensitivity.Location = new System.Drawing.Point(151, 102);
             this.comboBoxCollisionSensitivity.Margin = new System.Windows.Forms.Padding(4);
             this.comboBoxCollisionSensitivity.Name = "comboBoxCollisionSensitivity";
-            this.comboBoxCollisionSensitivity.Size = new System.Drawing.Size(159, 24);
+            this.comboBoxCollisionSensitivity.Size = new System.Drawing.Size(181, 24);
             this.comboBoxCollisionSensitivity.TabIndex = 5;
+            this.comboBoxCollisionSensitivity.SelectedIndexChanged += new System.EventHandler(this.comboBoxCollisionSensitivity_SelectedIndexChanged);
             // 
             // labelCollisionTarget
             // 
-            this.labelCollisionTarget.Location = new System.Drawing.Point(20, 112);
+            this.labelCollisionTarget.Location = new System.Drawing.Point(21, 105);
             this.labelCollisionTarget.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCollisionTarget.Name = "labelCollisionTarget";
             this.labelCollisionTarget.Size = new System.Drawing.Size(160, 20);
@@ -228,10 +208,10 @@ namespace RobotForceIntegration
             // 
             // buttonToggleMotion
             // 
-            this.buttonToggleMotion.Location = new System.Drawing.Point(172, 59);
+            this.buttonToggleMotion.Location = new System.Drawing.Point(182, 59);
             this.buttonToggleMotion.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToggleMotion.Name = "buttonToggleMotion";
-            this.buttonToggleMotion.Size = new System.Drawing.Size(160, 28);
+            this.buttonToggleMotion.Size = new System.Drawing.Size(150, 28);
             this.buttonToggleMotion.TabIndex = 3;
             this.buttonToggleMotion.Text = "Enable Motion";
             this.buttonToggleMotion.UseVisualStyleBackColor = true;
@@ -239,10 +219,10 @@ namespace RobotForceIntegration
             // 
             // buttonConnectRobot
             // 
-            this.buttonConnectRobot.Location = new System.Drawing.Point(24, 59);
+            this.buttonConnectRobot.Location = new System.Drawing.Point(23, 59);
             this.buttonConnectRobot.Margin = new System.Windows.Forms.Padding(4);
             this.buttonConnectRobot.Name = "buttonConnectRobot";
-            this.buttonConnectRobot.Size = new System.Drawing.Size(127, 28);
+            this.buttonConnectRobot.Size = new System.Drawing.Size(150, 28);
             this.buttonConnectRobot.TabIndex = 2;
             this.buttonConnectRobot.Text = "Connect";
             this.buttonConnectRobot.UseVisualStyleBackColor = true;
@@ -267,71 +247,31 @@ namespace RobotForceIntegration
             // 
             // groupBoxRobotState
             // 
-            this.groupBoxRobotState.Controls.Add(this.textBoxTcp);
-            this.groupBoxRobotState.Controls.Add(this.labelTcp);
-            this.groupBoxRobotState.Controls.Add(this.textBoxBase);
-            this.groupBoxRobotState.Controls.Add(this.labelBase);
             this.groupBoxRobotState.Controls.Add(this.textBoxPosition);
             this.groupBoxRobotState.Controls.Add(this.labelPosition);
             this.groupBoxRobotState.Controls.Add(this.textBoxJoint);
             this.groupBoxRobotState.Controls.Add(this.labelJoint);
-            this.groupBoxRobotState.Location = new System.Drawing.Point(380, 254);
+            this.groupBoxRobotState.Location = new System.Drawing.Point(782, 15);
             this.groupBoxRobotState.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxRobotState.Name = "groupBoxRobotState";
             this.groupBoxRobotState.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxRobotState.Size = new System.Drawing.Size(743, 237);
+            this.groupBoxRobotState.Size = new System.Drawing.Size(450, 95);
             this.groupBoxRobotState.TabIndex = 1;
             this.groupBoxRobotState.TabStop = false;
             this.groupBoxRobotState.Text = "Robot State";
             // 
-            // textBoxTcp
-            // 
-            this.textBoxTcp.Location = new System.Drawing.Point(139, 182);
-            this.textBoxTcp.Margin = new System.Windows.Forms.Padding(4);
-            this.textBoxTcp.Name = "textBoxTcp";
-            this.textBoxTcp.ReadOnly = true;
-            this.textBoxTcp.Size = new System.Drawing.Size(585, 22);
-            this.textBoxTcp.TabIndex = 7;
-            // 
-            // labelTcp
-            // 
-            this.labelTcp.Location = new System.Drawing.Point(24, 186);
-            this.labelTcp.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelTcp.Name = "labelTcp";
-            this.labelTcp.Size = new System.Drawing.Size(93, 20);
-            this.labelTcp.TabIndex = 6;
-            this.labelTcp.Text = "TCP";
-            // 
-            // textBoxBase
-            // 
-            this.textBoxBase.Location = new System.Drawing.Point(139, 135);
-            this.textBoxBase.Margin = new System.Windows.Forms.Padding(4);
-            this.textBoxBase.Name = "textBoxBase";
-            this.textBoxBase.ReadOnly = true;
-            this.textBoxBase.Size = new System.Drawing.Size(585, 22);
-            this.textBoxBase.TabIndex = 5;
-            // 
-            // labelBase
-            // 
-            this.labelBase.Location = new System.Drawing.Point(24, 138);
-            this.labelBase.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelBase.Name = "labelBase";
-            this.labelBase.Size = new System.Drawing.Size(93, 20);
-            this.labelBase.TabIndex = 4;
-            this.labelBase.Text = "Base";
-            // 
             // textBoxPosition
             // 
-            this.textBoxPosition.Location = new System.Drawing.Point(139, 88);
+            this.textBoxPosition.Location = new System.Drawing.Point(101, 59);
             this.textBoxPosition.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxPosition.Name = "textBoxPosition";
             this.textBoxPosition.ReadOnly = true;
-            this.textBoxPosition.Size = new System.Drawing.Size(585, 22);
+            this.textBoxPosition.Size = new System.Drawing.Size(325, 22);
             this.textBoxPosition.TabIndex = 3;
             // 
             // labelPosition
             // 
-            this.labelPosition.Location = new System.Drawing.Point(24, 92);
+            this.labelPosition.Location = new System.Drawing.Point(24, 63);
             this.labelPosition.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelPosition.Name = "labelPosition";
             this.labelPosition.Size = new System.Drawing.Size(93, 20);
@@ -340,16 +280,16 @@ namespace RobotForceIntegration
             // 
             // textBoxJoint
             // 
-            this.textBoxJoint.Location = new System.Drawing.Point(139, 42);
+            this.textBoxJoint.Location = new System.Drawing.Point(101, 27);
             this.textBoxJoint.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxJoint.Name = "textBoxJoint";
             this.textBoxJoint.ReadOnly = true;
-            this.textBoxJoint.Size = new System.Drawing.Size(585, 22);
+            this.textBoxJoint.Size = new System.Drawing.Size(325, 22);
             this.textBoxJoint.TabIndex = 1;
             // 
             // labelJoint
             // 
-            this.labelJoint.Location = new System.Drawing.Point(24, 46);
+            this.labelJoint.Location = new System.Drawing.Point(24, 31);
             this.labelJoint.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelJoint.Name = "labelJoint";
             this.labelJoint.Size = new System.Drawing.Size(93, 20);
@@ -370,18 +310,18 @@ namespace RobotForceIntegration
             this.groupBoxTool.Controls.Add(this.labelToolStepValue);
             this.groupBoxTool.Controls.Add(this.trackBarToolStep);
             this.groupBoxTool.Controls.Add(this.labelToolStep);
-            this.groupBoxTool.Location = new System.Drawing.Point(380, 15);
+            this.groupBoxTool.Location = new System.Drawing.Point(374, 15);
             this.groupBoxTool.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxTool.Name = "groupBoxTool";
             this.groupBoxTool.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxTool.Size = new System.Drawing.Size(353, 231);
+            this.groupBoxTool.Size = new System.Drawing.Size(400, 218);
             this.groupBoxTool.TabIndex = 2;
             this.groupBoxTool.TabStop = false;
             this.groupBoxTool.Text = "Tool Motion";
             // 
             // buttonSetPreset
             // 
-            this.buttonSetPreset.Location = new System.Drawing.Point(200, 173);
+            this.buttonSetPreset.Location = new System.Drawing.Point(258, 160);
             this.buttonSetPreset.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSetPreset.Name = "buttonSetPreset";
             this.buttonSetPreset.Size = new System.Drawing.Size(120, 28);
@@ -392,7 +332,7 @@ namespace RobotForceIntegration
             // 
             // buttonMovePreset
             // 
-            this.buttonMovePreset.Location = new System.Drawing.Point(200, 128);
+            this.buttonMovePreset.Location = new System.Drawing.Point(258, 119);
             this.buttonMovePreset.Margin = new System.Windows.Forms.Padding(4);
             this.buttonMovePreset.Name = "buttonMovePreset";
             this.buttonMovePreset.Size = new System.Drawing.Size(120, 28);
@@ -403,7 +343,7 @@ namespace RobotForceIntegration
             // 
             // buttonMoveHome
             // 
-            this.buttonMoveHome.Location = new System.Drawing.Point(200, 84);
+            this.buttonMoveHome.Location = new System.Drawing.Point(258, 78);
             this.buttonMoveHome.Margin = new System.Windows.Forms.Padding(4);
             this.buttonMoveHome.Name = "buttonMoveHome";
             this.buttonMoveHome.Size = new System.Drawing.Size(120, 28);
@@ -414,7 +354,7 @@ namespace RobotForceIntegration
             // 
             // buttonToolZPlus
             // 
-            this.buttonToolZPlus.Location = new System.Drawing.Point(112, 178);
+            this.buttonToolZPlus.Location = new System.Drawing.Point(112, 157);
             this.buttonToolZPlus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToolZPlus.Name = "buttonToolZPlus";
             this.buttonToolZPlus.Size = new System.Drawing.Size(80, 34);
@@ -425,7 +365,7 @@ namespace RobotForceIntegration
             // 
             // buttonToolZMinus
             // 
-            this.buttonToolZMinus.Location = new System.Drawing.Point(24, 178);
+            this.buttonToolZMinus.Location = new System.Drawing.Point(24, 157);
             this.buttonToolZMinus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToolZMinus.Name = "buttonToolZMinus";
             this.buttonToolZMinus.Size = new System.Drawing.Size(80, 34);
@@ -436,7 +376,7 @@ namespace RobotForceIntegration
             // 
             // buttonToolYPlus
             // 
-            this.buttonToolYPlus.Location = new System.Drawing.Point(112, 137);
+            this.buttonToolYPlus.Location = new System.Drawing.Point(112, 116);
             this.buttonToolYPlus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToolYPlus.Name = "buttonToolYPlus";
             this.buttonToolYPlus.Size = new System.Drawing.Size(80, 34);
@@ -447,7 +387,7 @@ namespace RobotForceIntegration
             // 
             // buttonToolYMinus
             // 
-            this.buttonToolYMinus.Location = new System.Drawing.Point(24, 137);
+            this.buttonToolYMinus.Location = new System.Drawing.Point(24, 116);
             this.buttonToolYMinus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToolYMinus.Name = "buttonToolYMinus";
             this.buttonToolYMinus.Size = new System.Drawing.Size(80, 34);
@@ -458,7 +398,7 @@ namespace RobotForceIntegration
             // 
             // buttonToolXPlus
             // 
-            this.buttonToolXPlus.Location = new System.Drawing.Point(112, 96);
+            this.buttonToolXPlus.Location = new System.Drawing.Point(112, 75);
             this.buttonToolXPlus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToolXPlus.Name = "buttonToolXPlus";
             this.buttonToolXPlus.Size = new System.Drawing.Size(80, 34);
@@ -469,7 +409,7 @@ namespace RobotForceIntegration
             // 
             // buttonToolXMinus
             // 
-            this.buttonToolXMinus.Location = new System.Drawing.Point(24, 96);
+            this.buttonToolXMinus.Location = new System.Drawing.Point(24, 75);
             this.buttonToolXMinus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonToolXMinus.Name = "buttonToolXMinus";
             this.buttonToolXMinus.Size = new System.Drawing.Size(80, 34);
@@ -480,7 +420,7 @@ namespace RobotForceIntegration
             // 
             // labelToolStepValue
             // 
-            this.labelToolStepValue.Location = new System.Drawing.Point(258, 38);
+            this.labelToolStepValue.Location = new System.Drawing.Point(322, 38);
             this.labelToolStepValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelToolStepValue.Name = "labelToolStepValue";
             this.labelToolStepValue.Size = new System.Drawing.Size(70, 20);
@@ -493,7 +433,7 @@ namespace RobotForceIntegration
             this.trackBarToolStep.Margin = new System.Windows.Forms.Padding(4);
             this.trackBarToolStep.Maximum = 100;
             this.trackBarToolStep.Name = "trackBarToolStep";
-            this.trackBarToolStep.Size = new System.Drawing.Size(138, 56);
+            this.trackBarToolStep.Size = new System.Drawing.Size(202, 56);
             this.trackBarToolStep.TabIndex = 1;
             this.trackBarToolStep.TickFrequency = 10;
             this.trackBarToolStep.Value = 67;
@@ -525,18 +465,18 @@ namespace RobotForceIntegration
             this.groupBoxJoints.Controls.Add(this.labelJointStepValue);
             this.groupBoxJoints.Controls.Add(this.trackBarJointStep);
             this.groupBoxJoints.Controls.Add(this.labelJointStep);
-            this.groupBoxJoints.Location = new System.Drawing.Point(744, 21);
+            this.groupBoxJoints.Location = new System.Drawing.Point(374, 239);
             this.groupBoxJoints.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxJoints.Name = "groupBoxJoints";
             this.groupBoxJoints.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxJoints.Size = new System.Drawing.Size(379, 225);
+            this.groupBoxJoints.Size = new System.Drawing.Size(400, 195);
             this.groupBoxJoints.TabIndex = 3;
             this.groupBoxJoints.TabStop = false;
             this.groupBoxJoints.Text = "Joint Motion";
             // 
             // buttonJoint6Plus
             // 
-            this.buttonJoint6Plus.Location = new System.Drawing.Point(280, 178);
+            this.buttonJoint6Plus.Location = new System.Drawing.Point(298, 142);
             this.buttonJoint6Plus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint6Plus.Name = "buttonJoint6Plus";
             this.buttonJoint6Plus.Size = new System.Drawing.Size(80, 34);
@@ -547,7 +487,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint6Minus
             // 
-            this.buttonJoint6Minus.Location = new System.Drawing.Point(192, 178);
+            this.buttonJoint6Minus.Location = new System.Drawing.Point(210, 142);
             this.buttonJoint6Minus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint6Minus.Name = "buttonJoint6Minus";
             this.buttonJoint6Minus.Size = new System.Drawing.Size(80, 34);
@@ -558,7 +498,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint5Plus
             // 
-            this.buttonJoint5Plus.Location = new System.Drawing.Point(104, 178);
+            this.buttonJoint5Plus.Location = new System.Drawing.Point(104, 142);
             this.buttonJoint5Plus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint5Plus.Name = "buttonJoint5Plus";
             this.buttonJoint5Plus.Size = new System.Drawing.Size(80, 34);
@@ -569,7 +509,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint5Minus
             // 
-            this.buttonJoint5Minus.Location = new System.Drawing.Point(16, 178);
+            this.buttonJoint5Minus.Location = new System.Drawing.Point(16, 142);
             this.buttonJoint5Minus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint5Minus.Name = "buttonJoint5Minus";
             this.buttonJoint5Minus.Size = new System.Drawing.Size(80, 34);
@@ -580,7 +520,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint4Plus
             // 
-            this.buttonJoint4Plus.Location = new System.Drawing.Point(280, 143);
+            this.buttonJoint4Plus.Location = new System.Drawing.Point(298, 107);
             this.buttonJoint4Plus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint4Plus.Name = "buttonJoint4Plus";
             this.buttonJoint4Plus.Size = new System.Drawing.Size(80, 34);
@@ -591,7 +531,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint4Minus
             // 
-            this.buttonJoint4Minus.Location = new System.Drawing.Point(192, 143);
+            this.buttonJoint4Minus.Location = new System.Drawing.Point(210, 107);
             this.buttonJoint4Minus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint4Minus.Name = "buttonJoint4Minus";
             this.buttonJoint4Minus.Size = new System.Drawing.Size(80, 34);
@@ -602,7 +542,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint3Plus
             // 
-            this.buttonJoint3Plus.Location = new System.Drawing.Point(104, 143);
+            this.buttonJoint3Plus.Location = new System.Drawing.Point(104, 107);
             this.buttonJoint3Plus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint3Plus.Name = "buttonJoint3Plus";
             this.buttonJoint3Plus.Size = new System.Drawing.Size(80, 34);
@@ -613,7 +553,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint3Minus
             // 
-            this.buttonJoint3Minus.Location = new System.Drawing.Point(16, 143);
+            this.buttonJoint3Minus.Location = new System.Drawing.Point(16, 107);
             this.buttonJoint3Minus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint3Minus.Name = "buttonJoint3Minus";
             this.buttonJoint3Minus.Size = new System.Drawing.Size(80, 34);
@@ -624,7 +564,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint2Plus
             // 
-            this.buttonJoint2Plus.Location = new System.Drawing.Point(280, 108);
+            this.buttonJoint2Plus.Location = new System.Drawing.Point(298, 72);
             this.buttonJoint2Plus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint2Plus.Name = "buttonJoint2Plus";
             this.buttonJoint2Plus.Size = new System.Drawing.Size(80, 34);
@@ -635,7 +575,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint2Minus
             // 
-            this.buttonJoint2Minus.Location = new System.Drawing.Point(192, 108);
+            this.buttonJoint2Minus.Location = new System.Drawing.Point(210, 72);
             this.buttonJoint2Minus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint2Minus.Name = "buttonJoint2Minus";
             this.buttonJoint2Minus.Size = new System.Drawing.Size(80, 34);
@@ -646,7 +586,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint1Plus
             // 
-            this.buttonJoint1Plus.Location = new System.Drawing.Point(104, 108);
+            this.buttonJoint1Plus.Location = new System.Drawing.Point(104, 72);
             this.buttonJoint1Plus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint1Plus.Name = "buttonJoint1Plus";
             this.buttonJoint1Plus.Size = new System.Drawing.Size(80, 34);
@@ -657,7 +597,7 @@ namespace RobotForceIntegration
             // 
             // buttonJoint1Minus
             // 
-            this.buttonJoint1Minus.Location = new System.Drawing.Point(16, 108);
+            this.buttonJoint1Minus.Location = new System.Drawing.Point(16, 72);
             this.buttonJoint1Minus.Margin = new System.Windows.Forms.Padding(4);
             this.buttonJoint1Minus.Name = "buttonJoint1Minus";
             this.buttonJoint1Minus.Size = new System.Drawing.Size(80, 34);
@@ -668,7 +608,7 @@ namespace RobotForceIntegration
             // 
             // labelJointStepValue
             // 
-            this.labelJointStepValue.Location = new System.Drawing.Point(290, 34);
+            this.labelJointStepValue.Location = new System.Drawing.Point(322, 34);
             this.labelJointStepValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelJointStepValue.Name = "labelJointStepValue";
             this.labelJointStepValue.Size = new System.Drawing.Size(70, 20);
@@ -682,7 +622,7 @@ namespace RobotForceIntegration
             this.trackBarJointStep.Maximum = 20;
             this.trackBarJointStep.Minimum = 1;
             this.trackBarJointStep.Name = "trackBarJointStep";
-            this.trackBarJointStep.Size = new System.Drawing.Size(178, 56);
+            this.trackBarJointStep.Size = new System.Drawing.Size(210, 56);
             this.trackBarJointStep.TabIndex = 13;
             this.trackBarJointStep.Value = 10;
             this.trackBarJointStep.Scroll += new System.EventHandler(this.trackBarJointStep_Scroll);
@@ -704,29 +644,19 @@ namespace RobotForceIntegration
             this.groupBoxSensor.Controls.Add(this.labelSensorCommand);
             this.groupBoxSensor.Controls.Add(this.buttonCloseSerial);
             this.groupBoxSensor.Controls.Add(this.buttonOpenSerial);
-            this.groupBoxSensor.Controls.Add(this.buttonRefreshPorts);
-            this.groupBoxSensor.Controls.Add(this.comboBoxDataBits);
-            this.groupBoxSensor.Controls.Add(this.labelDataBits);
-            this.groupBoxSensor.Controls.Add(this.comboBoxStopBits);
-            this.groupBoxSensor.Controls.Add(this.labelStopBits);
-            this.groupBoxSensor.Controls.Add(this.comboBoxParity);
-            this.groupBoxSensor.Controls.Add(this.labelParity);
-            this.groupBoxSensor.Controls.Add(this.comboBoxBaudRate);
-            this.groupBoxSensor.Controls.Add(this.labelBaudRate);
-            this.groupBoxSensor.Controls.Add(this.comboBoxSerialPort);
-            this.groupBoxSensor.Controls.Add(this.labelSerialPort);
-            this.groupBoxSensor.Location = new System.Drawing.Point(16, 330);
+            this.groupBoxSensor.Controls.Add(this.buttonSensorConfiguration);
+            this.groupBoxSensor.Location = new System.Drawing.Point(16, 281);
             this.groupBoxSensor.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxSensor.Name = "groupBoxSensor";
             this.groupBoxSensor.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxSensor.Size = new System.Drawing.Size(353, 340);
+            this.groupBoxSensor.Size = new System.Drawing.Size(350, 151);
             this.groupBoxSensor.TabIndex = 4;
             this.groupBoxSensor.TabStop = false;
             this.groupBoxSensor.Text = "Sensor";
             // 
             // buttonTare
             // 
-            this.buttonTare.Location = new System.Drawing.Point(182, 281);
+            this.buttonTare.Location = new System.Drawing.Point(182, 101);
             this.buttonTare.Margin = new System.Windows.Forms.Padding(4);
             this.buttonTare.Name = "buttonTare";
             this.buttonTare.Size = new System.Drawing.Size(150, 28);
@@ -737,7 +667,7 @@ namespace RobotForceIntegration
             // 
             // buttonSendCommand
             // 
-            this.buttonSendCommand.Location = new System.Drawing.Point(23, 281);
+            this.buttonSendCommand.Location = new System.Drawing.Point(23, 101);
             this.buttonSendCommand.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSendCommand.Name = "buttonSendCommand";
             this.buttonSendCommand.Size = new System.Drawing.Size(150, 28);
@@ -748,7 +678,7 @@ namespace RobotForceIntegration
             // 
             // textBoxSensorCommand
             // 
-            this.textBoxSensorCommand.Location = new System.Drawing.Point(121, 249);
+            this.textBoxSensorCommand.Location = new System.Drawing.Point(121, 69);
             this.textBoxSensorCommand.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxSensorCommand.Name = "textBoxSensorCommand";
             this.textBoxSensorCommand.Size = new System.Drawing.Size(211, 22);
@@ -756,7 +686,7 @@ namespace RobotForceIntegration
             // 
             // labelSensorCommand
             // 
-            this.labelSensorCommand.Location = new System.Drawing.Point(20, 252);
+            this.labelSensorCommand.Location = new System.Drawing.Point(20, 72);
             this.labelSensorCommand.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelSensorCommand.Name = "labelSensorCommand";
             this.labelSensorCommand.Size = new System.Drawing.Size(93, 20);
@@ -765,10 +695,10 @@ namespace RobotForceIntegration
             // 
             // buttonCloseSerial
             // 
-            this.buttonCloseSerial.Location = new System.Drawing.Point(232, 208);
+            this.buttonCloseSerial.Location = new System.Drawing.Point(257, 28);
             this.buttonCloseSerial.Margin = new System.Windows.Forms.Padding(4);
             this.buttonCloseSerial.Name = "buttonCloseSerial";
-            this.buttonCloseSerial.Size = new System.Drawing.Size(100, 28);
+            this.buttonCloseSerial.Size = new System.Drawing.Size(75, 28);
             this.buttonCloseSerial.TabIndex = 12;
             this.buttonCloseSerial.Text = "Close";
             this.buttonCloseSerial.UseVisualStyleBackColor = true;
@@ -776,25 +706,25 @@ namespace RobotForceIntegration
             // 
             // buttonOpenSerial
             // 
-            this.buttonOpenSerial.Location = new System.Drawing.Point(123, 208);
+            this.buttonOpenSerial.Location = new System.Drawing.Point(174, 28);
             this.buttonOpenSerial.Margin = new System.Windows.Forms.Padding(4);
             this.buttonOpenSerial.Name = "buttonOpenSerial";
-            this.buttonOpenSerial.Size = new System.Drawing.Size(100, 28);
+            this.buttonOpenSerial.Size = new System.Drawing.Size(75, 28);
             this.buttonOpenSerial.TabIndex = 11;
             this.buttonOpenSerial.Text = "Open";
             this.buttonOpenSerial.UseVisualStyleBackColor = true;
             this.buttonOpenSerial.Click += new System.EventHandler(this.ButtonOpenSerial_Click);
             // 
-            // buttonRefreshPorts
+            // buttonSensorConfiguration
             // 
-            this.buttonRefreshPorts.Location = new System.Drawing.Point(15, 208);
-            this.buttonRefreshPorts.Margin = new System.Windows.Forms.Padding(4);
-            this.buttonRefreshPorts.Name = "buttonRefreshPorts";
-            this.buttonRefreshPorts.Size = new System.Drawing.Size(100, 28);
-            this.buttonRefreshPorts.TabIndex = 10;
-            this.buttonRefreshPorts.Text = "Refresh Ports";
-            this.buttonRefreshPorts.UseVisualStyleBackColor = true;
-            this.buttonRefreshPorts.Click += new System.EventHandler(this.ButtonRefreshPorts_Click);
+            this.buttonSensorConfiguration.Location = new System.Drawing.Point(15, 28);
+            this.buttonSensorConfiguration.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonSensorConfiguration.Name = "buttonSensorConfiguration";
+            this.buttonSensorConfiguration.Size = new System.Drawing.Size(151, 28);
+            this.buttonSensorConfiguration.TabIndex = 10;
+            this.buttonSensorConfiguration.Text = "Configuration";
+            this.buttonSensorConfiguration.UseVisualStyleBackColor = true;
+            this.buttonSensorConfiguration.Click += new System.EventHandler(this.ButtonSensorConfiguration_Click);
             // 
             // comboBoxDataBits
             // 
@@ -912,21 +842,21 @@ namespace RobotForceIntegration
             this.groupBoxAcquisition.Controls.Add(this.buttonSelectCsv);
             this.groupBoxAcquisition.Controls.Add(this.textBoxCsvPath);
             this.groupBoxAcquisition.Controls.Add(this.labelCsvPath);
-            this.groupBoxAcquisition.Location = new System.Drawing.Point(766, 499);
+            this.groupBoxAcquisition.Location = new System.Drawing.Point(16, 436);
             this.groupBoxAcquisition.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxAcquisition.Name = "groupBoxAcquisition";
             this.groupBoxAcquisition.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxAcquisition.Size = new System.Drawing.Size(357, 171);
+            this.groupBoxAcquisition.Size = new System.Drawing.Size(350, 138);
             this.groupBoxAcquisition.TabIndex = 5;
             this.groupBoxAcquisition.TabStop = false;
             this.groupBoxAcquisition.Text = "Acquisition";
             // 
             // buttonSaveCsv
             // 
-            this.buttonSaveCsv.Location = new System.Drawing.Point(183, 93);
+            this.buttonSaveCsv.Location = new System.Drawing.Point(183, 61);
             this.buttonSaveCsv.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSaveCsv.Name = "buttonSaveCsv";
-            this.buttonSaveCsv.Size = new System.Drawing.Size(155, 28);
+            this.buttonSaveCsv.Size = new System.Drawing.Size(150, 28);
             this.buttonSaveCsv.TabIndex = 5;
             this.buttonSaveCsv.Text = "Save CSV";
             this.buttonSaveCsv.UseVisualStyleBackColor = true;
@@ -934,10 +864,10 @@ namespace RobotForceIntegration
             // 
             // buttonStartAcquisition
             // 
-            this.buttonStartAcquisition.Location = new System.Drawing.Point(23, 129);
+            this.buttonStartAcquisition.Location = new System.Drawing.Point(23, 97);
             this.buttonStartAcquisition.Margin = new System.Windows.Forms.Padding(4);
             this.buttonStartAcquisition.Name = "buttonStartAcquisition";
-            this.buttonStartAcquisition.Size = new System.Drawing.Size(315, 28);
+            this.buttonStartAcquisition.Size = new System.Drawing.Size(309, 28);
             this.buttonStartAcquisition.TabIndex = 4;
             this.buttonStartAcquisition.Text = "Start Test";
             this.buttonStartAcquisition.UseVisualStyleBackColor = true;
@@ -945,10 +875,10 @@ namespace RobotForceIntegration
             // 
             // buttonSelectCsv
             // 
-            this.buttonSelectCsv.Location = new System.Drawing.Point(23, 93);
+            this.buttonSelectCsv.Location = new System.Drawing.Point(23, 61);
             this.buttonSelectCsv.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSelectCsv.Name = "buttonSelectCsv";
-            this.buttonSelectCsv.Size = new System.Drawing.Size(155, 28);
+            this.buttonSelectCsv.Size = new System.Drawing.Size(150, 28);
             this.buttonSelectCsv.TabIndex = 3;
             this.buttonSelectCsv.Text = "Select CSV";
             this.buttonSelectCsv.UseVisualStyleBackColor = true;
@@ -956,11 +886,11 @@ namespace RobotForceIntegration
             // 
             // textBoxCsvPath
             // 
-            this.textBoxCsvPath.Location = new System.Drawing.Point(23, 59);
+            this.textBoxCsvPath.Location = new System.Drawing.Point(94, 31);
             this.textBoxCsvPath.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxCsvPath.Name = "textBoxCsvPath";
             this.textBoxCsvPath.ReadOnly = true;
-            this.textBoxCsvPath.Size = new System.Drawing.Size(315, 22);
+            this.textBoxCsvPath.Size = new System.Drawing.Size(238, 22);
             this.textBoxCsvPath.TabIndex = 1;
             // 
             // labelCsvPath
@@ -974,56 +904,22 @@ namespace RobotForceIntegration
             // 
             // groupBoxDodge
             // 
-            this.groupBoxDodge.Controls.Add(this.labelDodgeStepValue);
-            this.groupBoxDodge.Controls.Add(this.trackBarDodgeStep);
-            this.groupBoxDodge.Controls.Add(this.labelDodgeStep);
             this.groupBoxDodge.Controls.Add(this.labelDodgeThresholdValue);
             this.groupBoxDodge.Controls.Add(this.trackBarDodgeThreshold);
             this.groupBoxDodge.Controls.Add(this.labelDodgeThreshold);
             this.groupBoxDodge.Controls.Add(this.checkBoxDodgeEnabled);
-            this.groupBoxDodge.Location = new System.Drawing.Point(380, 499);
+            this.groupBoxDodge.Location = new System.Drawing.Point(374, 438);
             this.groupBoxDodge.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxDodge.Name = "groupBoxDodge";
             this.groupBoxDodge.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxDodge.Size = new System.Drawing.Size(374, 171);
+            this.groupBoxDodge.Size = new System.Drawing.Size(400, 136);
             this.groupBoxDodge.TabIndex = 5;
             this.groupBoxDodge.TabStop = false;
             this.groupBoxDodge.Text = "Dodge";
             // 
-            // labelDodgeStepValue
-            // 
-            this.labelDodgeStepValue.Location = new System.Drawing.Point(291, 99);
-            this.labelDodgeStepValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelDodgeStepValue.Name = "labelDodgeStepValue";
-            this.labelDodgeStepValue.Size = new System.Drawing.Size(62, 20);
-            this.labelDodgeStepValue.TabIndex = 6;
-            this.labelDodgeStepValue.Text = "5.0 mm";
-            // 
-            // trackBarDodgeStep
-            // 
-            this.trackBarDodgeStep.Location = new System.Drawing.Point(99, 91);
-            this.trackBarDodgeStep.Margin = new System.Windows.Forms.Padding(4);
-            this.trackBarDodgeStep.Maximum = 30;
-            this.trackBarDodgeStep.Minimum = 1;
-            this.trackBarDodgeStep.Name = "trackBarDodgeStep";
-            this.trackBarDodgeStep.Size = new System.Drawing.Size(184, 56);
-            this.trackBarDodgeStep.TabIndex = 5;
-            this.trackBarDodgeStep.TickFrequency = 5;
-            this.trackBarDodgeStep.Value = 5;
-            this.trackBarDodgeStep.Scroll += new System.EventHandler(this.trackBarDodgeStep_Scroll);
-            // 
-            // labelDodgeStep
-            // 
-            this.labelDodgeStep.Location = new System.Drawing.Point(20, 105);
-            this.labelDodgeStep.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.labelDodgeStep.Name = "labelDodgeStep";
-            this.labelDodgeStep.Size = new System.Drawing.Size(141, 20);
-            this.labelDodgeStep.TabIndex = 4;
-            this.labelDodgeStep.Text = "Step size";
-            // 
             // labelDodgeThresholdValue
             // 
-            this.labelDodgeThresholdValue.Location = new System.Drawing.Point(283, 47);
+            this.labelDodgeThresholdValue.Location = new System.Drawing.Point(283, 69);
             this.labelDodgeThresholdValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelDodgeThresholdValue.Name = "labelDodgeThresholdValue";
             this.labelDodgeThresholdValue.Size = new System.Drawing.Size(70, 20);
@@ -1032,7 +928,7 @@ namespace RobotForceIntegration
             // 
             // trackBarDodgeThreshold
             // 
-            this.trackBarDodgeThreshold.Location = new System.Drawing.Point(99, 47);
+            this.trackBarDodgeThreshold.Location = new System.Drawing.Point(99, 69);
             this.trackBarDodgeThreshold.Margin = new System.Windows.Forms.Padding(4);
             this.trackBarDodgeThreshold.Maximum = 100;
             this.trackBarDodgeThreshold.Name = "trackBarDodgeThreshold";
@@ -1043,7 +939,7 @@ namespace RobotForceIntegration
             // 
             // labelDodgeThreshold
             // 
-            this.labelDodgeThreshold.Location = new System.Drawing.Point(20, 60);
+            this.labelDodgeThreshold.Location = new System.Drawing.Point(20, 82);
             this.labelDodgeThreshold.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelDodgeThreshold.Name = "labelDodgeThreshold";
             this.labelDodgeThreshold.Size = new System.Drawing.Size(71, 20);
@@ -1053,7 +949,7 @@ namespace RobotForceIntegration
             // checkBoxDodgeEnabled
             // 
             this.checkBoxDodgeEnabled.AutoSize = true;
-            this.checkBoxDodgeEnabled.Location = new System.Drawing.Point(24, 27);
+            this.checkBoxDodgeEnabled.Location = new System.Drawing.Point(24, 32);
             this.checkBoxDodgeEnabled.Margin = new System.Windows.Forms.Padding(4);
             this.checkBoxDodgeEnabled.Name = "checkBoxDodgeEnabled";
             this.checkBoxDodgeEnabled.Size = new System.Drawing.Size(91, 20);
@@ -1064,16 +960,13 @@ namespace RobotForceIntegration
             // 
             // groupBoxLog
             // 
-            this.groupBoxLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBoxLog.Controls.Add(this.buttonClearLog);
             this.groupBoxLog.Controls.Add(this.textBoxSensorLog);
-            this.groupBoxLog.Location = new System.Drawing.Point(16, 678);
+            this.groupBoxLog.Location = new System.Drawing.Point(782, 117);
             this.groupBoxLog.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxLog.Name = "groupBoxLog";
             this.groupBoxLog.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxLog.Size = new System.Drawing.Size(1107, 241);
+            this.groupBoxLog.Size = new System.Drawing.Size(450, 457);
             this.groupBoxLog.TabIndex = 6;
             this.groupBoxLog.TabStop = false;
             this.groupBoxLog.Text = "Event Log";
@@ -1081,7 +974,7 @@ namespace RobotForceIntegration
             // buttonClearLog
             // 
             this.buttonClearLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonClearLog.Location = new System.Drawing.Point(975, 23);
+            this.buttonClearLog.Location = new System.Drawing.Point(322, 23);
             this.buttonClearLog.Margin = new System.Windows.Forms.Padding(4);
             this.buttonClearLog.Name = "buttonClearLog";
             this.buttonClearLog.Size = new System.Drawing.Size(109, 28);
@@ -1095,13 +988,13 @@ namespace RobotForceIntegration
             this.textBoxSensorLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxSensorLog.Location = new System.Drawing.Point(15, 26);
+            this.textBoxSensorLog.Location = new System.Drawing.Point(15, 61);
             this.textBoxSensorLog.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxSensorLog.Multiline = true;
             this.textBoxSensorLog.Name = "textBoxSensorLog";
             this.textBoxSensorLog.ReadOnly = true;
             this.textBoxSensorLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxSensorLog.Size = new System.Drawing.Size(938, 198);
+            this.textBoxSensorLog.Size = new System.Drawing.Size(416, 385);
             this.textBoxSensorLog.TabIndex = 0;
             // 
             // statusStripMain
@@ -1110,10 +1003,10 @@ namespace RobotForceIntegration
             this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelRobot,
             this.toolStripStatusLabelSensor});
-            this.statusStripMain.Location = new System.Drawing.Point(0, 927);
+            this.statusStripMain.Location = new System.Drawing.Point(0, 587);
             this.statusStripMain.Name = "statusStripMain";
             this.statusStripMain.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStripMain.Size = new System.Drawing.Size(1142, 26);
+            this.statusStripMain.Size = new System.Drawing.Size(1242, 26);
             this.statusStripMain.TabIndex = 7;
             // 
             // toolStripStatusLabelRobot
@@ -1151,7 +1044,7 @@ namespace RobotForceIntegration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1142, 953);
+            this.ClientSize = new System.Drawing.Size(1242, 613);
             this.Controls.Add(this.statusStripMain);
             this.Controls.Add(this.groupBoxLog);
             this.Controls.Add(this.groupBoxDodge);
@@ -1162,7 +1055,7 @@ namespace RobotForceIntegration
             this.Controls.Add(this.groupBoxRobotState);
             this.Controls.Add(this.groupBoxRobot);
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimumSize = new System.Drawing.Size(100, 100);
+            this.MinimumSize = new System.Drawing.Size(1260, 660);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Robot + Force Integration";
@@ -1184,7 +1077,6 @@ namespace RobotForceIntegration
             this.groupBoxAcquisition.PerformLayout();
             this.groupBoxDodge.ResumeLayout(false);
             this.groupBoxDodge.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeStep)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeThreshold)).EndInit();
             this.groupBoxLog.ResumeLayout(false);
             this.groupBoxLog.PerformLayout();
@@ -1200,7 +1092,6 @@ namespace RobotForceIntegration
         private System.Windows.Forms.TrackBar trackBarMotionSpeed;
         private System.Windows.Forms.Label labelMotionSpeed;
         private System.Windows.Forms.CheckBox checkBoxSelfCollision;
-        private System.Windows.Forms.Button buttonApplyCollisionSensitivity;
         private System.Windows.Forms.ComboBox comboBoxCollisionSensitivity;
         private System.Windows.Forms.Label labelCollisionTarget;
         private System.Windows.Forms.Button buttonToggleMotion;
@@ -1208,10 +1099,6 @@ namespace RobotForceIntegration
         private System.Windows.Forms.TextBox textBoxRobotIp;
         private System.Windows.Forms.Label labelRobotIp;
         private System.Windows.Forms.GroupBox groupBoxRobotState;
-        private System.Windows.Forms.TextBox textBoxTcp;
-        private System.Windows.Forms.Label labelTcp;
-        private System.Windows.Forms.TextBox textBoxBase;
-        private System.Windows.Forms.Label labelBase;
         private System.Windows.Forms.TextBox textBoxPosition;
         private System.Windows.Forms.Label labelPosition;
         private System.Windows.Forms.TextBox textBoxJoint;
@@ -1252,7 +1139,7 @@ namespace RobotForceIntegration
         private System.Windows.Forms.Label labelSensorCommand;
         private System.Windows.Forms.Button buttonCloseSerial;
         private System.Windows.Forms.Button buttonOpenSerial;
-        private System.Windows.Forms.Button buttonRefreshPorts;
+        private System.Windows.Forms.Button buttonSensorConfiguration;
         private System.Windows.Forms.ComboBox comboBoxDataBits;
         private System.Windows.Forms.Label labelDataBits;
         private System.Windows.Forms.ComboBox comboBoxStopBits;
@@ -1270,9 +1157,6 @@ namespace RobotForceIntegration
         private System.Windows.Forms.TextBox textBoxCsvPath;
         private System.Windows.Forms.Label labelCsvPath;
         private System.Windows.Forms.GroupBox groupBoxDodge;
-        private System.Windows.Forms.Label labelDodgeStepValue;
-        private System.Windows.Forms.TrackBar trackBarDodgeStep;
-        private System.Windows.Forms.Label labelDodgeStep;
         private System.Windows.Forms.Label labelDodgeThresholdValue;
         private System.Windows.Forms.TrackBar trackBarDodgeThreshold;
         private System.Windows.Forms.Label labelDodgeThreshold;

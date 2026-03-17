@@ -23,9 +23,7 @@ namespace RobotForceIntegration
             bool ConnectedFlag;
             bool EnableMotionFlag;
             bool SelfCollisionFlag;
-            bool WaitFlag;
             bool SafetyFlag;
-            float TimeOut;
             int CollisionSensitivity;
             int TeachSensitivity;
 
@@ -51,9 +49,7 @@ namespace RobotForceIntegration
             ConnectedFlag = false;
             EnableMotionFlag = false;
             SelfCollisionFlag = false;
-            WaitFlag = true;
             SafetyFlag = false;
-            TimeOut = -1;
             // Init Motion
             JointSpeed = 9.0F;
             JointAcceleration = 1000.0F;
