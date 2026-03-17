@@ -10,336 +10,1273 @@ namespace RobotForceIntegration
             {
                 components.Dispose();
             }
-
             base.Dispose(disposing);
         }
 
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.groupBoxRobot = CreateGroupBox("Robot", 12, 12, 350, 240);
-            this.labelRobotIp = CreateLabel("Robot IP", 15, 20, 70, 16);
-            this.textBoxRobotIp = CreateTextBox(90, 17, 233, 20);
-            this.buttonConnectRobot = CreateButton("Connect", 18, 48, 95, 23, this.ButtonConnectRobot_Click);
-            this.buttonToggleMotion = CreateButton("Enable Motion", 129, 48, 120, 23, this.ButtonToggleMotion_Click);
-            this.labelCollisionTarget = CreateLabel("Collision sensitivity", 15, 91, 120, 16);
-            this.comboBoxCollisionSensitivity = CreateComboBox(18, 111, 120, 21, true);
-            this.comboBoxCollisionSensitivity.Items.AddRange(new object[] { "0", "1", "2", "3", "4", "5" });
-            this.buttonApplyCollisionSensitivity = CreateButton("Apply", 154, 109, 95, 23, this.ButtonApplyCollisionSensitivity_Click);
-            this.checkBoxSelfCollision = CreateCheckBox("Self collision", 18, 148, true);
-            this.checkBoxSelfCollision.CheckedChanged += new System.EventHandler(this.checkBoxSelfCollision_CheckedChanged);
-            this.labelMotionSpeed = CreateLabel("Motion speed", 15, 184, 90, 16);
-            this.trackBarMotionSpeed = CreateTrackBar(18, 204, 231, 45, 1, 100, 50);
-            this.trackBarMotionSpeed.Scroll += new System.EventHandler(this.trackBarMotionSpeed_Scroll);
-            this.labelMotionSpeedValue = CreateLabel("50%", 262, 204, 61, 20);
-            this.groupBoxRobot.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.labelRobotIp, this.textBoxRobotIp, this.buttonConnectRobot, this.buttonToggleMotion,
-                this.labelCollisionTarget, this.comboBoxCollisionSensitivity, this.buttonApplyCollisionSensitivity,
-                this.checkBoxSelfCollision, this.labelMotionSpeed, this.trackBarMotionSpeed, this.labelMotionSpeedValue
-            });
-
-            this.groupBoxRobotState = CreateGroupBox("Robot State", 378, 12, 790, 137);
-            this.labelJoint = CreateLabel("Joint", 15, 22, 70, 16);
-            this.textBoxJoint = CreateTextBox(101, 19, 672, 20, true);
-            this.labelPosition = CreateLabel("Position", 15, 51, 70, 16);
-            this.textBoxPosition = CreateTextBox(101, 48, 672, 20, true);
-            this.labelBase = CreateLabel("Base", 15, 80, 70, 16);
-            this.textBoxBase = CreateTextBox(101, 77, 672, 20, true);
-            this.labelTcp = CreateLabel("TCP", 15, 109, 70, 16);
-            this.textBoxTcp = CreateTextBox(101, 106, 672, 20, true);
-            this.groupBoxRobotState.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.labelJoint, this.textBoxJoint, this.labelPosition, this.textBoxPosition,
-                this.labelBase, this.textBoxBase, this.labelTcp, this.textBoxTcp
-            });
-
-            this.groupBoxTool = CreateGroupBox("Tool Motion", 378, 155, 383, 207);
-            this.labelToolStep = CreateLabel("Step TOOL (mm)", 15, 31, 100, 16);
-            this.numericUpDownToolStep = CreateNumeric(124, 29, 90, 20, 0, 1, 100, 10);
-            this.buttonToolXMinus = CreateButton("-X", 18, 68, 90, 28, this.ButtonToolXMinus_Click);
-            this.buttonToolXPlus = CreateButton("+X", 124, 68, 90, 28, this.ButtonToolXPlus_Click);
-            this.buttonToolYMinus = CreateButton("-Y", 18, 102, 90, 28, this.ButtonToolYMinus_Click);
-            this.buttonToolYPlus = CreateButton("+Y", 124, 102, 90, 28, this.ButtonToolYPlus_Click);
-            this.buttonToolZMinus = CreateButton("-Z", 18, 136, 90, 28, this.ButtonToolZMinus_Click);
-            this.buttonToolZPlus = CreateButton("+Z", 124, 136, 90, 28, this.ButtonToolZPlus_Click);
-            this.buttonMoveHome = CreateButton("Go Home", 232, 43, 120, 23, this.ButtonMoveHome_Click);
-            this.buttonMovePreset = CreateButton("Move To Preset", 232, 79, 120, 23, this.ButtonMovePreset_Click);
-            this.buttonSetPreset = CreateButton("Set Preset", 232, 115, 120, 23, this.ButtonSetPreset_Click);
-            this.groupBoxTool.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.labelToolStep, this.numericUpDownToolStep, this.buttonToolXMinus, this.buttonToolXPlus,
-                this.buttonToolYMinus, this.buttonToolYPlus, this.buttonToolZMinus, this.buttonToolZPlus,
-                this.buttonMoveHome, this.buttonMovePreset, this.buttonSetPreset
-            });
-
-            this.groupBoxJoints = CreateGroupBox("Joint Motion", 777, 155, 391, 207);
-            this.labelJointStep = CreateLabel("Step: 10 deg", 18, 28, 120, 16);
-            this.buttonJoint1Minus = CreateButton("J1 -", 18, 58, 80, 28, this.ButtonJoint1Minus_Click);
-            this.buttonJoint1Plus = CreateButton("J1 +", 106, 58, 80, 28, this.ButtonJoint1Plus_Click);
-            this.buttonJoint2Minus = CreateButton("J2 -", 204, 58, 80, 28, this.ButtonJoint2Minus_Click);
-            this.buttonJoint2Plus = CreateButton("J2 +", 292, 58, 80, 28, this.ButtonJoint2Plus_Click);
-            this.buttonJoint3Minus = CreateButton("J3 -", 18, 94, 80, 28, this.ButtonJoint3Minus_Click);
-            this.buttonJoint3Plus = CreateButton("J3 +", 106, 94, 80, 28, this.ButtonJoint3Plus_Click);
-            this.buttonJoint4Minus = CreateButton("J4 -", 204, 94, 80, 28, this.ButtonJoint4Minus_Click);
-            this.buttonJoint4Plus = CreateButton("J4 +", 292, 94, 80, 28, this.ButtonJoint4Plus_Click);
-            this.buttonJoint5Minus = CreateButton("J5 -", 18, 130, 80, 28, this.ButtonJoint5Minus_Click);
-            this.buttonJoint5Plus = CreateButton("J5 +", 106, 130, 80, 28, this.ButtonJoint5Plus_Click);
-            this.buttonJoint6Minus = CreateButton("J6 -", 204, 130, 80, 28, this.ButtonJoint6Minus_Click);
-            this.buttonJoint6Plus = CreateButton("J6 +", 292, 130, 80, 28, this.ButtonJoint6Plus_Click);
-            this.groupBoxJoints.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.labelJointStep, this.buttonJoint1Minus, this.buttonJoint1Plus, this.buttonJoint2Minus, this.buttonJoint2Plus,
-                this.buttonJoint3Minus, this.buttonJoint3Plus, this.buttonJoint4Minus, this.buttonJoint4Plus,
-                this.buttonJoint5Minus, this.buttonJoint5Plus, this.buttonJoint6Minus, this.buttonJoint6Plus
-            });
-
-            this.groupBoxSensor = CreateGroupBox("Sensor", 12, 268, 350, 290);
-            this.labelSerialPort = CreateLabel("Serial port", 15, 28, 70, 16);
-            this.comboBoxSerialPort = CreateComboBox(129, 25, 194, 21, false);
-            this.labelBaudRate = CreateLabel("Baud rate", 15, 55, 70, 16);
-            this.comboBoxBaudRate = CreateComboBox(129, 52, 194, 21, true);
-            this.comboBoxBaudRate.Items.AddRange(new object[] { "9600", "19200", "57600", "115200" });
-            this.labelParity = CreateLabel("Parity", 15, 82, 70, 16);
-            this.comboBoxParity = CreateComboBox(129, 79, 194, 21, true);
-            this.comboBoxParity.Items.AddRange(new object[] { "None", "Even", "Odd" });
-            this.labelStopBits = CreateLabel("Stop bits", 15, 109, 70, 16);
-            this.comboBoxStopBits = CreateComboBox(129, 106, 194, 21, true);
-            this.comboBoxStopBits.Items.AddRange(new object[] { "One", "Two" });
-            this.labelDataBits = CreateLabel("Data bits", 15, 136, 70, 16);
-            this.comboBoxDataBits = CreateComboBox(129, 133, 194, 21, true);
-            this.comboBoxDataBits.Items.AddRange(new object[] { "7", "8" });
-            this.buttonRefreshPorts = CreateButton("Refresh Ports", 18, 169, 95, 23, this.ButtonRefreshPorts_Click);
-            this.buttonOpenSerial = CreateButton("Open", 129, 169, 95, 23, this.ButtonOpenSerial_Click);
-            this.buttonCloseSerial = CreateButton("Close", 240, 169, 83, 23, this.ButtonCloseSerial_Click);
-            this.labelSensorCommand = CreateLabel("Command", 15, 205, 70, 16);
-            this.textBoxSensorCommand = CreateTextBox(129, 202, 194, 20);
-            this.buttonSendCommand = CreateButton("Send", 129, 228, 95, 23, this.ButtonSendCommand_Click);
-            this.buttonRequestForce = CreateButton("Read Force", 240, 228, 83, 23, this.ButtonRequestForce_Click);
-            this.labelCurrentForce = CreateLabel("Current Force", 15, 259, 85, 16);
-            this.textBoxCurrentForce = CreateTextBox(129, 256, 194, 20, true);
-            this.groupBoxSensor.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.labelSerialPort, this.comboBoxSerialPort, this.labelBaudRate, this.comboBoxBaudRate,
-                this.labelParity, this.comboBoxParity, this.labelStopBits, this.comboBoxStopBits,
-                this.labelDataBits, this.comboBoxDataBits, this.buttonRefreshPorts, this.buttonOpenSerial,
-                this.buttonCloseSerial, this.labelSensorCommand, this.textBoxSensorCommand,
-                this.buttonSendCommand, this.buttonRequestForce, this.labelCurrentForce, this.textBoxCurrentForce
-            });
-
-            this.groupBoxAcquisition = CreateGroupBox("Acquisition", 12, 574, 350, 128);
-            this.labelCsvPath = CreateLabel("CSV file", 15, 28, 70, 16);
-            this.textBoxCsvPath = CreateTextBox(18, 48, 305, 20, true);
-            this.labelAcquisitionInfo = CreateLabel("Timer 300 ms, delta Z = TOOL step", 18, 78, 220, 16);
-            this.buttonSelectCsv = CreateButton("Select CSV", 18, 95, 95, 23, this.ButtonSelectCsv_Click);
-            this.buttonStartAcquisition = CreateButton("Start Test", 129, 95, 95, 23, this.ButtonStartAcquisition_Click);
-            this.buttonSaveCsv = CreateButton("Save CSV", 240, 95, 83, 23, this.ButtonSaveCsv_Click);
-            this.groupBoxAcquisition.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.labelCsvPath, this.textBoxCsvPath, this.labelAcquisitionInfo,
-                this.buttonSelectCsv, this.buttonStartAcquisition, this.buttonSaveCsv
-            });
-
-            this.groupBoxLog = CreateGroupBox("Event Log", 378, 368, 790, 334);
-            this.groupBoxLog.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            this.buttonClearLog = CreateButton("Clear", 691, 19, 82, 23, this.ButtonClearLog_Click);
-            this.buttonClearLog.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            this.textBoxSensorLog = CreateTextBox(18, 48, 755, 270, true);
-            this.textBoxSensorLog.Multiline = true;
-            this.textBoxSensorLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxSensorLog.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            this.groupBoxLog.Controls.AddRange(new System.Windows.Forms.Control[] { this.buttonClearLog, this.textBoxSensorLog });
-
+            this.groupBoxRobot = new System.Windows.Forms.GroupBox();
+            this.labelMotionSpeedValue = new System.Windows.Forms.Label();
+            this.trackBarMotionSpeed = new System.Windows.Forms.TrackBar();
+            this.labelMotionSpeed = new System.Windows.Forms.Label();
+            this.checkBoxSelfCollision = new System.Windows.Forms.CheckBox();
+            this.buttonApplyCollisionSensitivity = new System.Windows.Forms.Button();
+            this.comboBoxCollisionSensitivity = new System.Windows.Forms.ComboBox();
+            this.labelCollisionTarget = new System.Windows.Forms.Label();
+            this.buttonToggleMotion = new System.Windows.Forms.Button();
+            this.buttonConnectRobot = new System.Windows.Forms.Button();
+            this.textBoxRobotIp = new System.Windows.Forms.TextBox();
+            this.labelRobotIp = new System.Windows.Forms.Label();
+            this.groupBoxRobotState = new System.Windows.Forms.GroupBox();
+            this.textBoxTcp = new System.Windows.Forms.TextBox();
+            this.labelTcp = new System.Windows.Forms.Label();
+            this.textBoxBase = new System.Windows.Forms.TextBox();
+            this.labelBase = new System.Windows.Forms.Label();
+            this.textBoxPosition = new System.Windows.Forms.TextBox();
+            this.labelPosition = new System.Windows.Forms.Label();
+            this.textBoxJoint = new System.Windows.Forms.TextBox();
+            this.labelJoint = new System.Windows.Forms.Label();
+            this.groupBoxTool = new System.Windows.Forms.GroupBox();
+            this.buttonSetPreset = new System.Windows.Forms.Button();
+            this.buttonMovePreset = new System.Windows.Forms.Button();
+            this.buttonMoveHome = new System.Windows.Forms.Button();
+            this.buttonToolZPlus = new System.Windows.Forms.Button();
+            this.buttonToolZMinus = new System.Windows.Forms.Button();
+            this.buttonToolYPlus = new System.Windows.Forms.Button();
+            this.buttonToolYMinus = new System.Windows.Forms.Button();
+            this.buttonToolXPlus = new System.Windows.Forms.Button();
+            this.buttonToolXMinus = new System.Windows.Forms.Button();
+            this.labelToolStepValue = new System.Windows.Forms.Label();
+            this.trackBarToolStep = new System.Windows.Forms.TrackBar();
+            this.labelToolStep = new System.Windows.Forms.Label();
+            this.groupBoxJoints = new System.Windows.Forms.GroupBox();
+            this.buttonJoint6Plus = new System.Windows.Forms.Button();
+            this.buttonJoint6Minus = new System.Windows.Forms.Button();
+            this.buttonJoint5Plus = new System.Windows.Forms.Button();
+            this.buttonJoint5Minus = new System.Windows.Forms.Button();
+            this.buttonJoint4Plus = new System.Windows.Forms.Button();
+            this.buttonJoint4Minus = new System.Windows.Forms.Button();
+            this.buttonJoint3Plus = new System.Windows.Forms.Button();
+            this.buttonJoint3Minus = new System.Windows.Forms.Button();
+            this.buttonJoint2Plus = new System.Windows.Forms.Button();
+            this.buttonJoint2Minus = new System.Windows.Forms.Button();
+            this.buttonJoint1Plus = new System.Windows.Forms.Button();
+            this.buttonJoint1Minus = new System.Windows.Forms.Button();
+            this.labelJointStepValue = new System.Windows.Forms.Label();
+            this.trackBarJointStep = new System.Windows.Forms.TrackBar();
+            this.labelJointStep = new System.Windows.Forms.Label();
+            this.groupBoxSensor = new System.Windows.Forms.GroupBox();
+            this.buttonTare = new System.Windows.Forms.Button();
+            this.buttonSendCommand = new System.Windows.Forms.Button();
+            this.textBoxSensorCommand = new System.Windows.Forms.TextBox();
+            this.labelSensorCommand = new System.Windows.Forms.Label();
+            this.buttonCloseSerial = new System.Windows.Forms.Button();
+            this.buttonOpenSerial = new System.Windows.Forms.Button();
+            this.buttonRefreshPorts = new System.Windows.Forms.Button();
+            this.comboBoxDataBits = new System.Windows.Forms.ComboBox();
+            this.labelDataBits = new System.Windows.Forms.Label();
+            this.comboBoxStopBits = new System.Windows.Forms.ComboBox();
+            this.labelStopBits = new System.Windows.Forms.Label();
+            this.comboBoxParity = new System.Windows.Forms.ComboBox();
+            this.labelParity = new System.Windows.Forms.Label();
+            this.comboBoxBaudRate = new System.Windows.Forms.ComboBox();
+            this.labelBaudRate = new System.Windows.Forms.Label();
+            this.comboBoxSerialPort = new System.Windows.Forms.ComboBox();
+            this.labelSerialPort = new System.Windows.Forms.Label();
+            this.groupBoxAcquisition = new System.Windows.Forms.GroupBox();
+            this.buttonSaveCsv = new System.Windows.Forms.Button();
+            this.buttonStartAcquisition = new System.Windows.Forms.Button();
+            this.buttonSelectCsv = new System.Windows.Forms.Button();
+            this.textBoxCsvPath = new System.Windows.Forms.TextBox();
+            this.labelCsvPath = new System.Windows.Forms.Label();
+            this.groupBoxDodge = new System.Windows.Forms.GroupBox();
+            this.labelDodgeStepValue = new System.Windows.Forms.Label();
+            this.trackBarDodgeStep = new System.Windows.Forms.TrackBar();
+            this.labelDodgeStep = new System.Windows.Forms.Label();
+            this.labelDodgeThresholdValue = new System.Windows.Forms.Label();
+            this.trackBarDodgeThreshold = new System.Windows.Forms.TrackBar();
+            this.labelDodgeThreshold = new System.Windows.Forms.Label();
+            this.checkBoxDodgeEnabled = new System.Windows.Forms.CheckBox();
+            this.groupBoxLog = new System.Windows.Forms.GroupBox();
+            this.buttonClearLog = new System.Windows.Forms.Button();
+            this.textBoxSensorLog = new System.Windows.Forms.TextBox();
             this.statusStripMain = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabelRobot = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabelSensor = new System.Windows.Forms.ToolStripStatusLabel();
-            this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { this.toolStripStatusLabelRobot, this.toolStripStatusLabelSensor });
-            this.statusStripMain.Location = new System.Drawing.Point(0, 715);
-            this.statusStripMain.Size = new System.Drawing.Size(1180, 22);
-            this.toolStripStatusLabelRobot.Text = "Robot: not connected";
-            this.toolStripStatusLabelSensor.Text = "Sensor: serial closed";
-
             this.timerCMD = new System.Windows.Forms.Timer(this.components);
+            this.timerConnection = new System.Windows.Forms.Timer(this.components);
+            this.timerDodge = new System.Windows.Forms.Timer(this.components);
+            this.serialPortSensor = new System.IO.Ports.SerialPort(this.components);
+            this.groupBoxRobot.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarMotionSpeed)).BeginInit();
+            this.groupBoxRobotState.SuspendLayout();
+            this.groupBoxTool.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarToolStep)).BeginInit();
+            this.groupBoxJoints.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarJointStep)).BeginInit();
+            this.groupBoxSensor.SuspendLayout();
+            this.groupBoxAcquisition.SuspendLayout();
+            this.groupBoxDodge.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeStep)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeThreshold)).BeginInit();
+            this.groupBoxLog.SuspendLayout();
+            this.statusStripMain.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // groupBoxRobot
+            // 
+            this.groupBoxRobot.Controls.Add(this.labelMotionSpeedValue);
+            this.groupBoxRobot.Controls.Add(this.trackBarMotionSpeed);
+            this.groupBoxRobot.Controls.Add(this.labelMotionSpeed);
+            this.groupBoxRobot.Controls.Add(this.checkBoxSelfCollision);
+            this.groupBoxRobot.Controls.Add(this.buttonApplyCollisionSensitivity);
+            this.groupBoxRobot.Controls.Add(this.comboBoxCollisionSensitivity);
+            this.groupBoxRobot.Controls.Add(this.labelCollisionTarget);
+            this.groupBoxRobot.Controls.Add(this.buttonToggleMotion);
+            this.groupBoxRobot.Controls.Add(this.buttonConnectRobot);
+            this.groupBoxRobot.Controls.Add(this.textBoxRobotIp);
+            this.groupBoxRobot.Controls.Add(this.labelRobotIp);
+            this.groupBoxRobot.Location = new System.Drawing.Point(16, 15);
+            this.groupBoxRobot.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxRobot.Name = "groupBoxRobot";
+            this.groupBoxRobot.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxRobot.Size = new System.Drawing.Size(353, 307);
+            this.groupBoxRobot.TabIndex = 0;
+            this.groupBoxRobot.TabStop = false;
+            this.groupBoxRobot.Text = "Robot";
+            // 
+            // labelMotionSpeedValue
+            // 
+            this.labelMotionSpeedValue.Location = new System.Drawing.Point(292, 251);
+            this.labelMotionSpeedValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelMotionSpeedValue.Name = "labelMotionSpeedValue";
+            this.labelMotionSpeedValue.Size = new System.Drawing.Size(40, 25);
+            this.labelMotionSpeedValue.TabIndex = 10;
+            this.labelMotionSpeedValue.Text = "50%";
+            // 
+            // trackBarMotionSpeed
+            // 
+            this.trackBarMotionSpeed.Location = new System.Drawing.Point(23, 247);
+            this.trackBarMotionSpeed.Margin = new System.Windows.Forms.Padding(4);
+            this.trackBarMotionSpeed.Maximum = 100;
+            this.trackBarMotionSpeed.Minimum = 1;
+            this.trackBarMotionSpeed.Name = "trackBarMotionSpeed";
+            this.trackBarMotionSpeed.Size = new System.Drawing.Size(275, 56);
+            this.trackBarMotionSpeed.TabIndex = 9;
+            this.trackBarMotionSpeed.TickFrequency = 10;
+            this.trackBarMotionSpeed.Value = 50;
+            this.trackBarMotionSpeed.Scroll += new System.EventHandler(this.trackBarMotionSpeed_Scroll);
+            // 
+            // labelMotionSpeed
+            // 
+            this.labelMotionSpeed.Location = new System.Drawing.Point(20, 226);
+            this.labelMotionSpeed.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelMotionSpeed.Name = "labelMotionSpeed";
+            this.labelMotionSpeed.Size = new System.Drawing.Size(120, 20);
+            this.labelMotionSpeed.TabIndex = 8;
+            this.labelMotionSpeed.Text = "Motion speed";
+            // 
+            // checkBoxSelfCollision
+            // 
+            this.checkBoxSelfCollision.AutoSize = true;
+            this.checkBoxSelfCollision.Location = new System.Drawing.Point(24, 182);
+            this.checkBoxSelfCollision.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBoxSelfCollision.Name = "checkBoxSelfCollision";
+            this.checkBoxSelfCollision.Size = new System.Drawing.Size(104, 20);
+            this.checkBoxSelfCollision.TabIndex = 7;
+            this.checkBoxSelfCollision.Text = "Self collision";
+            this.checkBoxSelfCollision.UseVisualStyleBackColor = true;
+            this.checkBoxSelfCollision.CheckedChanged += new System.EventHandler(this.checkBoxSelfCollision_CheckedChanged);
+            // 
+            // buttonApplyCollisionSensitivity
+            // 
+            this.buttonApplyCollisionSensitivity.Location = new System.Drawing.Point(205, 134);
+            this.buttonApplyCollisionSensitivity.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonApplyCollisionSensitivity.Name = "buttonApplyCollisionSensitivity";
+            this.buttonApplyCollisionSensitivity.Size = new System.Drawing.Size(127, 28);
+            this.buttonApplyCollisionSensitivity.TabIndex = 6;
+            this.buttonApplyCollisionSensitivity.Text = "Apply";
+            this.buttonApplyCollisionSensitivity.UseVisualStyleBackColor = true;
+            this.buttonApplyCollisionSensitivity.Click += new System.EventHandler(this.ButtonApplyCollisionSensitivity_Click);
+            // 
+            // comboBoxCollisionSensitivity
+            // 
+            this.comboBoxCollisionSensitivity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxCollisionSensitivity.FormattingEnabled = true;
+            this.comboBoxCollisionSensitivity.Items.AddRange(new object[] {
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"});
+            this.comboBoxCollisionSensitivity.Location = new System.Drawing.Point(24, 137);
+            this.comboBoxCollisionSensitivity.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxCollisionSensitivity.Name = "comboBoxCollisionSensitivity";
+            this.comboBoxCollisionSensitivity.Size = new System.Drawing.Size(159, 24);
+            this.comboBoxCollisionSensitivity.TabIndex = 5;
+            // 
+            // labelCollisionTarget
+            // 
+            this.labelCollisionTarget.Location = new System.Drawing.Point(20, 112);
+            this.labelCollisionTarget.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelCollisionTarget.Name = "labelCollisionTarget";
+            this.labelCollisionTarget.Size = new System.Drawing.Size(160, 20);
+            this.labelCollisionTarget.TabIndex = 4;
+            this.labelCollisionTarget.Text = "Collision sensitivity";
+            // 
+            // buttonToggleMotion
+            // 
+            this.buttonToggleMotion.Location = new System.Drawing.Point(172, 59);
+            this.buttonToggleMotion.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToggleMotion.Name = "buttonToggleMotion";
+            this.buttonToggleMotion.Size = new System.Drawing.Size(160, 28);
+            this.buttonToggleMotion.TabIndex = 3;
+            this.buttonToggleMotion.Text = "Enable Motion";
+            this.buttonToggleMotion.UseVisualStyleBackColor = true;
+            this.buttonToggleMotion.Click += new System.EventHandler(this.ButtonToggleMotion_Click);
+            // 
+            // buttonConnectRobot
+            // 
+            this.buttonConnectRobot.Location = new System.Drawing.Point(24, 59);
+            this.buttonConnectRobot.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonConnectRobot.Name = "buttonConnectRobot";
+            this.buttonConnectRobot.Size = new System.Drawing.Size(127, 28);
+            this.buttonConnectRobot.TabIndex = 2;
+            this.buttonConnectRobot.Text = "Connect";
+            this.buttonConnectRobot.UseVisualStyleBackColor = true;
+            this.buttonConnectRobot.Click += new System.EventHandler(this.ButtonConnectRobot_Click);
+            // 
+            // textBoxRobotIp
+            // 
+            this.textBoxRobotIp.Location = new System.Drawing.Point(120, 21);
+            this.textBoxRobotIp.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxRobotIp.Name = "textBoxRobotIp";
+            this.textBoxRobotIp.Size = new System.Drawing.Size(212, 22);
+            this.textBoxRobotIp.TabIndex = 1;
+            // 
+            // labelRobotIp
+            // 
+            this.labelRobotIp.Location = new System.Drawing.Point(20, 25);
+            this.labelRobotIp.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelRobotIp.Name = "labelRobotIp";
+            this.labelRobotIp.Size = new System.Drawing.Size(93, 20);
+            this.labelRobotIp.TabIndex = 0;
+            this.labelRobotIp.Text = "Robot IP";
+            // 
+            // groupBoxRobotState
+            // 
+            this.groupBoxRobotState.Controls.Add(this.textBoxTcp);
+            this.groupBoxRobotState.Controls.Add(this.labelTcp);
+            this.groupBoxRobotState.Controls.Add(this.textBoxBase);
+            this.groupBoxRobotState.Controls.Add(this.labelBase);
+            this.groupBoxRobotState.Controls.Add(this.textBoxPosition);
+            this.groupBoxRobotState.Controls.Add(this.labelPosition);
+            this.groupBoxRobotState.Controls.Add(this.textBoxJoint);
+            this.groupBoxRobotState.Controls.Add(this.labelJoint);
+            this.groupBoxRobotState.Location = new System.Drawing.Point(380, 254);
+            this.groupBoxRobotState.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxRobotState.Name = "groupBoxRobotState";
+            this.groupBoxRobotState.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxRobotState.Size = new System.Drawing.Size(743, 237);
+            this.groupBoxRobotState.TabIndex = 1;
+            this.groupBoxRobotState.TabStop = false;
+            this.groupBoxRobotState.Text = "Robot State";
+            // 
+            // textBoxTcp
+            // 
+            this.textBoxTcp.Location = new System.Drawing.Point(139, 182);
+            this.textBoxTcp.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxTcp.Name = "textBoxTcp";
+            this.textBoxTcp.ReadOnly = true;
+            this.textBoxTcp.Size = new System.Drawing.Size(585, 22);
+            this.textBoxTcp.TabIndex = 7;
+            // 
+            // labelTcp
+            // 
+            this.labelTcp.Location = new System.Drawing.Point(24, 186);
+            this.labelTcp.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelTcp.Name = "labelTcp";
+            this.labelTcp.Size = new System.Drawing.Size(93, 20);
+            this.labelTcp.TabIndex = 6;
+            this.labelTcp.Text = "TCP";
+            // 
+            // textBoxBase
+            // 
+            this.textBoxBase.Location = new System.Drawing.Point(139, 135);
+            this.textBoxBase.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxBase.Name = "textBoxBase";
+            this.textBoxBase.ReadOnly = true;
+            this.textBoxBase.Size = new System.Drawing.Size(585, 22);
+            this.textBoxBase.TabIndex = 5;
+            // 
+            // labelBase
+            // 
+            this.labelBase.Location = new System.Drawing.Point(24, 138);
+            this.labelBase.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelBase.Name = "labelBase";
+            this.labelBase.Size = new System.Drawing.Size(93, 20);
+            this.labelBase.TabIndex = 4;
+            this.labelBase.Text = "Base";
+            // 
+            // textBoxPosition
+            // 
+            this.textBoxPosition.Location = new System.Drawing.Point(139, 88);
+            this.textBoxPosition.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxPosition.Name = "textBoxPosition";
+            this.textBoxPosition.ReadOnly = true;
+            this.textBoxPosition.Size = new System.Drawing.Size(585, 22);
+            this.textBoxPosition.TabIndex = 3;
+            // 
+            // labelPosition
+            // 
+            this.labelPosition.Location = new System.Drawing.Point(24, 92);
+            this.labelPosition.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelPosition.Name = "labelPosition";
+            this.labelPosition.Size = new System.Drawing.Size(93, 20);
+            this.labelPosition.TabIndex = 2;
+            this.labelPosition.Text = "Position";
+            // 
+            // textBoxJoint
+            // 
+            this.textBoxJoint.Location = new System.Drawing.Point(139, 42);
+            this.textBoxJoint.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxJoint.Name = "textBoxJoint";
+            this.textBoxJoint.ReadOnly = true;
+            this.textBoxJoint.Size = new System.Drawing.Size(585, 22);
+            this.textBoxJoint.TabIndex = 1;
+            // 
+            // labelJoint
+            // 
+            this.labelJoint.Location = new System.Drawing.Point(24, 46);
+            this.labelJoint.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelJoint.Name = "labelJoint";
+            this.labelJoint.Size = new System.Drawing.Size(93, 20);
+            this.labelJoint.TabIndex = 0;
+            this.labelJoint.Text = "Joint";
+            // 
+            // groupBoxTool
+            // 
+            this.groupBoxTool.Controls.Add(this.buttonSetPreset);
+            this.groupBoxTool.Controls.Add(this.buttonMovePreset);
+            this.groupBoxTool.Controls.Add(this.buttonMoveHome);
+            this.groupBoxTool.Controls.Add(this.buttonToolZPlus);
+            this.groupBoxTool.Controls.Add(this.buttonToolZMinus);
+            this.groupBoxTool.Controls.Add(this.buttonToolYPlus);
+            this.groupBoxTool.Controls.Add(this.buttonToolYMinus);
+            this.groupBoxTool.Controls.Add(this.buttonToolXPlus);
+            this.groupBoxTool.Controls.Add(this.buttonToolXMinus);
+            this.groupBoxTool.Controls.Add(this.labelToolStepValue);
+            this.groupBoxTool.Controls.Add(this.trackBarToolStep);
+            this.groupBoxTool.Controls.Add(this.labelToolStep);
+            this.groupBoxTool.Location = new System.Drawing.Point(380, 15);
+            this.groupBoxTool.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxTool.Name = "groupBoxTool";
+            this.groupBoxTool.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxTool.Size = new System.Drawing.Size(353, 231);
+            this.groupBoxTool.TabIndex = 2;
+            this.groupBoxTool.TabStop = false;
+            this.groupBoxTool.Text = "Tool Motion";
+            // 
+            // buttonSetPreset
+            // 
+            this.buttonSetPreset.Location = new System.Drawing.Point(200, 173);
+            this.buttonSetPreset.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonSetPreset.Name = "buttonSetPreset";
+            this.buttonSetPreset.Size = new System.Drawing.Size(120, 28);
+            this.buttonSetPreset.TabIndex = 10;
+            this.buttonSetPreset.Text = "Set Preset";
+            this.buttonSetPreset.UseVisualStyleBackColor = true;
+            this.buttonSetPreset.Click += new System.EventHandler(this.ButtonSetPreset_Click);
+            // 
+            // buttonMovePreset
+            // 
+            this.buttonMovePreset.Location = new System.Drawing.Point(200, 128);
+            this.buttonMovePreset.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonMovePreset.Name = "buttonMovePreset";
+            this.buttonMovePreset.Size = new System.Drawing.Size(120, 28);
+            this.buttonMovePreset.TabIndex = 9;
+            this.buttonMovePreset.Text = "Move To Preset";
+            this.buttonMovePreset.UseVisualStyleBackColor = true;
+            this.buttonMovePreset.Click += new System.EventHandler(this.ButtonMovePreset_Click);
+            // 
+            // buttonMoveHome
+            // 
+            this.buttonMoveHome.Location = new System.Drawing.Point(200, 84);
+            this.buttonMoveHome.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonMoveHome.Name = "buttonMoveHome";
+            this.buttonMoveHome.Size = new System.Drawing.Size(120, 28);
+            this.buttonMoveHome.TabIndex = 8;
+            this.buttonMoveHome.Text = "Go Home";
+            this.buttonMoveHome.UseVisualStyleBackColor = true;
+            this.buttonMoveHome.Click += new System.EventHandler(this.ButtonMoveHome_Click);
+            // 
+            // buttonToolZPlus
+            // 
+            this.buttonToolZPlus.Location = new System.Drawing.Point(112, 178);
+            this.buttonToolZPlus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToolZPlus.Name = "buttonToolZPlus";
+            this.buttonToolZPlus.Size = new System.Drawing.Size(80, 34);
+            this.buttonToolZPlus.TabIndex = 7;
+            this.buttonToolZPlus.Text = "+Z";
+            this.buttonToolZPlus.UseVisualStyleBackColor = true;
+            this.buttonToolZPlus.Click += new System.EventHandler(this.ButtonToolZPlus_Click);
+            // 
+            // buttonToolZMinus
+            // 
+            this.buttonToolZMinus.Location = new System.Drawing.Point(24, 178);
+            this.buttonToolZMinus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToolZMinus.Name = "buttonToolZMinus";
+            this.buttonToolZMinus.Size = new System.Drawing.Size(80, 34);
+            this.buttonToolZMinus.TabIndex = 6;
+            this.buttonToolZMinus.Text = "-Z";
+            this.buttonToolZMinus.UseVisualStyleBackColor = true;
+            this.buttonToolZMinus.Click += new System.EventHandler(this.ButtonToolZMinus_Click);
+            // 
+            // buttonToolYPlus
+            // 
+            this.buttonToolYPlus.Location = new System.Drawing.Point(112, 137);
+            this.buttonToolYPlus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToolYPlus.Name = "buttonToolYPlus";
+            this.buttonToolYPlus.Size = new System.Drawing.Size(80, 34);
+            this.buttonToolYPlus.TabIndex = 5;
+            this.buttonToolYPlus.Text = "+Y";
+            this.buttonToolYPlus.UseVisualStyleBackColor = true;
+            this.buttonToolYPlus.Click += new System.EventHandler(this.ButtonToolYPlus_Click);
+            // 
+            // buttonToolYMinus
+            // 
+            this.buttonToolYMinus.Location = new System.Drawing.Point(24, 137);
+            this.buttonToolYMinus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToolYMinus.Name = "buttonToolYMinus";
+            this.buttonToolYMinus.Size = new System.Drawing.Size(80, 34);
+            this.buttonToolYMinus.TabIndex = 4;
+            this.buttonToolYMinus.Text = "-Y";
+            this.buttonToolYMinus.UseVisualStyleBackColor = true;
+            this.buttonToolYMinus.Click += new System.EventHandler(this.ButtonToolYMinus_Click);
+            // 
+            // buttonToolXPlus
+            // 
+            this.buttonToolXPlus.Location = new System.Drawing.Point(112, 96);
+            this.buttonToolXPlus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToolXPlus.Name = "buttonToolXPlus";
+            this.buttonToolXPlus.Size = new System.Drawing.Size(80, 34);
+            this.buttonToolXPlus.TabIndex = 3;
+            this.buttonToolXPlus.Text = "+X";
+            this.buttonToolXPlus.UseVisualStyleBackColor = true;
+            this.buttonToolXPlus.Click += new System.EventHandler(this.ButtonToolXPlus_Click);
+            // 
+            // buttonToolXMinus
+            // 
+            this.buttonToolXMinus.Location = new System.Drawing.Point(24, 96);
+            this.buttonToolXMinus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonToolXMinus.Name = "buttonToolXMinus";
+            this.buttonToolXMinus.Size = new System.Drawing.Size(80, 34);
+            this.buttonToolXMinus.TabIndex = 2;
+            this.buttonToolXMinus.Text = "-X";
+            this.buttonToolXMinus.UseVisualStyleBackColor = true;
+            this.buttonToolXMinus.Click += new System.EventHandler(this.ButtonToolXMinus_Click);
+            // 
+            // labelToolStepValue
+            // 
+            this.labelToolStepValue.Location = new System.Drawing.Point(258, 38);
+            this.labelToolStepValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelToolStepValue.Name = "labelToolStepValue";
+            this.labelToolStepValue.Size = new System.Drawing.Size(70, 20);
+            this.labelToolStepValue.TabIndex = 2;
+            this.labelToolStepValue.Text = "10.0 mm";
+            // 
+            // trackBarToolStep
+            // 
+            this.trackBarToolStep.Location = new System.Drawing.Point(112, 27);
+            this.trackBarToolStep.Margin = new System.Windows.Forms.Padding(4);
+            this.trackBarToolStep.Maximum = 100;
+            this.trackBarToolStep.Name = "trackBarToolStep";
+            this.trackBarToolStep.Size = new System.Drawing.Size(138, 56);
+            this.trackBarToolStep.TabIndex = 1;
+            this.trackBarToolStep.TickFrequency = 10;
+            this.trackBarToolStep.Value = 67;
+            this.trackBarToolStep.Scroll += new System.EventHandler(this.trackBarToolStep_Scroll);
+            // 
+            // labelToolStep
+            // 
+            this.labelToolStep.Location = new System.Drawing.Point(20, 38);
+            this.labelToolStep.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelToolStep.Name = "labelToolStep";
+            this.labelToolStep.Size = new System.Drawing.Size(84, 20);
+            this.labelToolStep.TabIndex = 0;
+            this.labelToolStep.Text = "Step TOOL";
+            // 
+            // groupBoxJoints
+            // 
+            this.groupBoxJoints.Controls.Add(this.buttonJoint6Plus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint6Minus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint5Plus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint5Minus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint4Plus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint4Minus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint3Plus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint3Minus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint2Plus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint2Minus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint1Plus);
+            this.groupBoxJoints.Controls.Add(this.buttonJoint1Minus);
+            this.groupBoxJoints.Controls.Add(this.labelJointStepValue);
+            this.groupBoxJoints.Controls.Add(this.trackBarJointStep);
+            this.groupBoxJoints.Controls.Add(this.labelJointStep);
+            this.groupBoxJoints.Location = new System.Drawing.Point(744, 21);
+            this.groupBoxJoints.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxJoints.Name = "groupBoxJoints";
+            this.groupBoxJoints.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxJoints.Size = new System.Drawing.Size(379, 225);
+            this.groupBoxJoints.TabIndex = 3;
+            this.groupBoxJoints.TabStop = false;
+            this.groupBoxJoints.Text = "Joint Motion";
+            // 
+            // buttonJoint6Plus
+            // 
+            this.buttonJoint6Plus.Location = new System.Drawing.Point(280, 178);
+            this.buttonJoint6Plus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint6Plus.Name = "buttonJoint6Plus";
+            this.buttonJoint6Plus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint6Plus.TabIndex = 12;
+            this.buttonJoint6Plus.Text = "J6 +";
+            this.buttonJoint6Plus.UseVisualStyleBackColor = true;
+            this.buttonJoint6Plus.Click += new System.EventHandler(this.ButtonJoint6Plus_Click);
+            // 
+            // buttonJoint6Minus
+            // 
+            this.buttonJoint6Minus.Location = new System.Drawing.Point(192, 178);
+            this.buttonJoint6Minus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint6Minus.Name = "buttonJoint6Minus";
+            this.buttonJoint6Minus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint6Minus.TabIndex = 11;
+            this.buttonJoint6Minus.Text = "J6 -";
+            this.buttonJoint6Minus.UseVisualStyleBackColor = true;
+            this.buttonJoint6Minus.Click += new System.EventHandler(this.ButtonJoint6Minus_Click);
+            // 
+            // buttonJoint5Plus
+            // 
+            this.buttonJoint5Plus.Location = new System.Drawing.Point(104, 178);
+            this.buttonJoint5Plus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint5Plus.Name = "buttonJoint5Plus";
+            this.buttonJoint5Plus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint5Plus.TabIndex = 10;
+            this.buttonJoint5Plus.Text = "J5 +";
+            this.buttonJoint5Plus.UseVisualStyleBackColor = true;
+            this.buttonJoint5Plus.Click += new System.EventHandler(this.ButtonJoint5Plus_Click);
+            // 
+            // buttonJoint5Minus
+            // 
+            this.buttonJoint5Minus.Location = new System.Drawing.Point(16, 178);
+            this.buttonJoint5Minus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint5Minus.Name = "buttonJoint5Minus";
+            this.buttonJoint5Minus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint5Minus.TabIndex = 9;
+            this.buttonJoint5Minus.Text = "J5 -";
+            this.buttonJoint5Minus.UseVisualStyleBackColor = true;
+            this.buttonJoint5Minus.Click += new System.EventHandler(this.ButtonJoint5Minus_Click);
+            // 
+            // buttonJoint4Plus
+            // 
+            this.buttonJoint4Plus.Location = new System.Drawing.Point(280, 143);
+            this.buttonJoint4Plus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint4Plus.Name = "buttonJoint4Plus";
+            this.buttonJoint4Plus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint4Plus.TabIndex = 8;
+            this.buttonJoint4Plus.Text = "J4 +";
+            this.buttonJoint4Plus.UseVisualStyleBackColor = true;
+            this.buttonJoint4Plus.Click += new System.EventHandler(this.ButtonJoint4Plus_Click);
+            // 
+            // buttonJoint4Minus
+            // 
+            this.buttonJoint4Minus.Location = new System.Drawing.Point(192, 143);
+            this.buttonJoint4Minus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint4Minus.Name = "buttonJoint4Minus";
+            this.buttonJoint4Minus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint4Minus.TabIndex = 7;
+            this.buttonJoint4Minus.Text = "J4 -";
+            this.buttonJoint4Minus.UseVisualStyleBackColor = true;
+            this.buttonJoint4Minus.Click += new System.EventHandler(this.ButtonJoint4Minus_Click);
+            // 
+            // buttonJoint3Plus
+            // 
+            this.buttonJoint3Plus.Location = new System.Drawing.Point(104, 143);
+            this.buttonJoint3Plus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint3Plus.Name = "buttonJoint3Plus";
+            this.buttonJoint3Plus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint3Plus.TabIndex = 6;
+            this.buttonJoint3Plus.Text = "J3 +";
+            this.buttonJoint3Plus.UseVisualStyleBackColor = true;
+            this.buttonJoint3Plus.Click += new System.EventHandler(this.ButtonJoint3Plus_Click);
+            // 
+            // buttonJoint3Minus
+            // 
+            this.buttonJoint3Minus.Location = new System.Drawing.Point(16, 143);
+            this.buttonJoint3Minus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint3Minus.Name = "buttonJoint3Minus";
+            this.buttonJoint3Minus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint3Minus.TabIndex = 5;
+            this.buttonJoint3Minus.Text = "J3 -";
+            this.buttonJoint3Minus.UseVisualStyleBackColor = true;
+            this.buttonJoint3Minus.Click += new System.EventHandler(this.ButtonJoint3Minus_Click);
+            // 
+            // buttonJoint2Plus
+            // 
+            this.buttonJoint2Plus.Location = new System.Drawing.Point(280, 108);
+            this.buttonJoint2Plus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint2Plus.Name = "buttonJoint2Plus";
+            this.buttonJoint2Plus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint2Plus.TabIndex = 4;
+            this.buttonJoint2Plus.Text = "J2 +";
+            this.buttonJoint2Plus.UseVisualStyleBackColor = true;
+            this.buttonJoint2Plus.Click += new System.EventHandler(this.ButtonJoint2Plus_Click);
+            // 
+            // buttonJoint2Minus
+            // 
+            this.buttonJoint2Minus.Location = new System.Drawing.Point(192, 108);
+            this.buttonJoint2Minus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint2Minus.Name = "buttonJoint2Minus";
+            this.buttonJoint2Minus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint2Minus.TabIndex = 3;
+            this.buttonJoint2Minus.Text = "J2 -";
+            this.buttonJoint2Minus.UseVisualStyleBackColor = true;
+            this.buttonJoint2Minus.Click += new System.EventHandler(this.ButtonJoint2Minus_Click);
+            // 
+            // buttonJoint1Plus
+            // 
+            this.buttonJoint1Plus.Location = new System.Drawing.Point(104, 108);
+            this.buttonJoint1Plus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint1Plus.Name = "buttonJoint1Plus";
+            this.buttonJoint1Plus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint1Plus.TabIndex = 2;
+            this.buttonJoint1Plus.Text = "J1 +";
+            this.buttonJoint1Plus.UseVisualStyleBackColor = true;
+            this.buttonJoint1Plus.Click += new System.EventHandler(this.ButtonJoint1Plus_Click);
+            // 
+            // buttonJoint1Minus
+            // 
+            this.buttonJoint1Minus.Location = new System.Drawing.Point(16, 108);
+            this.buttonJoint1Minus.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonJoint1Minus.Name = "buttonJoint1Minus";
+            this.buttonJoint1Minus.Size = new System.Drawing.Size(80, 34);
+            this.buttonJoint1Minus.TabIndex = 1;
+            this.buttonJoint1Minus.Text = "J1 -";
+            this.buttonJoint1Minus.UseVisualStyleBackColor = true;
+            this.buttonJoint1Minus.Click += new System.EventHandler(this.ButtonJoint1Minus_Click);
+            // 
+            // labelJointStepValue
+            // 
+            this.labelJointStepValue.Location = new System.Drawing.Point(290, 34);
+            this.labelJointStepValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelJointStepValue.Name = "labelJointStepValue";
+            this.labelJointStepValue.Size = new System.Drawing.Size(70, 20);
+            this.labelJointStepValue.TabIndex = 14;
+            this.labelJointStepValue.Text = "10.0 deg";
+            // 
+            // trackBarJointStep
+            // 
+            this.trackBarJointStep.Location = new System.Drawing.Point(104, 23);
+            this.trackBarJointStep.Margin = new System.Windows.Forms.Padding(4);
+            this.trackBarJointStep.Maximum = 20;
+            this.trackBarJointStep.Minimum = 1;
+            this.trackBarJointStep.Name = "trackBarJointStep";
+            this.trackBarJointStep.Size = new System.Drawing.Size(178, 56);
+            this.trackBarJointStep.TabIndex = 13;
+            this.trackBarJointStep.Value = 10;
+            this.trackBarJointStep.Scroll += new System.EventHandler(this.trackBarJointStep_Scroll);
+            // 
+            // labelJointStep
+            // 
+            this.labelJointStep.Location = new System.Drawing.Point(24, 34);
+            this.labelJointStep.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelJointStep.Name = "labelJointStep";
+            this.labelJointStep.Size = new System.Drawing.Size(72, 20);
+            this.labelJointStep.TabIndex = 0;
+            this.labelJointStep.Text = "Joint step";
+            // 
+            // groupBoxSensor
+            // 
+            this.groupBoxSensor.Controls.Add(this.buttonTare);
+            this.groupBoxSensor.Controls.Add(this.buttonSendCommand);
+            this.groupBoxSensor.Controls.Add(this.textBoxSensorCommand);
+            this.groupBoxSensor.Controls.Add(this.labelSensorCommand);
+            this.groupBoxSensor.Controls.Add(this.buttonCloseSerial);
+            this.groupBoxSensor.Controls.Add(this.buttonOpenSerial);
+            this.groupBoxSensor.Controls.Add(this.buttonRefreshPorts);
+            this.groupBoxSensor.Controls.Add(this.comboBoxDataBits);
+            this.groupBoxSensor.Controls.Add(this.labelDataBits);
+            this.groupBoxSensor.Controls.Add(this.comboBoxStopBits);
+            this.groupBoxSensor.Controls.Add(this.labelStopBits);
+            this.groupBoxSensor.Controls.Add(this.comboBoxParity);
+            this.groupBoxSensor.Controls.Add(this.labelParity);
+            this.groupBoxSensor.Controls.Add(this.comboBoxBaudRate);
+            this.groupBoxSensor.Controls.Add(this.labelBaudRate);
+            this.groupBoxSensor.Controls.Add(this.comboBoxSerialPort);
+            this.groupBoxSensor.Controls.Add(this.labelSerialPort);
+            this.groupBoxSensor.Location = new System.Drawing.Point(16, 330);
+            this.groupBoxSensor.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxSensor.Name = "groupBoxSensor";
+            this.groupBoxSensor.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxSensor.Size = new System.Drawing.Size(353, 340);
+            this.groupBoxSensor.TabIndex = 4;
+            this.groupBoxSensor.TabStop = false;
+            this.groupBoxSensor.Text = "Sensor";
+            // 
+            // buttonTare
+            // 
+            this.buttonTare.Location = new System.Drawing.Point(182, 281);
+            this.buttonTare.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonTare.Name = "buttonTare";
+            this.buttonTare.Size = new System.Drawing.Size(150, 28);
+            this.buttonTare.TabIndex = 15;
+            this.buttonTare.Text = "Tare";
+            this.buttonTare.UseVisualStyleBackColor = true;
+            this.buttonTare.Click += new System.EventHandler(this.ButtonTare_Click);
+            // 
+            // buttonSendCommand
+            // 
+            this.buttonSendCommand.Location = new System.Drawing.Point(23, 281);
+            this.buttonSendCommand.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonSendCommand.Name = "buttonSendCommand";
+            this.buttonSendCommand.Size = new System.Drawing.Size(150, 28);
+            this.buttonSendCommand.TabIndex = 14;
+            this.buttonSendCommand.Text = "Send";
+            this.buttonSendCommand.UseVisualStyleBackColor = true;
+            this.buttonSendCommand.Click += new System.EventHandler(this.ButtonSendCommand_Click);
+            // 
+            // textBoxSensorCommand
+            // 
+            this.textBoxSensorCommand.Location = new System.Drawing.Point(121, 249);
+            this.textBoxSensorCommand.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxSensorCommand.Name = "textBoxSensorCommand";
+            this.textBoxSensorCommand.Size = new System.Drawing.Size(211, 22);
+            this.textBoxSensorCommand.TabIndex = 14;
+            // 
+            // labelSensorCommand
+            // 
+            this.labelSensorCommand.Location = new System.Drawing.Point(20, 252);
+            this.labelSensorCommand.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelSensorCommand.Name = "labelSensorCommand";
+            this.labelSensorCommand.Size = new System.Drawing.Size(93, 20);
+            this.labelSensorCommand.TabIndex = 13;
+            this.labelSensorCommand.Text = "Command";
+            // 
+            // buttonCloseSerial
+            // 
+            this.buttonCloseSerial.Location = new System.Drawing.Point(232, 208);
+            this.buttonCloseSerial.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonCloseSerial.Name = "buttonCloseSerial";
+            this.buttonCloseSerial.Size = new System.Drawing.Size(100, 28);
+            this.buttonCloseSerial.TabIndex = 12;
+            this.buttonCloseSerial.Text = "Close";
+            this.buttonCloseSerial.UseVisualStyleBackColor = true;
+            this.buttonCloseSerial.Click += new System.EventHandler(this.ButtonCloseSerial_Click);
+            // 
+            // buttonOpenSerial
+            // 
+            this.buttonOpenSerial.Location = new System.Drawing.Point(123, 208);
+            this.buttonOpenSerial.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonOpenSerial.Name = "buttonOpenSerial";
+            this.buttonOpenSerial.Size = new System.Drawing.Size(100, 28);
+            this.buttonOpenSerial.TabIndex = 11;
+            this.buttonOpenSerial.Text = "Open";
+            this.buttonOpenSerial.UseVisualStyleBackColor = true;
+            this.buttonOpenSerial.Click += new System.EventHandler(this.ButtonOpenSerial_Click);
+            // 
+            // buttonRefreshPorts
+            // 
+            this.buttonRefreshPorts.Location = new System.Drawing.Point(15, 208);
+            this.buttonRefreshPorts.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonRefreshPorts.Name = "buttonRefreshPorts";
+            this.buttonRefreshPorts.Size = new System.Drawing.Size(100, 28);
+            this.buttonRefreshPorts.TabIndex = 10;
+            this.buttonRefreshPorts.Text = "Refresh Ports";
+            this.buttonRefreshPorts.UseVisualStyleBackColor = true;
+            this.buttonRefreshPorts.Click += new System.EventHandler(this.ButtonRefreshPorts_Click);
+            // 
+            // comboBoxDataBits
+            // 
+            this.comboBoxDataBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxDataBits.FormattingEnabled = true;
+            this.comboBoxDataBits.Items.AddRange(new object[] {
+            "7",
+            "8"});
+            this.comboBoxDataBits.Location = new System.Drawing.Point(120, 167);
+            this.comboBoxDataBits.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxDataBits.Name = "comboBoxDataBits";
+            this.comboBoxDataBits.Size = new System.Drawing.Size(212, 24);
+            this.comboBoxDataBits.TabIndex = 9;
+            // 
+            // labelDataBits
+            // 
+            this.labelDataBits.Location = new System.Drawing.Point(20, 167);
+            this.labelDataBits.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelDataBits.Name = "labelDataBits";
+            this.labelDataBits.Size = new System.Drawing.Size(93, 20);
+            this.labelDataBits.TabIndex = 8;
+            this.labelDataBits.Text = "Data bits";
+            // 
+            // comboBoxStopBits
+            // 
+            this.comboBoxStopBits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxStopBits.FormattingEnabled = true;
+            this.comboBoxStopBits.Items.AddRange(new object[] {
+            "One",
+            "Two"});
+            this.comboBoxStopBits.Location = new System.Drawing.Point(120, 131);
+            this.comboBoxStopBits.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxStopBits.Name = "comboBoxStopBits";
+            this.comboBoxStopBits.Size = new System.Drawing.Size(212, 24);
+            this.comboBoxStopBits.TabIndex = 7;
+            // 
+            // labelStopBits
+            // 
+            this.labelStopBits.Location = new System.Drawing.Point(20, 134);
+            this.labelStopBits.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelStopBits.Name = "labelStopBits";
+            this.labelStopBits.Size = new System.Drawing.Size(93, 20);
+            this.labelStopBits.TabIndex = 6;
+            this.labelStopBits.Text = "Stop bits";
+            // 
+            // comboBoxParity
+            // 
+            this.comboBoxParity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxParity.FormattingEnabled = true;
+            this.comboBoxParity.Items.AddRange(new object[] {
+            "None",
+            "Even",
+            "Odd"});
+            this.comboBoxParity.Location = new System.Drawing.Point(120, 99);
+            this.comboBoxParity.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxParity.Name = "comboBoxParity";
+            this.comboBoxParity.Size = new System.Drawing.Size(212, 24);
+            this.comboBoxParity.TabIndex = 5;
+            // 
+            // labelParity
+            // 
+            this.labelParity.Location = new System.Drawing.Point(20, 101);
+            this.labelParity.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelParity.Name = "labelParity";
+            this.labelParity.Size = new System.Drawing.Size(93, 20);
+            this.labelParity.TabIndex = 4;
+            this.labelParity.Text = "Parity";
+            // 
+            // comboBoxBaudRate
+            // 
+            this.comboBoxBaudRate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxBaudRate.FormattingEnabled = true;
+            this.comboBoxBaudRate.Items.AddRange(new object[] {
+            "9600",
+            "19200",
+            "57600",
+            "115200"});
+            this.comboBoxBaudRate.Location = new System.Drawing.Point(121, 64);
+            this.comboBoxBaudRate.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxBaudRate.Name = "comboBoxBaudRate";
+            this.comboBoxBaudRate.Size = new System.Drawing.Size(211, 24);
+            this.comboBoxBaudRate.TabIndex = 3;
+            // 
+            // labelBaudRate
+            // 
+            this.labelBaudRate.Location = new System.Drawing.Point(20, 68);
+            this.labelBaudRate.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelBaudRate.Name = "labelBaudRate";
+            this.labelBaudRate.Size = new System.Drawing.Size(93, 20);
+            this.labelBaudRate.TabIndex = 2;
+            this.labelBaudRate.Text = "Baud rate";
+            // 
+            // comboBoxSerialPort
+            // 
+            this.comboBoxSerialPort.FormattingEnabled = true;
+            this.comboBoxSerialPort.Location = new System.Drawing.Point(120, 30);
+            this.comboBoxSerialPort.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBoxSerialPort.Name = "comboBoxSerialPort";
+            this.comboBoxSerialPort.Size = new System.Drawing.Size(212, 24);
+            this.comboBoxSerialPort.TabIndex = 1;
+            // 
+            // labelSerialPort
+            // 
+            this.labelSerialPort.Location = new System.Drawing.Point(20, 34);
+            this.labelSerialPort.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelSerialPort.Name = "labelSerialPort";
+            this.labelSerialPort.Size = new System.Drawing.Size(93, 20);
+            this.labelSerialPort.TabIndex = 0;
+            this.labelSerialPort.Text = "Serial port";
+            // 
+            // groupBoxAcquisition
+            // 
+            this.groupBoxAcquisition.Controls.Add(this.buttonSaveCsv);
+            this.groupBoxAcquisition.Controls.Add(this.buttonStartAcquisition);
+            this.groupBoxAcquisition.Controls.Add(this.buttonSelectCsv);
+            this.groupBoxAcquisition.Controls.Add(this.textBoxCsvPath);
+            this.groupBoxAcquisition.Controls.Add(this.labelCsvPath);
+            this.groupBoxAcquisition.Location = new System.Drawing.Point(766, 499);
+            this.groupBoxAcquisition.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxAcquisition.Name = "groupBoxAcquisition";
+            this.groupBoxAcquisition.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxAcquisition.Size = new System.Drawing.Size(357, 171);
+            this.groupBoxAcquisition.TabIndex = 5;
+            this.groupBoxAcquisition.TabStop = false;
+            this.groupBoxAcquisition.Text = "Acquisition";
+            // 
+            // buttonSaveCsv
+            // 
+            this.buttonSaveCsv.Location = new System.Drawing.Point(183, 93);
+            this.buttonSaveCsv.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonSaveCsv.Name = "buttonSaveCsv";
+            this.buttonSaveCsv.Size = new System.Drawing.Size(155, 28);
+            this.buttonSaveCsv.TabIndex = 5;
+            this.buttonSaveCsv.Text = "Save CSV";
+            this.buttonSaveCsv.UseVisualStyleBackColor = true;
+            this.buttonSaveCsv.Click += new System.EventHandler(this.ButtonSaveCsv_Click);
+            // 
+            // buttonStartAcquisition
+            // 
+            this.buttonStartAcquisition.Location = new System.Drawing.Point(23, 129);
+            this.buttonStartAcquisition.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonStartAcquisition.Name = "buttonStartAcquisition";
+            this.buttonStartAcquisition.Size = new System.Drawing.Size(315, 28);
+            this.buttonStartAcquisition.TabIndex = 4;
+            this.buttonStartAcquisition.Text = "Start Test";
+            this.buttonStartAcquisition.UseVisualStyleBackColor = true;
+            this.buttonStartAcquisition.Click += new System.EventHandler(this.ButtonStartAcquisition_Click);
+            // 
+            // buttonSelectCsv
+            // 
+            this.buttonSelectCsv.Location = new System.Drawing.Point(23, 93);
+            this.buttonSelectCsv.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonSelectCsv.Name = "buttonSelectCsv";
+            this.buttonSelectCsv.Size = new System.Drawing.Size(155, 28);
+            this.buttonSelectCsv.TabIndex = 3;
+            this.buttonSelectCsv.Text = "Select CSV";
+            this.buttonSelectCsv.UseVisualStyleBackColor = true;
+            this.buttonSelectCsv.Click += new System.EventHandler(this.ButtonSelectCsv_Click);
+            // 
+            // textBoxCsvPath
+            // 
+            this.textBoxCsvPath.Location = new System.Drawing.Point(23, 59);
+            this.textBoxCsvPath.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxCsvPath.Name = "textBoxCsvPath";
+            this.textBoxCsvPath.ReadOnly = true;
+            this.textBoxCsvPath.Size = new System.Drawing.Size(315, 22);
+            this.textBoxCsvPath.TabIndex = 1;
+            // 
+            // labelCsvPath
+            // 
+            this.labelCsvPath.Location = new System.Drawing.Point(20, 34);
+            this.labelCsvPath.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelCsvPath.Name = "labelCsvPath";
+            this.labelCsvPath.Size = new System.Drawing.Size(93, 20);
+            this.labelCsvPath.TabIndex = 0;
+            this.labelCsvPath.Text = "CSV file";
+            // 
+            // groupBoxDodge
+            // 
+            this.groupBoxDodge.Controls.Add(this.labelDodgeStepValue);
+            this.groupBoxDodge.Controls.Add(this.trackBarDodgeStep);
+            this.groupBoxDodge.Controls.Add(this.labelDodgeStep);
+            this.groupBoxDodge.Controls.Add(this.labelDodgeThresholdValue);
+            this.groupBoxDodge.Controls.Add(this.trackBarDodgeThreshold);
+            this.groupBoxDodge.Controls.Add(this.labelDodgeThreshold);
+            this.groupBoxDodge.Controls.Add(this.checkBoxDodgeEnabled);
+            this.groupBoxDodge.Location = new System.Drawing.Point(380, 499);
+            this.groupBoxDodge.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxDodge.Name = "groupBoxDodge";
+            this.groupBoxDodge.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxDodge.Size = new System.Drawing.Size(374, 171);
+            this.groupBoxDodge.TabIndex = 5;
+            this.groupBoxDodge.TabStop = false;
+            this.groupBoxDodge.Text = "Dodge";
+            // 
+            // labelDodgeStepValue
+            // 
+            this.labelDodgeStepValue.Location = new System.Drawing.Point(291, 99);
+            this.labelDodgeStepValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelDodgeStepValue.Name = "labelDodgeStepValue";
+            this.labelDodgeStepValue.Size = new System.Drawing.Size(62, 20);
+            this.labelDodgeStepValue.TabIndex = 6;
+            this.labelDodgeStepValue.Text = "5.0 mm";
+            // 
+            // trackBarDodgeStep
+            // 
+            this.trackBarDodgeStep.Location = new System.Drawing.Point(99, 91);
+            this.trackBarDodgeStep.Margin = new System.Windows.Forms.Padding(4);
+            this.trackBarDodgeStep.Maximum = 30;
+            this.trackBarDodgeStep.Minimum = 1;
+            this.trackBarDodgeStep.Name = "trackBarDodgeStep";
+            this.trackBarDodgeStep.Size = new System.Drawing.Size(184, 56);
+            this.trackBarDodgeStep.TabIndex = 5;
+            this.trackBarDodgeStep.TickFrequency = 5;
+            this.trackBarDodgeStep.Value = 5;
+            this.trackBarDodgeStep.Scroll += new System.EventHandler(this.trackBarDodgeStep_Scroll);
+            // 
+            // labelDodgeStep
+            // 
+            this.labelDodgeStep.Location = new System.Drawing.Point(20, 105);
+            this.labelDodgeStep.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelDodgeStep.Name = "labelDodgeStep";
+            this.labelDodgeStep.Size = new System.Drawing.Size(141, 20);
+            this.labelDodgeStep.TabIndex = 4;
+            this.labelDodgeStep.Text = "Step size";
+            // 
+            // labelDodgeThresholdValue
+            // 
+            this.labelDodgeThresholdValue.Location = new System.Drawing.Point(283, 47);
+            this.labelDodgeThresholdValue.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelDodgeThresholdValue.Name = "labelDodgeThresholdValue";
+            this.labelDodgeThresholdValue.Size = new System.Drawing.Size(70, 20);
+            this.labelDodgeThresholdValue.TabIndex = 3;
+            this.labelDodgeThresholdValue.Text = "0.100 kg";
+            // 
+            // trackBarDodgeThreshold
+            // 
+            this.trackBarDodgeThreshold.Location = new System.Drawing.Point(99, 47);
+            this.trackBarDodgeThreshold.Margin = new System.Windows.Forms.Padding(4);
+            this.trackBarDodgeThreshold.Maximum = 100;
+            this.trackBarDodgeThreshold.Name = "trackBarDodgeThreshold";
+            this.trackBarDodgeThreshold.Size = new System.Drawing.Size(184, 56);
+            this.trackBarDodgeThreshold.TabIndex = 2;
+            this.trackBarDodgeThreshold.TickFrequency = 10;
+            this.trackBarDodgeThreshold.Scroll += new System.EventHandler(this.trackBarDodgeThreshold_Scroll);
+            // 
+            // labelDodgeThreshold
+            // 
+            this.labelDodgeThreshold.Location = new System.Drawing.Point(20, 60);
+            this.labelDodgeThreshold.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelDodgeThreshold.Name = "labelDodgeThreshold";
+            this.labelDodgeThreshold.Size = new System.Drawing.Size(71, 20);
+            this.labelDodgeThreshold.TabIndex = 1;
+            this.labelDodgeThreshold.Text = "Sensibility";
+            // 
+            // checkBoxDodgeEnabled
+            // 
+            this.checkBoxDodgeEnabled.AutoSize = true;
+            this.checkBoxDodgeEnabled.Location = new System.Drawing.Point(24, 27);
+            this.checkBoxDodgeEnabled.Margin = new System.Windows.Forms.Padding(4);
+            this.checkBoxDodgeEnabled.Name = "checkBoxDodgeEnabled";
+            this.checkBoxDodgeEnabled.Size = new System.Drawing.Size(91, 20);
+            this.checkBoxDodgeEnabled.TabIndex = 0;
+            this.checkBoxDodgeEnabled.Text = "Dodge On";
+            this.checkBoxDodgeEnabled.UseVisualStyleBackColor = true;
+            this.checkBoxDodgeEnabled.CheckedChanged += new System.EventHandler(this.checkBoxDodgeEnabled_CheckedChanged);
+            // 
+            // groupBoxLog
+            // 
+            this.groupBoxLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxLog.Controls.Add(this.buttonClearLog);
+            this.groupBoxLog.Controls.Add(this.textBoxSensorLog);
+            this.groupBoxLog.Location = new System.Drawing.Point(16, 678);
+            this.groupBoxLog.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxLog.Name = "groupBoxLog";
+            this.groupBoxLog.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxLog.Size = new System.Drawing.Size(1107, 241);
+            this.groupBoxLog.TabIndex = 6;
+            this.groupBoxLog.TabStop = false;
+            this.groupBoxLog.Text = "Event Log";
+            // 
+            // buttonClearLog
+            // 
+            this.buttonClearLog.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonClearLog.Location = new System.Drawing.Point(975, 23);
+            this.buttonClearLog.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonClearLog.Name = "buttonClearLog";
+            this.buttonClearLog.Size = new System.Drawing.Size(109, 28);
+            this.buttonClearLog.TabIndex = 1;
+            this.buttonClearLog.Text = "Clear";
+            this.buttonClearLog.UseVisualStyleBackColor = true;
+            this.buttonClearLog.Click += new System.EventHandler(this.ButtonClearLog_Click);
+            // 
+            // textBoxSensorLog
+            // 
+            this.textBoxSensorLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxSensorLog.Location = new System.Drawing.Point(15, 26);
+            this.textBoxSensorLog.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxSensorLog.Multiline = true;
+            this.textBoxSensorLog.Name = "textBoxSensorLog";
+            this.textBoxSensorLog.ReadOnly = true;
+            this.textBoxSensorLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxSensorLog.Size = new System.Drawing.Size(938, 198);
+            this.textBoxSensorLog.TabIndex = 0;
+            // 
+            // statusStripMain
+            // 
+            this.statusStripMain.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabelRobot,
+            this.toolStripStatusLabelSensor});
+            this.statusStripMain.Location = new System.Drawing.Point(0, 927);
+            this.statusStripMain.Name = "statusStripMain";
+            this.statusStripMain.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
+            this.statusStripMain.Size = new System.Drawing.Size(1142, 26);
+            this.statusStripMain.TabIndex = 7;
+            // 
+            // toolStripStatusLabelRobot
+            // 
+            this.toolStripStatusLabelRobot.Name = "toolStripStatusLabelRobot";
+            this.toolStripStatusLabelRobot.Size = new System.Drawing.Size(152, 20);
+            this.toolStripStatusLabelRobot.Text = "Robot: not connected";
+            // 
+            // toolStripStatusLabelSensor
+            // 
+            this.toolStripStatusLabelSensor.Name = "toolStripStatusLabelSensor";
+            this.toolStripStatusLabelSensor.Size = new System.Drawing.Size(142, 20);
+            this.toolStripStatusLabelSensor.Text = "Sensor: serial closed";
+            // 
+            // timerCMD
+            // 
             this.timerCMD.Interval = 300;
             this.timerCMD.Tick += new System.EventHandler(this.timerCMD_Tick);
-            this.timerConnection = new System.Windows.Forms.Timer(this.components);
+            // 
+            // timerConnection
+            // 
             this.timerConnection.Interval = 1000;
             this.timerConnection.Tick += new System.EventHandler(this.timerConnection_Tick);
-            this.serialPortSensor = new System.IO.Ports.SerialPort(this.components);
+            // 
+            // timerDodge
+            // 
+            this.timerDodge.Interval = 350;
+            this.timerDodge.Tick += new System.EventHandler(this.timerDodge_Tick);
+            // 
+            // serialPortSensor
+            // 
             this.serialPortSensor.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPortSensor_DataReceived);
-
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1180, 737);
-            this.MinimumSize = new System.Drawing.Size(1196, 776);
+            this.ClientSize = new System.Drawing.Size(1142, 953);
+            this.Controls.Add(this.statusStripMain);
+            this.Controls.Add(this.groupBoxLog);
+            this.Controls.Add(this.groupBoxDodge);
+            this.Controls.Add(this.groupBoxAcquisition);
+            this.Controls.Add(this.groupBoxSensor);
+            this.Controls.Add(this.groupBoxJoints);
+            this.Controls.Add(this.groupBoxTool);
+            this.Controls.Add(this.groupBoxRobotState);
+            this.Controls.Add(this.groupBoxRobot);
+            this.Margin = new System.Windows.Forms.Padding(4);
+            this.MinimumSize = new System.Drawing.Size(100, 100);
+            this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Robot + Force Integration";
-            this.Controls.AddRange(new System.Windows.Forms.Control[] {
-                this.groupBoxRobot, this.groupBoxRobotState, this.groupBoxTool, this.groupBoxJoints,
-                this.groupBoxSensor, this.groupBoxAcquisition, this.groupBoxLog, this.statusStripMain
-            });
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-        }
+            this.groupBoxRobot.ResumeLayout(false);
+            this.groupBoxRobot.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarMotionSpeed)).EndInit();
+            this.groupBoxRobotState.ResumeLayout(false);
+            this.groupBoxRobotState.PerformLayout();
+            this.groupBoxTool.ResumeLayout(false);
+            this.groupBoxTool.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarToolStep)).EndInit();
+            this.groupBoxJoints.ResumeLayout(false);
+            this.groupBoxJoints.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarJointStep)).EndInit();
+            this.groupBoxSensor.ResumeLayout(false);
+            this.groupBoxSensor.PerformLayout();
+            this.groupBoxAcquisition.ResumeLayout(false);
+            this.groupBoxAcquisition.PerformLayout();
+            this.groupBoxDodge.ResumeLayout(false);
+            this.groupBoxDodge.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeStep)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeThreshold)).EndInit();
+            this.groupBoxLog.ResumeLayout(false);
+            this.groupBoxLog.PerformLayout();
+            this.statusStripMain.ResumeLayout(false);
+            this.statusStripMain.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
-        private static System.Windows.Forms.GroupBox CreateGroupBox(string text, int x, int y, int w, int h)
-        {
-            return new System.Windows.Forms.GroupBox
-            {
-                Text = text,
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h)
-            };
-        }
-
-        private static System.Windows.Forms.Label CreateLabel(string text, int x, int y, int w, int h)
-        {
-            return new System.Windows.Forms.Label
-            {
-                AutoSize = false,
-                Text = text,
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h)
-            };
-        }
-
-        private static System.Windows.Forms.TextBox CreateTextBox(int x, int y, int w, int h, bool readOnly = false)
-        {
-            return new System.Windows.Forms.TextBox
-            {
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h),
-                ReadOnly = readOnly
-            };
-        }
-
-        private static System.Windows.Forms.Button CreateButton(string text, int x, int y, int w, int h, System.EventHandler handler)
-        {
-            System.Windows.Forms.Button button = new System.Windows.Forms.Button
-            {
-                Text = text,
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h),
-                UseVisualStyleBackColor = true
-            };
-            button.Click += handler;
-            return button;
-        }
-
-        private static System.Windows.Forms.ComboBox CreateComboBox(int x, int y, int w, int h, bool dropDownList)
-        {
-            return new System.Windows.Forms.ComboBox
-            {
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h),
-                DropDownStyle = dropDownList ? System.Windows.Forms.ComboBoxStyle.DropDownList : System.Windows.Forms.ComboBoxStyle.DropDown
-            };
-        }
-
-        private static System.Windows.Forms.NumericUpDown CreateNumeric(int x, int y, int w, int h, decimal decimals, decimal minimum, decimal maximum, decimal value)
-        {
-            return new System.Windows.Forms.NumericUpDown
-            {
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h),
-                DecimalPlaces = (int)decimals,
-                Minimum = minimum,
-                Maximum = maximum,
-                Value = value
-            };
-        }
-
-        private static System.Windows.Forms.TrackBar CreateTrackBar(int x, int y, int w, int h, int minimum, int maximum, int value)
-        {
-            return new System.Windows.Forms.TrackBar
-            {
-                Location = new System.Drawing.Point(x, y),
-                Size = new System.Drawing.Size(w, h),
-                Minimum = minimum,
-                Maximum = maximum,
-                TickFrequency = 10,
-                Value = value
-            };
-        }
-
-        private static System.Windows.Forms.CheckBox CreateCheckBox(string text, int x, int y, bool autoCheck)
-        {
-            return new System.Windows.Forms.CheckBox
-            {
-                AutoCheck = autoCheck,
-                AutoSize = true,
-                Text = text,
-                Location = new System.Drawing.Point(x, y)
-            };
         }
 
         private System.Windows.Forms.GroupBox groupBoxRobot;
-        private System.Windows.Forms.Label labelRobotIp;
-        private System.Windows.Forms.TextBox textBoxRobotIp;
-        private System.Windows.Forms.Button buttonConnectRobot;
-        private System.Windows.Forms.Button buttonToggleMotion;
-        private System.Windows.Forms.Label labelCollisionTarget;
-        private System.Windows.Forms.ComboBox comboBoxCollisionSensitivity;
-        private System.Windows.Forms.Button buttonApplyCollisionSensitivity;
-        private System.Windows.Forms.CheckBox checkBoxSelfCollision;
-        private System.Windows.Forms.Label labelMotionSpeed;
-        private System.Windows.Forms.TrackBar trackBarMotionSpeed;
         private System.Windows.Forms.Label labelMotionSpeedValue;
+        private System.Windows.Forms.TrackBar trackBarMotionSpeed;
+        private System.Windows.Forms.Label labelMotionSpeed;
+        private System.Windows.Forms.CheckBox checkBoxSelfCollision;
+        private System.Windows.Forms.Button buttonApplyCollisionSensitivity;
+        private System.Windows.Forms.ComboBox comboBoxCollisionSensitivity;
+        private System.Windows.Forms.Label labelCollisionTarget;
+        private System.Windows.Forms.Button buttonToggleMotion;
+        private System.Windows.Forms.Button buttonConnectRobot;
+        private System.Windows.Forms.TextBox textBoxRobotIp;
+        private System.Windows.Forms.Label labelRobotIp;
         private System.Windows.Forms.GroupBox groupBoxRobotState;
-        private System.Windows.Forms.Label labelJoint;
-        private System.Windows.Forms.TextBox textBoxJoint;
-        private System.Windows.Forms.Label labelPosition;
-        private System.Windows.Forms.TextBox textBoxPosition;
-        private System.Windows.Forms.Label labelBase;
-        private System.Windows.Forms.TextBox textBoxBase;
-        private System.Windows.Forms.Label labelTcp;
         private System.Windows.Forms.TextBox textBoxTcp;
+        private System.Windows.Forms.Label labelTcp;
+        private System.Windows.Forms.TextBox textBoxBase;
+        private System.Windows.Forms.Label labelBase;
+        private System.Windows.Forms.TextBox textBoxPosition;
+        private System.Windows.Forms.Label labelPosition;
+        private System.Windows.Forms.TextBox textBoxJoint;
+        private System.Windows.Forms.Label labelJoint;
         private System.Windows.Forms.GroupBox groupBoxTool;
-        private System.Windows.Forms.Label labelToolStep;
-        private System.Windows.Forms.NumericUpDown numericUpDownToolStep;
-        private System.Windows.Forms.Button buttonToolXMinus;
-        private System.Windows.Forms.Button buttonToolXPlus;
-        private System.Windows.Forms.Button buttonToolYMinus;
-        private System.Windows.Forms.Button buttonToolYPlus;
-        private System.Windows.Forms.Button buttonToolZMinus;
-        private System.Windows.Forms.Button buttonToolZPlus;
-        private System.Windows.Forms.Button buttonMoveHome;
-        private System.Windows.Forms.Button buttonMovePreset;
         private System.Windows.Forms.Button buttonSetPreset;
+        private System.Windows.Forms.Button buttonMovePreset;
+        private System.Windows.Forms.Button buttonMoveHome;
+        private System.Windows.Forms.Button buttonToolZPlus;
+        private System.Windows.Forms.Button buttonToolZMinus;
+        private System.Windows.Forms.Button buttonToolYPlus;
+        private System.Windows.Forms.Button buttonToolYMinus;
+        private System.Windows.Forms.Button buttonToolXPlus;
+        private System.Windows.Forms.Button buttonToolXMinus;
+        private System.Windows.Forms.Label labelToolStepValue;
+        private System.Windows.Forms.TrackBar trackBarToolStep;
+        private System.Windows.Forms.Label labelToolStep;
         private System.Windows.Forms.GroupBox groupBoxJoints;
-        private System.Windows.Forms.Label labelJointStep;
-        private System.Windows.Forms.Button buttonJoint1Minus;
-        private System.Windows.Forms.Button buttonJoint1Plus;
-        private System.Windows.Forms.Button buttonJoint2Minus;
-        private System.Windows.Forms.Button buttonJoint2Plus;
-        private System.Windows.Forms.Button buttonJoint3Minus;
-        private System.Windows.Forms.Button buttonJoint3Plus;
-        private System.Windows.Forms.Button buttonJoint4Minus;
-        private System.Windows.Forms.Button buttonJoint4Plus;
-        private System.Windows.Forms.Button buttonJoint5Minus;
-        private System.Windows.Forms.Button buttonJoint5Plus;
-        private System.Windows.Forms.Button buttonJoint6Minus;
+        private System.Windows.Forms.Label labelJointStepValue;
+        private System.Windows.Forms.TrackBar trackBarJointStep;
         private System.Windows.Forms.Button buttonJoint6Plus;
+        private System.Windows.Forms.Button buttonJoint6Minus;
+        private System.Windows.Forms.Button buttonJoint5Plus;
+        private System.Windows.Forms.Button buttonJoint5Minus;
+        private System.Windows.Forms.Button buttonJoint4Plus;
+        private System.Windows.Forms.Button buttonJoint4Minus;
+        private System.Windows.Forms.Button buttonJoint3Plus;
+        private System.Windows.Forms.Button buttonJoint3Minus;
+        private System.Windows.Forms.Button buttonJoint2Plus;
+        private System.Windows.Forms.Button buttonJoint2Minus;
+        private System.Windows.Forms.Button buttonJoint1Plus;
+        private System.Windows.Forms.Button buttonJoint1Minus;
+        private System.Windows.Forms.Label labelJointStep;
         private System.Windows.Forms.GroupBox groupBoxSensor;
-        private System.Windows.Forms.Label labelSerialPort;
-        private System.Windows.Forms.ComboBox comboBoxSerialPort;
-        private System.Windows.Forms.Label labelBaudRate;
-        private System.Windows.Forms.ComboBox comboBoxBaudRate;
-        private System.Windows.Forms.Label labelParity;
-        private System.Windows.Forms.ComboBox comboBoxParity;
-        private System.Windows.Forms.Label labelStopBits;
-        private System.Windows.Forms.ComboBox comboBoxStopBits;
-        private System.Windows.Forms.Label labelDataBits;
-        private System.Windows.Forms.ComboBox comboBoxDataBits;
-        private System.Windows.Forms.Button buttonRefreshPorts;
-        private System.Windows.Forms.Button buttonOpenSerial;
-        private System.Windows.Forms.Button buttonCloseSerial;
-        private System.Windows.Forms.Label labelSensorCommand;
-        private System.Windows.Forms.TextBox textBoxSensorCommand;
+        private System.Windows.Forms.Button buttonTare;
         private System.Windows.Forms.Button buttonSendCommand;
-        private System.Windows.Forms.Button buttonRequestForce;
-        private System.Windows.Forms.Label labelCurrentForce;
-        private System.Windows.Forms.TextBox textBoxCurrentForce;
+        private System.Windows.Forms.TextBox textBoxSensorCommand;
+        private System.Windows.Forms.Label labelSensorCommand;
+        private System.Windows.Forms.Button buttonCloseSerial;
+        private System.Windows.Forms.Button buttonOpenSerial;
+        private System.Windows.Forms.Button buttonRefreshPorts;
+        private System.Windows.Forms.ComboBox comboBoxDataBits;
+        private System.Windows.Forms.Label labelDataBits;
+        private System.Windows.Forms.ComboBox comboBoxStopBits;
+        private System.Windows.Forms.Label labelStopBits;
+        private System.Windows.Forms.ComboBox comboBoxParity;
+        private System.Windows.Forms.Label labelParity;
+        private System.Windows.Forms.ComboBox comboBoxBaudRate;
+        private System.Windows.Forms.Label labelBaudRate;
+        private System.Windows.Forms.ComboBox comboBoxSerialPort;
+        private System.Windows.Forms.Label labelSerialPort;
         private System.Windows.Forms.GroupBox groupBoxAcquisition;
-        private System.Windows.Forms.Label labelCsvPath;
-        private System.Windows.Forms.TextBox textBoxCsvPath;
-        private System.Windows.Forms.Label labelAcquisitionInfo;
-        private System.Windows.Forms.Button buttonSelectCsv;
-        private System.Windows.Forms.Button buttonStartAcquisition;
         private System.Windows.Forms.Button buttonSaveCsv;
+        private System.Windows.Forms.Button buttonStartAcquisition;
+        private System.Windows.Forms.Button buttonSelectCsv;
+        private System.Windows.Forms.TextBox textBoxCsvPath;
+        private System.Windows.Forms.Label labelCsvPath;
+        private System.Windows.Forms.GroupBox groupBoxDodge;
+        private System.Windows.Forms.Label labelDodgeStepValue;
+        private System.Windows.Forms.TrackBar trackBarDodgeStep;
+        private System.Windows.Forms.Label labelDodgeStep;
+        private System.Windows.Forms.Label labelDodgeThresholdValue;
+        private System.Windows.Forms.TrackBar trackBarDodgeThreshold;
+        private System.Windows.Forms.Label labelDodgeThreshold;
+        private System.Windows.Forms.CheckBox checkBoxDodgeEnabled;
         private System.Windows.Forms.GroupBox groupBoxLog;
         private System.Windows.Forms.Button buttonClearLog;
         private System.Windows.Forms.TextBox textBoxSensorLog;
@@ -348,6 +1285,7 @@ namespace RobotForceIntegration
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelSensor;
         private System.Windows.Forms.Timer timerCMD;
         private System.Windows.Forms.Timer timerConnection;
+        private System.Windows.Forms.Timer timerDodge;
         private System.IO.Ports.SerialPort serialPortSensor;
     }
 }

@@ -428,6 +428,13 @@ namespace RobotForceIntegration
             return ret;
         }
 
+        public int StopCurrentMotion()
+        {
+            if (xArmCreatedFlag && ConnectedFlag)
+                return SafeApiCall(() => XArmAPI.set_state(4));
+            return -1;
+        }
+
         public int GetState()
         {
             int ret = -1;
@@ -449,13 +456,33 @@ namespace RobotForceIntegration
             return ret;
         }
 
+        public int PrepareCartesianVelocityMotion()
+        {
+            int ret = -1;
+            if (xArmCreatedFlag && ConnectedFlag)
+            {
+                ret = SafeApiCall(() => XArmAPI.set_mode(5));
+                if (ret == 0)
+                    ret = SafeApiCall(() => XArmAPI.set_state(0));
+                if (ret == 0)
+                    SafeApiCall(() => XArmAPI.set_cartesian_velo_continuous(true));
+            }
+            return ret;
+        }
+
         public void SetMotionScale(int percent)
         {
             int clampedPercent = Math.Max(1, Math.Min(100, percent));
             JointSpeed = clampedPercent;
-            JointAcceleration = clampedPercent * 10.0F;
+            JointAcceleration = clampedPercent * 18.0F;
             LinearSpeed = clampedPercent * 2.0F;
-            LinearAcceleration = clampedPercent * 20.0F;
+            LinearAcceleration = clampedPercent * 80.0F;
+
+            if (xArmCreatedFlag && ConnectedFlag)
+            {
+                SafeApiCall(() => XArmAPI.set_joint_maxacc(JointAcceleration));
+                SafeApiCall(() => XArmAPI.set_tcp_maxacc(LinearAcceleration));
+            }
         }
 
         // world_offset Get Set
@@ -586,6 +613,19 @@ namespace RobotForceIntegration
         {
             float[] pose = { dx, dy, dz, 0.0F, 0.0F, 0.0F };
             return MoveTool(pose, wait, timeout);
+        }
+
+        public int SetCartesianVelocity(float vx, float vy, float vz, float vrx = 0.0F, float vry = 0.0F, float vrz = 0.0F, bool isToolCoord = false, float duration = -1.0F)
+        {
+            float[] speeds = { vx, vy, vz, vrx, vry, vrz };
+            return SafeApiCall(() => XArmAPI.vc_set_cartesian_velocity(speeds, isToolCoord, duration));
+        }
+
+        public int SetCartesianVelocityContinuous(bool onOff)
+        {
+            if (xArmCreatedFlag && ConnectedFlag)
+                return SafeApiCall(() => XArmAPI.set_cartesian_velo_continuous(onOff));
+            return -1;
         }
 
         // Inverse Kinematics

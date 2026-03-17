@@ -30,7 +30,25 @@ namespace RobotForceIntegration
         private const string DefaultRobotIp = "192.168.1.223";
         private const int ConnectionProbeIntervalMilliseconds = 1000;
         private const int AcquisitionIntervalMilliseconds = 300;
-        private const float JointStepDegrees = 10.0F;
+        private const int DodgeIntervalMilliseconds = 50;
+        private const int DodgeForceSampleTimeoutMilliseconds = 100;
+        private const int DodgeForceWatchdogMilliseconds = 100;
+        private const float DodgeStopWatchdogSeconds = 0.03F;
+        private const float DodgeVelocityWatchdogSeconds = 0.08F;
+        private const float DodgeVelocityGain = 4.0F;
+        private const float DodgeMinimumVelocityMmPerSecond = 2.0F;
+        private const int DodgeResponseGainPercent = 220;
+        private const int DodgeSpeedLimitPercent = 220;
+        private const int DodgeAccelerationPercent = 260;
+        private const int DodgeBrakingPercent = 1400;
+        private const int DodgeFilterPercent = 35;
+        private const double ToolStepMinMm = 1.0;
+        private const double ToolStepMaxMm = 100.0;
+        private const double JointStepMinDegrees = 1.0;
+        private const double JointStepMaxDegrees = 20.0;
+        private const double DodgeThresholdMinKg = 0.1;
+        private const double DodgeThresholdMaxKg = 1.0;
+        private const int DodgeManualOverrideWindowMilliseconds = 1500;
 
         private readonly Robot xARM;
         private readonly List<Measure> measures;
@@ -39,10 +57,18 @@ namespace RobotForceIntegration
 
         private string csvFile;
         private float currentForce;
+        private float filteredForce;
         private float pendingPositionZ;
         private bool awaitingForceSample;
         private bool acquisitionRunning;
         private bool syncingSelfCollisionCheck;
+        private bool dodgeAwaitingForceSample;
+        private bool dodgeVelocityModeActive;
+        private DateTime lastForceSampleUtc;
+        private DateTime lastDodgeRequestUtc;
+        private DateTime lastManualMotionUtc;
+        private float lastDodgeVelocityMmPerSecond;
+        private bool dodgeManualMotionActive;
 
         public Form1()
         {
@@ -53,6 +79,7 @@ namespace RobotForceIntegration
             serialBuffer = new StringBuilder();
             csvFile = string.Empty;
             currentForce = 0.0F;
+            filteredForce = 0.0F;
 
             comboBoxCollisionSensitivity.SelectedIndex = 3;
             comboBoxBaudRate.SelectedItem = "115200";
@@ -61,13 +88,23 @@ namespace RobotForceIntegration
             comboBoxDataBits.SelectedItem = "8";
             textBoxRobotIp.Text = DefaultRobotIp;
             textBoxSensorCommand.Text = "M";
-            numericUpDownToolStep.Value = 10;
+            trackBarToolStep.Value = MapLogValueToTrackBar(10.0, trackBarToolStep.Minimum, trackBarToolStep.Maximum, ToolStepMinMm, ToolStepMaxMm);
+            trackBarJointStep.Value = 10;
             trackBarMotionSpeed.Value = 50;
+            trackBarDodgeThreshold.Value = trackBarDodgeThreshold.Minimum;
+            trackBarDodgeStep.Value = 5;
 
             timerConnection.Interval = ConnectionProbeIntervalMilliseconds;
             timerCMD.Interval = AcquisitionIntervalMilliseconds;
+            timerDodge.Interval = DodgeIntervalMilliseconds;
+            lastForceSampleUtc = DateTime.MinValue;
+            lastDodgeRequestUtc = DateTime.MinValue;
 
             ApplyMotionSpeedProfile();
+            UpdateToolStepDisplay();
+            UpdateJointStepDisplay();
+            UpdateDodgeThresholdDisplay();
+            UpdateDodgeStepDisplay();
             RefreshSerialPorts();
             UpdateRobotStatus(false);
             UpdateSerialStatus(false);
@@ -101,7 +138,8 @@ namespace RobotForceIntegration
             buttonMoveHome.Enabled = enabled;
             buttonMovePreset.Enabled = enabled;
             buttonSetPreset.Enabled = enabled;
-            numericUpDownToolStep.Enabled = enabled;
+            trackBarToolStep.Enabled = enabled;
+            trackBarJointStep.Enabled = enabled;
             buttonToolXMinus.Enabled = enabled;
             buttonToolXPlus.Enabled = enabled;
             buttonToolYMinus.Enabled = enabled;
@@ -127,6 +165,7 @@ namespace RobotForceIntegration
             bool robotConnected = IsRobotConnected();
             bool robotReady = IsRobotReady();
             bool serialReady = IsSerialReady();
+            bool dodgeAvailable = robotReady && serialReady && !acquisitionRunning;
 
             buttonToggleMotion.Enabled = robotConnected;
             buttonToggleMotion.Text = robotReady ? "Disable Motion" : "Enable Motion";
@@ -144,10 +183,14 @@ namespace RobotForceIntegration
             comboBoxDataBits.Enabled = !serialReady;
             textBoxSensorCommand.Enabled = serialReady;
             buttonSendCommand.Enabled = serialReady;
-            buttonRequestForce.Enabled = serialReady;
+            buttonTare.Enabled = serialReady;
             buttonStartAcquisition.Text = acquisitionRunning ? "Stop Test" : "Start Test";
+            checkBoxDodgeEnabled.Enabled = dodgeAvailable;
+            trackBarDodgeThreshold.Enabled = dodgeAvailable;
+            trackBarDodgeStep.Enabled = dodgeAvailable;
 
             SetMotionControlsEnabled(robotReady);
+            SyncDodgeTimerState();
         }
 
         private void UpdateRobotStatus(bool connected)
@@ -219,6 +262,93 @@ namespace RobotForceIntegration
             labelMotionSpeedValue.Text = trackBarMotionSpeed.Value.ToString(CultureInfo.InvariantCulture) + "%";
         }
 
+        private static double MapTrackBarToLogValue(int trackValue, int minimum, int maximum, double minValue, double maxValue)
+        {
+            double ratio = (double)(trackValue - minimum) / Math.Max(1, maximum - minimum);
+            double minLog = Math.Log10(minValue);
+            double maxLog = Math.Log10(maxValue);
+            return Math.Pow(10.0, minLog + (maxLog - minLog) * ratio);
+        }
+
+        private static int MapLogValueToTrackBar(double value, int minimum, int maximum, double minValue, double maxValue)
+        {
+            double clampedValue = Math.Max(minValue, Math.Min(maxValue, value));
+            double minLog = Math.Log10(minValue);
+            double maxLog = Math.Log10(maxValue);
+            double ratio = (Math.Log10(clampedValue) - minLog) / Math.Max(double.Epsilon, maxLog - minLog);
+            return minimum + (int)Math.Round(ratio * (maximum - minimum), MidpointRounding.AwayFromZero);
+        }
+
+        private double GetDodgeThresholdKg()
+        {
+            return MapTrackBarToLogValue(
+                trackBarDodgeThreshold.Value,
+                trackBarDodgeThreshold.Minimum,
+                trackBarDodgeThreshold.Maximum,
+                DodgeThresholdMinKg,
+                DodgeThresholdMaxKg);
+        }
+
+        private float GetDodgeStepSizeMm()
+        {
+            return trackBarDodgeStep.Value;
+        }
+
+        private float GetToolStep()
+        {
+            return Math.Max(1.0F, (float)Math.Round(MapTrackBarToLogValue(
+                trackBarToolStep.Value,
+                trackBarToolStep.Minimum,
+                trackBarToolStep.Maximum,
+                ToolStepMinMm,
+                ToolStepMaxMm), MidpointRounding.AwayFromZero));
+        }
+
+        private float GetJointStepDegrees()
+        {
+            return trackBarJointStep.Value;
+        }
+
+        private void UpdateToolStepDisplay()
+        {
+            labelToolStepValue.Text = GetToolStep().ToString("0", CultureInfo.InvariantCulture) + " mm";
+        }
+
+        private void UpdateJointStepDisplay()
+        {
+            labelJointStepValue.Text = GetJointStepDegrees().ToString("0", CultureInfo.InvariantCulture) + " deg";
+        }
+
+        private void UpdateDodgeThresholdDisplay()
+        {
+            labelDodgeThresholdValue.Text = GetDodgeThresholdKg().ToString("0.000", CultureInfo.InvariantCulture) + " kg";
+        }
+
+        private void UpdateDodgeStepDisplay()
+        {
+            labelDodgeStepValue.Text = GetDodgeStepSizeMm().ToString("0.0", CultureInfo.InvariantCulture) + " mm";
+        }
+
+        private bool IsDodgeRunning()
+        {
+            return checkBoxDodgeEnabled.Checked && IsRobotReady() && IsSerialReady() && !acquisitionRunning;
+        }
+
+        private void SyncDodgeTimerState()
+        {
+            if (IsDodgeRunning())
+            {
+                if (!timerDodge.Enabled)
+                    timerDodge.Start();
+            }
+            else
+            {
+                timerDodge.Stop();
+                dodgeAwaitingForceSample = false;
+                StopDodgeVelocityControl();
+            }
+        }
+
         private void RefreshSerialPorts()
         {
             string currentSelection = comboBoxSerialPort.Text;
@@ -256,12 +386,15 @@ namespace RobotForceIntegration
 
         private void UpdateForceDisplay()
         {
-            textBoxCurrentForce.Text = currentForce.ToString("F3", CultureInfo.InvariantCulture);
         }
 
-        private float GetToolStep()
+        private void TareSensor()
         {
-            return (float)numericUpDownToolStep.Value;
+            currentForce = 0.0F;
+            filteredForce = 0.0F;
+            lastForceSampleUtc = DateTime.MinValue;
+            UpdateForceDisplay();
+            SendSensorCommand("T");
         }
 
         private void ShowRobotError(string action, int code)
@@ -304,7 +437,343 @@ namespace RobotForceIntegration
 
         private void MoveToolByStep(float dx, float dy, float dz, string action)
         {
-            ExecuteRobotCommand(() => xARM.MoveToolRelative(dx, dy, dz, true), action);
+            bool dodgeProtected = IsManualMotionProtectedByDodge();
+            if (dodgeProtected)
+            {
+                if (CancelManualMotionIfObstacle(action))
+                    return;
+
+                StopDodgeVelocityControl();
+            }
+
+            bool executed = ExecuteRobotCommand(() => xARM.MoveToolRelative(dx, dy, dz, !dodgeProtected), action);
+            if (!executed)
+                return;
+
+            if (dodgeProtected)
+                MarkManualMotionForDodge();
+        }
+
+        private bool EnsureDodgeVelocityMode()
+        {
+            if (!IsRobotReady())
+                return false;
+
+            if (dodgeVelocityModeActive)
+                return true;
+
+            int code = xARM.PrepareCartesianVelocityMotion();
+            if (code == 0)
+            {
+                dodgeVelocityModeActive = true;
+                AppendSensorLog("[DODGE] Cartesian velocity mode active");
+                return true;
+            }
+
+            ShowRobotError("Enable dodge velocity mode", code);
+            checkBoxDodgeEnabled.Checked = false;
+            return false;
+        }
+
+        private void StopDodgeVelocityControl()
+        {
+            if (!dodgeVelocityModeActive && Math.Abs(lastDodgeVelocityMmPerSecond) < 0.001F)
+                return;
+
+            if (IsRobotConnected())
+            {
+                xARM.SetCartesianVelocity(0.0F, 0.0F, 0.0F, isToolCoord: true, duration: DodgeVelocityWatchdogSeconds);
+                xARM.SetCartesianVelocityContinuous(false);
+                if (xARM.IsEnableMotion())
+                    xARM.PrepareMotion();
+            }
+
+            dodgeVelocityModeActive = false;
+            lastDodgeVelocityMmPerSecond = 0.0F;
+            ClearManualMotionForDodge();
+        }
+
+        private bool HasFreshDodgeForceSample()
+        {
+            return lastForceSampleUtc != DateTime.MinValue &&
+                (DateTime.UtcNow - lastForceSampleUtc).TotalMilliseconds <= DodgeForceWatchdogMilliseconds;
+        }
+
+        private bool EvaluateDodgeImmediateStop()
+        {
+            if (!checkBoxDodgeEnabled.Checked)
+            {
+                return false;
+            }
+
+            if (!HasFreshDodgeForceSample())
+            {
+                return false;
+            }
+
+            if (Math.Abs(currentForce) >= (float)GetDodgeThresholdKg())
+            {
+                return false;
+            }
+
+            if (Math.Abs(lastDodgeVelocityMmPerSecond) < 0.001F && !dodgeManualMotionActive)
+            {
+                return false;
+            }
+
+            if (!SendImmediateZeroDodgeVelocity())
+                return true;
+
+            if (!InterruptDodgeMotionImmediately("Immediate dodge stop"))
+                return true;
+
+            AppendSensorLog("[DODGE] Immediate stop on first raw sample below threshold");
+            return true;
+        }
+
+        private bool SendImmediateZeroDodgeVelocity()
+        {
+            if (!dodgeVelocityModeActive && Math.Abs(lastDodgeVelocityMmPerSecond) < 0.001F)
+                return true;
+
+            if (!IsRobotConnected())
+            {
+                lastDodgeVelocityMmPerSecond = 0.0F;
+                return true;
+            }
+
+            int code = xARM.SetCartesianVelocity(0.0F, 0.0F, 0.0F, isToolCoord: true, duration: DodgeStopWatchdogSeconds);
+            if (code != 0 && code != 9)
+            {
+                ShowRobotError("Zero dodge velocity", code);
+                checkBoxDodgeEnabled.Checked = false;
+                return false;
+            }
+
+            lastDodgeVelocityMmPerSecond = 0.0F;
+            return true;
+        }
+
+        private bool InterruptDodgeMotionImmediately(string action)
+        {
+            if (IsRobotConnected())
+            {
+                int code = xARM.SetCartesianVelocity(0.0F, 0.0F, 0.0F, isToolCoord: true, duration: DodgeStopWatchdogSeconds);
+                if (code != 0 && code != 9)
+                {
+                    ShowRobotError(action, code);
+                    checkBoxDodgeEnabled.Checked = false;
+                    return false;
+                }
+
+                xARM.SetCartesianVelocityContinuous(false);
+
+                code = xARM.StopCurrentMotion();
+                if (code != 0)
+                {
+                    ShowRobotError(action, code);
+                    checkBoxDodgeEnabled.Checked = false;
+                    return false;
+                }
+
+                if (xARM.IsEnableMotion())
+                {
+                    code = xARM.PrepareMotion();
+                    if (code != 0)
+                    {
+                        ShowRobotError("Re-arm after dodge stop", code);
+                        checkBoxDodgeEnabled.Checked = false;
+                        return false;
+                    }
+                }
+            }
+
+            dodgeVelocityModeActive = false;
+            lastDodgeVelocityMmPerSecond = 0.0F;
+            dodgeAwaitingForceSample = false;
+            ClearManualMotionForDodge();
+            return true;
+        }
+
+        private bool IsDodgeObstacleDetected()
+        {
+            return checkBoxDodgeEnabled.Checked &&
+                HasFreshDodgeForceSample() &&
+                Math.Abs(GetDodgeEffectiveForceKg()) >= (float)GetDodgeThresholdKg();
+        }
+
+        private bool IsManualMotionProtectedByDodge()
+        {
+            return checkBoxDodgeEnabled.Checked && IsSerialReady() && !acquisitionRunning;
+        }
+
+        private void MarkManualMotionForDodge()
+        {
+            dodgeManualMotionActive = true;
+            lastManualMotionUtc = DateTime.UtcNow;
+        }
+
+        private void ClearManualMotionForDodge()
+        {
+            dodgeManualMotionActive = false;
+        }
+
+        private bool CancelManualMotionIfObstacle(string action)
+        {
+            if (!IsDodgeObstacleDetected())
+                return false;
+
+            AppendSensorLog("[DODGE] Manual command blocked: " + action);
+            return true;
+        }
+
+        private bool StopManualMotionForDodge()
+        {
+            if (!dodgeManualMotionActive)
+                return true;
+
+            int code = xARM.StopCurrentMotion();
+            if (code != 0)
+            {
+                ShowRobotError("Stop manual motion for dodge", code);
+                checkBoxDodgeEnabled.Checked = false;
+                return false;
+            }
+
+            ClearManualMotionForDodge();
+            return true;
+        }
+
+        private float GetDodgeVelocityCapMmPerSecond()
+        {
+            return Math.Max(10.0F, trackBarMotionSpeed.Value * 4.0F * (DodgeSpeedLimitPercent / 100.0F));
+        }
+
+        private float GetDodgeResponseGain()
+        {
+            return DodgeResponseGainPercent / 100.0F;
+        }
+
+        private float GetDodgeLinearGainMmPerSecondPerKg()
+        {
+            return Math.Max(5.0F, GetDodgeStepSizeMm() * 40.0F * GetDodgeResponseGain());
+        }
+
+        private float GetDodgeFilterAlpha()
+        {
+            return Math.Max(0.05F, Math.Min(0.95F, DodgeFilterPercent / 100.0F));
+        }
+
+        private float GetDodgeEffectiveForceKg()
+        {
+            float thresholdKg = (float)GetDodgeThresholdKg();
+            if (Math.Abs(currentForce) <= thresholdKg)
+                return currentForce;
+
+            if (Math.Sign(currentForce) != Math.Sign(filteredForce) ||
+                Math.Abs(currentForce) < Math.Abs(filteredForce))
+            {
+                return currentForce;
+            }
+
+            return filteredForce;
+        }
+
+        private static float MoveTowards(float currentValue, float targetValue, float maxDelta)
+        {
+            if (currentValue < targetValue)
+                return Math.Min(currentValue + maxDelta, targetValue);
+
+            return Math.Max(currentValue - maxDelta, targetValue);
+        }
+
+        private float ApplyDodgeVelocityDynamics(float targetVelocityMmPerSecond)
+        {
+            if (Math.Abs(targetVelocityMmPerSecond) < 0.001F)
+                return 0.0F;
+
+            float intervalSeconds = DodgeIntervalMilliseconds / 1000.0F;
+            float cap = Math.Max(10.0F, GetDodgeVelocityCapMmPerSecond());
+            float accelerationStep = Math.Max(5.0F, cap * (DodgeAccelerationPercent / 100.0F) * intervalSeconds);
+            float brakingStep = Math.Max(accelerationStep, cap * (DodgeBrakingPercent / 100.0F) * intervalSeconds);
+            bool braking = Math.Sign(targetVelocityMmPerSecond) != Math.Sign(lastDodgeVelocityMmPerSecond) ||
+                Math.Abs(targetVelocityMmPerSecond) < Math.Abs(lastDodgeVelocityMmPerSecond);
+
+            return MoveTowards(
+                lastDodgeVelocityMmPerSecond,
+                targetVelocityMmPerSecond,
+                braking ? brakingStep : accelerationStep);
+        }
+
+        private float ComputeDodgeVelocityMmPerSecond()
+        {
+            if (!HasFreshDodgeForceSample())
+                return 0.0F;
+
+            float thresholdKg = (float)GetDodgeThresholdKg();
+            float signedForceKg = GetDodgeEffectiveForceKg();
+            float magnitudeKg = Math.Abs(signedForceKg);
+            float excessKg = magnitudeKg - thresholdKg;
+            if (excessKg <= 0.0F)
+                return 0.0F;
+
+            float targetVelocity = excessKg * GetDodgeLinearGainMmPerSecondPerKg();
+            targetVelocity = Math.Max(DodgeMinimumVelocityMmPerSecond, targetVelocity);
+            targetVelocity = Math.Min(GetDodgeVelocityCapMmPerSecond(), targetVelocity);
+
+            return signedForceKg >= 0.0F ? targetVelocity : -targetVelocity;
+        }
+
+        private bool SendDodgeVelocityCommand(float velocityMmPerSecond)
+        {
+            if (Math.Abs(velocityMmPerSecond) > 0.001F &&
+                dodgeManualMotionActive &&
+                (DateTime.UtcNow - lastManualMotionUtc).TotalMilliseconds <= DodgeManualOverrideWindowMilliseconds)
+            {
+                if (!StopManualMotionForDodge())
+                    return false;
+            }
+
+            if (dodgeManualMotionActive &&
+                (DateTime.UtcNow - lastManualMotionUtc).TotalMilliseconds > DodgeManualOverrideWindowMilliseconds)
+            {
+                ClearManualMotionForDodge();
+            }
+
+            if (!EnsureDodgeVelocityMode())
+                return false;
+
+            float commandedVelocity = ApplyDodgeVelocityDynamics(velocityMmPerSecond);
+            int code = xARM.SetCartesianVelocity(
+                0.0F,
+                0.0F,
+                commandedVelocity,
+                isToolCoord: true,
+                duration: DodgeVelocityWatchdogSeconds);
+
+            if (code == 9)
+            {
+                dodgeVelocityModeActive = false;
+                if (!EnsureDodgeVelocityMode())
+                    return false;
+
+                code = xARM.SetCartesianVelocity(
+                    0.0F,
+                    0.0F,
+                    commandedVelocity,
+                    isToolCoord: true,
+                    duration: DodgeVelocityWatchdogSeconds);
+            }
+
+            if (code != 0)
+            {
+                ShowRobotError("Dodge velocity control", code);
+                checkBoxDodgeEnabled.Checked = false;
+                return false;
+            }
+
+            lastDodgeVelocityMmPerSecond = commandedVelocity;
+            return true;
         }
 
         private void MoveJointByStep(int jointIndex, float deltaDegrees)
@@ -312,13 +781,26 @@ namespace RobotForceIntegration
             if (!IsRobotReady())
                 return;
 
+            string action = "Move J" + (jointIndex + 1).ToString(CultureInfo.InvariantCulture);
+            bool dodgeProtected = IsManualMotionProtectedByDodge();
+            if (dodgeProtected)
+            {
+                if (CancelManualMotionIfObstacle(action))
+                    return;
+
+                StopDodgeVelocityControl();
+            }
+
             float[] angles = xARM.GetCurrentJoint();
             float nextValue = angles[jointIndex] + deltaDegrees;
             nextValue = Math.Max(xARM.MinJoint[jointIndex], Math.Min(xARM.MaxJoint[jointIndex], nextValue));
             angles[jointIndex] = nextValue;
-            ExecuteRobotCommand(
-                () => xARM.MoveJointValues(angles, wait: true),
-                "Move J" + (jointIndex + 1).ToString(CultureInfo.InvariantCulture));
+            bool executed = ExecuteRobotCommand(
+                () => xARM.MoveJointValues(angles, wait: !dodgeProtected),
+                action);
+
+            if (executed && dodgeProtected)
+                MarkManualMotionForDodge();
         }
 
         private bool EnsureCsvFileSelected()
@@ -488,7 +970,38 @@ namespace RobotForceIntegration
                 return;
 
             currentForce = force;
+            if (lastForceSampleUtc == DateTime.MinValue)
+            {
+                filteredForce = force;
+            }
+            else
+            {
+                float appliedAlpha = GetDodgeFilterAlpha();
+                if (Math.Sign(force) != Math.Sign(filteredForce) ||
+                    Math.Abs(force) < Math.Abs(filteredForce))
+                {
+                    appliedAlpha = Math.Max(0.85F, appliedAlpha);
+                }
+
+                filteredForce = ((1.0F - appliedAlpha) * filteredForce) + (appliedAlpha * force);
+            }
+
+            if (Math.Abs(force) <= (float)GetDodgeThresholdKg())
+                filteredForce = force;
+
+            lastForceSampleUtc = DateTime.UtcNow;
+            bool dodgeStopped = EvaluateDodgeImmediateStop();
             UpdateForceDisplay();
+
+            if (dodgeAwaitingForceSample)
+            {
+                dodgeAwaitingForceSample = false;
+                if (IsDodgeRunning() && !dodgeStopped && Math.Abs(currentForce) >= (float)GetDodgeThresholdKg())
+                {
+                    if (!SendDodgeVelocityCommand(ComputeDodgeVelocityMmPerSecond()))
+                        return;
+                }
+            }
 
             if (!acquisitionRunning || !awaitingForceSample)
                 return;
@@ -557,6 +1070,7 @@ namespace RobotForceIntegration
             if (xARM.IsEnableMotion())
             {
                 StopAcquisition(false);
+                StopDodgeVelocityControl();
                 code = xARM.EnableMotion(false);
                 if (code != 0)
                     ShowRobotError("Disable motion", code);
@@ -641,6 +1155,26 @@ namespace RobotForceIntegration
             ApplyMotionSpeedProfile();
         }
 
+        private void trackBarDodgeThreshold_Scroll(object sender, EventArgs e)
+        {
+            UpdateDodgeThresholdDisplay();
+        }
+
+        private void trackBarDodgeStep_Scroll(object sender, EventArgs e)
+        {
+            UpdateDodgeStepDisplay();
+        }
+
+        private void checkBoxDodgeEnabled_CheckedChanged(object sender, EventArgs e)
+        {
+            AppendSensorLog(checkBoxDodgeEnabled.Checked ? "[DODGE] Enabled" : "[DODGE] Disabled");
+            if (checkBoxDodgeEnabled.Checked)
+                TareSensor();
+            else
+                StopDodgeVelocityControl();
+            SyncUiState();
+        }
+
         private void ButtonMoveHome_Click(object sender, EventArgs e)
         {
             ExecuteRobotCommand(() => xARM.MoveHome(wait: true), "Move Home");
@@ -694,18 +1228,28 @@ namespace RobotForceIntegration
             MoveToolByStep(0.0F, 0.0F, GetToolStep(), "Move Tool +Z");
         }
 
-        private void ButtonJoint1Minus_Click(object sender, EventArgs e) { MoveJointByStep(0, -JointStepDegrees); }
-        private void ButtonJoint1Plus_Click(object sender, EventArgs e) { MoveJointByStep(0, JointStepDegrees); }
-        private void ButtonJoint2Minus_Click(object sender, EventArgs e) { MoveJointByStep(1, -JointStepDegrees); }
-        private void ButtonJoint2Plus_Click(object sender, EventArgs e) { MoveJointByStep(1, JointStepDegrees); }
-        private void ButtonJoint3Minus_Click(object sender, EventArgs e) { MoveJointByStep(2, -JointStepDegrees); }
-        private void ButtonJoint3Plus_Click(object sender, EventArgs e) { MoveJointByStep(2, JointStepDegrees); }
-        private void ButtonJoint4Minus_Click(object sender, EventArgs e) { MoveJointByStep(3, -JointStepDegrees); }
-        private void ButtonJoint4Plus_Click(object sender, EventArgs e) { MoveJointByStep(3, JointStepDegrees); }
-        private void ButtonJoint5Minus_Click(object sender, EventArgs e) { MoveJointByStep(4, -JointStepDegrees); }
-        private void ButtonJoint5Plus_Click(object sender, EventArgs e) { MoveJointByStep(4, JointStepDegrees); }
-        private void ButtonJoint6Minus_Click(object sender, EventArgs e) { MoveJointByStep(5, -JointStepDegrees); }
-        private void ButtonJoint6Plus_Click(object sender, EventArgs e) { MoveJointByStep(5, JointStepDegrees); }
+        private void ButtonJoint1Minus_Click(object sender, EventArgs e) { MoveJointByStep(0, -GetJointStepDegrees()); }
+        private void ButtonJoint1Plus_Click(object sender, EventArgs e) { MoveJointByStep(0, GetJointStepDegrees()); }
+        private void ButtonJoint2Minus_Click(object sender, EventArgs e) { MoveJointByStep(1, -GetJointStepDegrees()); }
+        private void ButtonJoint2Plus_Click(object sender, EventArgs e) { MoveJointByStep(1, GetJointStepDegrees()); }
+        private void ButtonJoint3Minus_Click(object sender, EventArgs e) { MoveJointByStep(2, -GetJointStepDegrees()); }
+        private void ButtonJoint3Plus_Click(object sender, EventArgs e) { MoveJointByStep(2, GetJointStepDegrees()); }
+        private void ButtonJoint4Minus_Click(object sender, EventArgs e) { MoveJointByStep(3, -GetJointStepDegrees()); }
+        private void ButtonJoint4Plus_Click(object sender, EventArgs e) { MoveJointByStep(3, GetJointStepDegrees()); }
+        private void ButtonJoint5Minus_Click(object sender, EventArgs e) { MoveJointByStep(4, -GetJointStepDegrees()); }
+        private void ButtonJoint5Plus_Click(object sender, EventArgs e) { MoveJointByStep(4, GetJointStepDegrees()); }
+        private void ButtonJoint6Minus_Click(object sender, EventArgs e) { MoveJointByStep(5, -GetJointStepDegrees()); }
+        private void ButtonJoint6Plus_Click(object sender, EventArgs e) { MoveJointByStep(5, GetJointStepDegrees()); }
+
+        private void trackBarToolStep_Scroll(object sender, EventArgs e)
+        {
+            UpdateToolStepDisplay();
+        }
+
+        private void trackBarJointStep_Scroll(object sender, EventArgs e)
+        {
+            UpdateJointStepDisplay();
+        }
 
         private void ButtonRefreshPorts_Click(object sender, EventArgs e)
         {
@@ -733,6 +1277,7 @@ namespace RobotForceIntegration
         private void ButtonCloseSerial_Click(object sender, EventArgs e)
         {
             StopAcquisition(false);
+            StopDodgeVelocityControl();
 
             if (serialPortSensor.IsOpen)
             {
@@ -753,9 +1298,9 @@ namespace RobotForceIntegration
             SendSensorCommand(command);
         }
 
-        private void ButtonRequestForce_Click(object sender, EventArgs e)
+        private void ButtonTare_Click(object sender, EventArgs e)
         {
-            SendSensorCommand("M");
+            TareSensor();
         }
 
         private void ButtonSelectCsv_Click(object sender, EventArgs e)
@@ -782,6 +1327,28 @@ namespace RobotForceIntegration
         private void ButtonClearLog_Click(object sender, EventArgs e)
         {
             textBoxSensorLog.Clear();
+        }
+
+        private void timerDodge_Tick(object sender, EventArgs e)
+        {
+            if (!IsDodgeRunning())
+            {
+                SyncDodgeTimerState();
+                return;
+            }
+
+            if (dodgeAwaitingForceSample &&
+                (DateTime.UtcNow - lastDodgeRequestUtc).TotalMilliseconds > DodgeForceSampleTimeoutMilliseconds)
+            {
+                dodgeAwaitingForceSample = false;
+            }
+
+            if (!dodgeAwaitingForceSample)
+            {
+                dodgeAwaitingForceSample = true;
+                lastDodgeRequestUtc = DateTime.UtcNow;
+                SendSensorCommand("M");
+            }
         }
 
         private void timerCMD_Tick(object sender, EventArgs e)
@@ -819,6 +1386,7 @@ namespace RobotForceIntegration
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             StopAcquisition(false);
+            StopDodgeVelocityControl();
             timerConnection.Stop();
 
             if (serialPortSensor.IsOpen)
