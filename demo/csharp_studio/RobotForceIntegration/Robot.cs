@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -258,10 +258,13 @@ namespace RobotForceIntegration
             if (!EnsureSuccess(ret, "Robot initialization: clean errors")) return false;
 
             ret = SafeApiCall(() => XArmAPI.get_world_offset(BASE), "get_world_offset");
-            if (!EnsureSuccess(ret, "Robot initialization: read world offset")) return false;
+            // Sur certains firmwares, get_world_offset renvoie Code 1. On ignore cette erreur non bloquante.
+            if (ret != 0 && ret != 1)
+                if (!EnsureSuccess(ret, "Robot initialization: read world offset")) return false;
 
             ret = SafeApiCall(() => XArmAPI.get_tcp_offset(TCP), "get_tcp_offset");
-            if (!EnsureSuccess(ret, "Robot initialization: read TCP offset")) return false;
+            if (ret != 0 && ret != 1)
+                if (!EnsureSuccess(ret, "Robot initialization: read TCP offset")) return false;
 
             ret = SafeApiCall(() => XArmAPI.get_position(CurrentPosition), "get_position");
             if (!EnsureSuccess(ret, "Robot initialization: read position")) return false;

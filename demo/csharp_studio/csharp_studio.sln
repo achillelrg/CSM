@@ -3,24 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xarm", "xarm\xarm.vcxproj", "{64DB8C68-8120-405D-9893-1459CAC5DCCA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xarm_csharp_demo", "xarm_csharp_demo\xarm_csharp_demo.csproj", "{5A3C96D8-E2E3-48D5-AF68-5486D6405492}"
-	ProjectSection(ProjectDependencies) = postProject
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA} = {64DB8C68-8120-405D-9893-1459CAC5DCCA}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RS232-PC", "RS232-PC\RS232-PC.csproj", "{01D5F45B-FF15-4528-BED4-789020C8E1BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xARMForm", "xARMForm\xARMForm.csproj", "{968B557A-BA31-491F-85BE-C7F4A233A9D2}"
-	ProjectSection(ProjectDependencies) = postProject
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA} = {64DB8C68-8120-405D-9893-1459CAC5DCCA}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotForceIntegration", "RobotForceIntegration\RobotForceIntegration.csproj", "{B7E55FE7-3D20-4CE7-BE7E-2D8FBE6C87C1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA} = {64DB8C68-8120-405D-9893-1459CAC5DCCA}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,18 +21,17 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Debug|Any CPU.Build.0 = Debug|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Debug|x64.ActiveCfg = Debug|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Debug|x64.Build.0 = Debug|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Debug|x86.ActiveCfg = Debug|Win32
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Debug|x86.Build.0 = Debug|Win32
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Release|Any CPU.ActiveCfg = Release|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Release|Any CPU.Build.0 = Release|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Release|x64.ActiveCfg = Release|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Release|x64.Build.0 = Release|x64
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Release|x86.ActiveCfg = Release|Win32
-		{64DB8C68-8120-405D-9893-1459CAC5DCCA}.Release|x86.Build.0 = Release|Win32
+
+
+
+
+
+
+
+
+
+
+
 		{5A3C96D8-E2E3-48D5-AF68-5486D6405492}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{5A3C96D8-E2E3-48D5-AF68-5486D6405492}.Debug|Any CPU.Build.0 = Debug|x64
 		{5A3C96D8-E2E3-48D5-AF68-5486D6405492}.Debug|x64.ActiveCfg = Debug|x64

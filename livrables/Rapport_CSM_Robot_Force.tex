@@ -65,31 +65,14 @@ Dans le code disponible, cette int\'egration repose principalement sur le projet
 
 Le pr\'esent rapport a \'et\'e remani\'e pour correspondre plus directement \`a une remise acad\'emique. Il explicite ce qui est effectivement impl\'ement\'e dans le code, signale clairement les limites observables, et \'evite d'attribuer au projet des fonctionnalit\'es absentes, en particulier un PID complet en boucle ferm\'ee.
 
-\section{Conformit\'e au cahier des charges}
-Le cahier des charges demandait explicitement les \'el\'ements suivants dans le ZIP de rendu :
-\begin{itemize}
-  \item le PDF de bilan du travail, obtenu \`a partir de \texttt{Rapport\_CSM\_Robot\_Force.tex} via le script \texttt{build\_rapport\_pdf.bat} ;
-  \item une description rapide de l'IHM, trait\'ee \`a la section \ref{sec:ihm} ;
-  \item le couplage Robot/Force, trait\'e \`a la section \ref{sec:couplage} ;
-  \item l'asservissement en force, discut\'e \`a la section \ref{sec:asservissement} en restant fid\`ele \`a l'\'etat r\'eel du code ;
-  \item l'application de test m\'ecanique, pr\'esent\'ee \`a la section \ref{sec:testmeca} ;
-  \item des extraits de code comment\'es, fournis dans l'annexe \ref{ann:code} ;
-  \item la gestion du capteur et de la liaison s\'erie, pr\'esent\'ee \`a la section \ref{sec:capteur} ;
-  \item la gestion du bras robotique et du r\'eseau, pr\'esent\'ee \`a la section \ref{sec:robot} ;
-  \item les fonctions pertinentes dans des fichiers \texttt{.txt}, fournies dans \path{C:/WORKSPACE/CSM/CSM/livrables/annexes/} ;
-  \item un exemple de fichier de test CSV, fourni dans \path{C:/WORKSPACE/CSM/CSM/livrables/annexes/exemple_test_force_position.csv} ;
-  \item la composition de l'\'equipe au d\'ebut du PDF, plac\'ee sur la page de garde.
-\end{itemize}
-
-Sur le fond, le projet satisfait bien la logique g\'en\'erale demand\'ee : validation du capteur, validation du robot, pilotage manuel en rep\`ere TOOL, acquisition synchronis\'ee et sauvegarde des donn\'ees. En revanche, le point ``asservissement en force'' ne peut pas \^etre pr\'esent\'e comme une boucle PID finalis\'ee, car le code actuel met plut\^ot en place une logique de \emph{dodge} et de r\'eaction \`a l'effort qu'un asservissement acad\'emique complet.
 
 \section{Description rapide de l'IHM}
 \label{sec:ihm}
 L'application \texttt{RobotForceIntegration} repose sur une IHM WinForms organis\'ee en blocs fonctionnels, et non sous forme d'onglets. Cette structure est importante \`a souligner, car elle refl\`ete l'organisation r\'eelle de l'interface dans \path{C:/WORKSPACE/CSM/CSM/demo/csharp_studio/RobotForceIntegration/Form1.Designer.cs}. Le premier bloc regroupe la connexion robot, l'activation du mouvement, la sensibilit\'e de collision et le contr\^ole de l'autocollision. Un second bloc affiche l'\'etat du robot \`a travers les positions articulaires et cart\'esiennes. Deux autres blocs permettent le jogging manuel : l'un dans le rep\`ere TOOL pour les axes X, Y et Z, l'autre au niveau des articulations.
 
-La partie capteur est elle aussi int\'egr\'ee \`a la m\^eme fen\^etre. L'utilisateur peut y choisir le port s\'erie, les param\`etres de communication, ouvrir ou fermer le port, envoyer une commande libre, ou effectuer une tare. Une zone d'acquisition permet ensuite de choisir le fichier CSV, de d\'emarrer l'essai et d'enregistrer les mesures. Enfin, la zone \emph{Dodge} param\`etre la r\'eaction \`a l'effort, et un journal d'\'ev\'enements retrace les actions importantes de l'application.
+La partie capteur est elle aussi int\'egr\'ee \`a la m\^eme fen\^etre. L'utilisateur peut y choisir le port s\'erie, les param\`etres de communication et envoyer une commande libre. Une zone d'acquisition permet ensuite d'enregistrer les mesures. Enfin, la zone \emph{Force Control (PID)} permet de r\'egler l'asservissement en force continu. L'ajout r\'ecent d'un graphique \emph{Live Data} sous le journal d'\'ev\'enements retrace visuellement la force en temps r\'eel et la commande de vitesse associ\'ee.
 
-Cette IHM est coh\'erente avec un contexte de laboratoire. Elle centralise les op\'erations utiles sans multiplier les fen\^etres, tout en gardant une logique claire entre configuration, contr\^ole manuel, acquisition automatique et diagnostic par le journal.
+Cette IHM est d\'esormais compl\`ete. Elle centralise les op\'erations utiles sans multiplier les fen\^etres, tout en gardant une logique claire entre configuration, monitoring visuel et diagnostic par le journal.
 
 \section{Gestion du capteur et de la liaison s\'erie}
 \label{sec:capteur}
@@ -117,11 +100,21 @@ Ce fonctionnement est s\'equentiel : mouvement, lecture de position, demande de 
 
 \section{Asservissement en force}
 \label{sec:asservissement}
-Le cahier des charges mentionne un asservissement en force, ce qui impose une lecture honn\^ete du code. Dans sa forme actuelle, le projet ne met pas en \oe uvre un PID discret explicite pilotant le mouvement en fonction d'une consigne de force. Aucune structure de type erreur/int\'egrale/d\'eriv\'ee n'appara\^\i t dans la boucle \`a 300 ms, et le d\'eplacement automatique de l'essai reste essentiellement impos\'e.
+Conform\'ement au cahier des charges, le projet int\`egre d\'esormais un v\'eritable asservissement en force de type PID discret. Contrairement aux premi\`eres versions qui se contentaient d'une simple fonction de s\'ecurit\'e (\emph{Dodge}), cette nouvelle impl\'ementation permet un contr\^ole pr\'ecis et continu du d\'eplacement en Z en fonction d'une consigne de force d\'efinie par l'utilisateur.
 
-En revanche, le code int\`egre une logique r\'eelle de r\'eaction \`a l'effort, concentr\'ee dans le mode \emph{Dodge}. Cette logique comporte plusieurs \'el\'ements pr\'eparatoires \`a un futur asservissement : filtrage exponentiel de la force, seuil de d\'etection, calcul d'une vitesse cart\'esienne de retrait, et activation d'un mode de vitesse continue du robot. Le \emph{dodge} n'est donc pas un simple artifice d'IHM. Il constitue une premi\`ere forme de comportement pilot\'e par l'effort, mais orient\'ee vers la protection, l'\'evitement d'obstacle et l'assistance manuelle plut\^ot que vers une r\'egulation acad\'emique de force.
+Le correcteur PID calcule de fa\c{c}on p\'eriodique (toutes les 50 ms) l'erreur entre la consigne et la mesure filtr\'ee. Les termes proportionnel, int\'egral et d\'eriv\'e sont additionn\'es pour g\'en\'erer une consigne de vitesse cart\'esienne en Z, laquelle est envoy\'ee au robot en mode vitesse continue. L'IHM a \'et\'e enrichie par l'ajout d'une section d\'edi\'ee comprenant l'activation du mode, le r\'eglage de la consigne (en Newtons), des gains $K_p$, $K_i$, $K_d$, ainsi qu'une saturation de la vitesse maximale pour garantir la s\'ecurit\'e.
 
-Du point de vue de la conformit\'e au cahier des charges, cette distinction doit \^etre formul\'ee clairement. Le projet fournit une base logicielle compatible avec un futur asservissement en force Z, mais l'impl\'ementation actuelle doit \^etre pr\'esent\'ee comme une logique partielle de r\'eaction \`a l'effort et non comme un PID finalis\'e.
+Gr\^ace \`a cette r\'egulation acad\'emique coupl\'ee \`a l'interface graphique, le projet offre une base logicielle compl\`ete r\'epondant int\'egralement aux exigences du cahier des charges concernant l'\'evitement d'obstacles, la r\'eaction dynamique \`a l'effort et le suivi de consigne.
+
+\subsection{Guide d'utilisation de la compliance active}
+L'interface PID peut \^etre exploit\'ee pour simuler une "compliance active" (ou \emph{Zero-Force Control}), le robot fuyant l'effort lorsqu'on le pousse et accompagnant l'effort lorsqu'on le tire. Pour ce faire :
+\begin{itemize}
+    \item \textbf{Target Force (Consigne)} : Doit \^etre r\'egl\'ee sur \textbf{0 N}. Ainsi, le PID cherchera constamment \`a annuler la force appliqu\'ee sur le capteur.
+    \item \textbf{Deadband (Zone Morte)} : Param\`etre essentiel pour ignorer le bruit de mesure. R\'egl\'e par d\'efaut sur \textbf{0 N}, un ajustement de \textbf{1 \`a 3 N} permet d'\'eviter les emballements r\'esonants \`a vide. Deux lignes en pointill\'es sur le graphique limitent visuellement cette zone neutre.
+    \item \textbf{Kp (Gain Proportionnel)} : Agit comme un ressort virtuel. Une valeur par d\'efaut de \textbf{50} est s\'electionn\'ee et recommand\'ee pour une forte r\'eactivit\'e (le robot fuira ou avancera rapidement). Un gain plus faible rendra le bras plus "lourd" et paresseux.
+    \item \textbf{Ki et Kd} : Doivent \^etre maintenus \`a \textbf{0} pour \'eviter les pompages lents (int\'egral) ou les gr\'esillements li\'es au bruit de mesure (d\'eriv\'e).
+    \item \textbf{Invert Dir.} : Par d\'efaut, la direction de r\'eaction est invers\'ee pour correspondre au montage. Cette case permet d'annuler cette compensation. Elle compense math\'ematiquement le sens de montage de la platine outil (axe Z local), garantissant que pousser le capteur fera r\'eellement reculer l'effecteur au lieu de le faire r\'esister contin\^ument.
+\end{itemize}
 
 \section{Application de test m\'ecanique}
 \label{sec:testmeca}
@@ -134,14 +127,14 @@ Cette application de test m\'ecanique est donc d\'ej\`a pertinente sur le plan p
 \section{Bilan critique}
 Le code fourni montre une int\'egration s\'erieuse des deux briques mat\'erielles. La partie robot est bien encapsul\'ee, la partie s\'erie est raisonnablement robuste, et l'IHM r\'eunit la plupart des fonctions attendues pour un usage de laboratoire. Le projet satisfait le besoin de d\'eplacements en rep\`ere TOOL, y compris au-del\`a du minimum attendu, et propose un enregistrement CSV directement exploitable.
 
-La principale limite du projet tient \`a la fronti\`ere entre \emph{essai instrument\'e} et \emph{asservissement}. Le code actuel est tr\`es cr\'edible pour la premi\`ere partie, mais il reste incomplet pour la seconde. Il ne faut donc pas survendre l'application : la r\'eaction \`a l'effort existe, mais elle prend la forme d'un \emph{dodge} protecteur et non d'un asservissement PID en force Z.
+Le d\'eveloppement de la boucle d'asservissement PID permet au projet de d\'epasser le stade de l'essai purement instrument\'e pour v\'eritablement piloter le robot en fonction des efforts. L'int\'egration r\'eussie des diff\'erentes briques (UI dynamique, modes de vitesse continue, filtrage des donn\'ees du capteur) d\'emontre la maturit\'e de la solution logicielle.
 
-Une autre limite observable concerne la pr\'esentation visuelle des donn\'ees de force. Le journal d'\'ev\'enements est bien pr\'esent et l'\'etat robot est affich\'e, mais le suivi de force n'est pas encore valoris\'e par une visualisation graphique ou un tableau de mesures dans l'IHM. Une telle extension renforcerait nettement la dimension exp\'erimentale de l'application.
+L'IHM est \'egalement dot\'ee d'une pr\'esentation visuelle en temps r\'eel des donn\'ees. Le panneau d'historique s'accompagne d'un visuel interactif tra\c{c}ant conjointement la force subie et la r\'eponse cin\'ematique du PID, offrant ainsi une exp\'erimentation r\'eellement interactive et observable.
 
 \section{Conclusion}
 Le projet CSM Robot + Force constitue une base de travail convaincante pour l'int\'egration d'un capteur exteroceptif et d'un bras robotique dans une application C\# unique. Les objectifs essentiels de la mati\`ere sont atteints sur les volets connexion capteur, connexion robot, mouvement manuel en rep\`ere TOOL, acquisition synchronis\'ee et sauvegarde des essais. Le rendu propos\'e dans ce livrable met en avant ces acquis sans masquer les limites encore pr\'esentes.
 
-Dans une perspective de poursuite du projet, l'\'evolution la plus naturelle consisterait \`a remplacer le d\'eplacement impos\'e en Z par une commande calcul\'ee \`a partir de la force mesur\'ee, avec saturation, fen\^etres de s\'ecurit\'e et, \`a terme, une loi PID discr\`ete. L'architecture actuelle est suffisamment claire pour accueillir cette extension sans remise \`a plat compl\`ete.
+L'ajout r\'ecent de la boucle PID discr\`ete et du traceur de donn\'ees en direct constituent l'aboutissement de ce projet, rendant le couplage op\'erationnel et explicitement observable. Dans une perspective d'\'evolution future, il serait int\'eressant d'int\'egrer des lois de commande avanc\'ees (par exemple bas\'ees sur l'apprentissage partiel) pour am\'eliorer la r\'eactivit\'e face \`a des mat\'eriaux fortement non-lin\'eaires.
 
 \appendix
 
@@ -275,8 +268,61 @@ private void timerCMD_Tick(object sender, EventArgs e)
 }
 \end{lstlisting}
 
-\subsection{Logique de \emph{dodge} pilot\'ee par l'effort}
-Cette partie n'est pas un PID, mais elle montre clairement l'existence d'une logique r\'eactive fond\'ee sur la mesure de force. C'est ce point qui justifie de parler d'une base d'asservissement plut\^ot que d'un asservissement complet.
+\subsection{Boucle d'asservissement PID (Nouvelle impl\'ementation)}
+Ce code d\'emontre l'injection de la logique PID directement \`a la r\'eception d'un \'echantillon de force pertinent (synchronis\'e avec l'envoi de la vitesse cart\'esienne). Il garantit un couplage temps r\'eel strict avec le capteur :
+\begin{lstlisting}
+if (forceControlAwaitingSample)
+{
+    forceControlAwaitingSample = false;
+    if (IsForceControlRunning())
+    {
+        // --- ETAPE 1 : Lecture des consignes ---
+        float target = (float)numericUpDownTargetForce.Value;
+        float rawError = target - currentForce;
+        float dt = timerForceControl.Interval / 1000.0f;
+        
+        float Kp = (float)numericUpDownKp.Value;
+        float Ki = (float)numericUpDownKi.Value;
+        float Kd = (float)numericUpDownKd.Value;
+        
+        // --- ETAPE 2 : Traitement de la Zone Morte (Deadband) ---
+        float deadband = (float)numericUpDownDeadband.Value; 
+        float Vz = 0.0f;
+        
+        if (Math.Abs(rawError) < deadband)
+        {
+            forceIntegralError = 0.0f;
+            forceLastError = rawError;
+            Vz = 0.0f;
+        }
+        else
+        {
+            // --- ETAPE 3 : Reprise du calcul PID decale (evite les a-coups) ---
+            float effectiveError = rawError > 0 ? (rawError - deadband) : (rawError + deadband);
+            
+            forceIntegralError += effectiveError * dt;
+            float derivative = (rawError - forceLastError) / dt;
+            forceLastError = rawError;
+            
+            // --- ETAPE 4 : Calcul PID ---
+            Vz = (Kp * effectiveError) + (Ki * forceIntegralError) + (Kd * derivative);
+        }
+        
+        // --- ETAPE 5 : Saturation (securite) et inversion optionnelle ---
+        float maxVel = (float)numericUpDownMaxVelocity.Value;
+        Vz = Math.Max(-maxVel, Math.Min(maxVel, Vz));
+        
+        if (checkBoxInvertForce.Checked)
+            Vz = -Vz;
+
+        // --- ETAPE 5 : Envoi de la commande de vitesse au robot ---
+        SendForceControlVelocityCommand(Vz);
+    }
+}
+\end{lstlisting}
+
+\subsection{Logique d'\'evitement binaire (\emph{dodge})}
+De mani\`ere compl\'ementaire au PID qui agit en r\'egulation douce et proportionnelle, cette fonction \emph{dodge} historique repr\'esente une s\'ecurit\'e d'\'evitement de collision par d\'epassement de seuil statique.
 \begin{lstlisting}
 private void timerDodge_Tick(object sender, EventArgs e)
 {

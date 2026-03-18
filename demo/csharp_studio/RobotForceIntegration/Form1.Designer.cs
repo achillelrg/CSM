@@ -1,4 +1,4 @@
-namespace RobotForceIntegration
+﻿namespace RobotForceIntegration
 {
     partial class Form1
     {
@@ -100,6 +100,211 @@ namespace RobotForceIntegration
             this.timerConnection = new System.Windows.Forms.Timer(this.components);
             this.timerDodge = new System.Windows.Forms.Timer(this.components);
             this.serialPortSensor = new System.IO.Ports.SerialPort(this.components);
+            this.groupBoxForceControl = new System.Windows.Forms.GroupBox();
+            this.checkBoxForceControl = new System.Windows.Forms.CheckBox();
+            this.labelTargetForce = new System.Windows.Forms.Label();
+            this.numericUpDownTargetForce = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDownDeadband = new System.Windows.Forms.NumericUpDown();
+            this.labelDeadband = new System.Windows.Forms.Label();
+            this.labelKp = new System.Windows.Forms.Label();
+            this.numericUpDownKp = new System.Windows.Forms.NumericUpDown();
+            this.labelKi = new System.Windows.Forms.Label();
+            this.numericUpDownKi = new System.Windows.Forms.NumericUpDown();
+            this.labelKd = new System.Windows.Forms.Label();
+            this.numericUpDownKd = new System.Windows.Forms.NumericUpDown();
+            this.labelMaxVelocity = new System.Windows.Forms.Label();
+            this.numericUpDownMaxVelocity = new System.Windows.Forms.NumericUpDown();
+            this.timerForceControl = new System.Windows.Forms.Timer(this.components);
+            this.checkBoxInvertForce = new System.Windows.Forms.CheckBox();
+            this.groupBoxForceControl.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTargetForce)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDeadband)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownKp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownKi)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownKd)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaxVelocity)).BeginInit();
+
+            
+
+            // 
+            // numericUpDownDeadband
+            // 
+            this.numericUpDownDeadband.DecimalPlaces = 1;
+            this.numericUpDownDeadband.Location = new System.Drawing.Point(180, 45);
+            this.numericUpDownDeadband.Name = "numericUpDownDeadband";
+            this.numericUpDownDeadband.Size = new System.Drawing.Size(70, 24);
+            this.numericUpDownDeadband.TabIndex = 22;
+            this.numericUpDownDeadband.Value = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.numericUpDownDeadband.ValueChanged += new System.EventHandler(this.numericUpDownDeadband_ValueChanged);
+            // 
+            // labelDeadband
+            // 
+            this.labelDeadband.AutoSize = true;
+            this.labelDeadband.Location = new System.Drawing.Point(180, 25);
+            this.labelDeadband.Name = "labelDeadband";
+            this.labelDeadband.Size = new System.Drawing.Size(95, 18);
+            this.labelDeadband.TabIndex = 23;
+            this.labelDeadband.Text = "Deadband (N):";
+            // 
+            // groupBoxForceControl
+            // 
+            this.groupBoxForceControl.Controls.Add(this.checkBoxForceControl);
+            this.groupBoxForceControl.Controls.Add(this.numericUpDownDeadband);
+            this.groupBoxForceControl.Controls.Add(this.labelDeadband);
+            this.groupBoxForceControl.Controls.Add(this.labelTargetForce);
+            this.groupBoxForceControl.Controls.Add(this.numericUpDownTargetForce);
+            this.groupBoxForceControl.Controls.Add(this.labelKp);
+            this.groupBoxForceControl.Controls.Add(this.numericUpDownKp);
+            this.groupBoxForceControl.Controls.Add(this.labelKi);
+            this.groupBoxForceControl.Controls.Add(this.numericUpDownKi);
+            this.groupBoxForceControl.Controls.Add(this.labelKd);
+            this.groupBoxForceControl.Controls.Add(this.numericUpDownKd);
+            this.groupBoxForceControl.Controls.Add(this.labelMaxVelocity);
+            this.groupBoxForceControl.Controls.Add(this.numericUpDownMaxVelocity);
+            this.groupBoxForceControl.Controls.Add(this.checkBoxInvertForce);
+            
+            // 
+            // checkBoxInvertForce
+            // 
+            this.checkBoxInvertForce.AutoSize = true;
+            this.checkBoxInvertForce.Location = new System.Drawing.Point(600, 45);
+            this.checkBoxInvertForce.Name = "checkBoxInvertForce";
+            this.checkBoxInvertForce.Size = new System.Drawing.Size(95, 20);
+            this.checkBoxInvertForce.TabIndex = 11;
+            this.checkBoxInvertForce.Text = "Invert Dir.";
+            this.checkBoxInvertForce.UseVisualStyleBackColor = true;
+            this.groupBoxForceControl.Location = new System.Drawing.Point(16, 580);
+            this.groupBoxForceControl.Name = "groupBoxForceControl";
+            this.groupBoxForceControl.Size = new System.Drawing.Size(758, 100);
+            this.groupBoxForceControl.TabIndex = 8;
+            this.groupBoxForceControl.TabStop = false;
+            this.groupBoxForceControl.Text = "Force Control (PID)";
+            // 
+            // checkBoxForceControl
+            // 
+            this.checkBoxForceControl.AutoSize = false;
+            this.checkBoxForceControl.Location = new System.Drawing.Point(15, 25);
+            this.checkBoxForceControl.Name = "checkBoxForceControl";
+            this.checkBoxForceControl.Size = new System.Drawing.Size(70, 40);
+            this.checkBoxForceControl.CheckAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.checkBoxForceControl.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
+            this.checkBoxForceControl.TabIndex = 0;
+            this.checkBoxForceControl.Text = "Enable PID";
+            this.checkBoxForceControl.UseVisualStyleBackColor = true;
+            this.checkBoxForceControl.CheckedChanged += new System.EventHandler(this.checkBoxForceControl_CheckedChanged);
+            // 
+            // labelTargetForce
+            // 
+            this.labelTargetForce.AutoSize = true;
+            this.labelTargetForce.Location = new System.Drawing.Point(90, 25);
+            this.labelTargetForce.Name = "labelTargetForce";
+            this.labelTargetForce.Size = new System.Drawing.Size(100, 16);
+            this.labelTargetForce.TabIndex = 1;
+            this.labelTargetForce.Text = "Target Force (N)";
+            // 
+            // numericUpDownTargetForce
+            // 
+            this.numericUpDownTargetForce.DecimalPlaces = 2;
+            this.numericUpDownTargetForce.Location = new System.Drawing.Point(90, 45);
+            this.numericUpDownTargetForce.Minimum = new decimal(new int[] { 100, 0, 0, -2147483648 });
+            this.numericUpDownTargetForce.Name = "numericUpDownTargetForce";
+            this.numericUpDownTargetForce.Size = new System.Drawing.Size(80, 22);
+            this.numericUpDownTargetForce.TabIndex = 2;
+            this.numericUpDownTargetForce.Value = new decimal(new int[] { 0, 0, 0, 0 });
+            // 
+            // labelKp
+            // 
+            this.labelKp.AutoSize = true;
+            this.labelKp.Location = new System.Drawing.Point(280, 25);
+            this.labelKp.Name = "labelKp";
+            this.labelKp.Size = new System.Drawing.Size(23, 16);
+            this.labelKp.TabIndex = 3;
+            this.labelKp.Text = "Kp";
+            // 
+            // numericUpDownKp
+            // 
+            this.numericUpDownKp.DecimalPlaces = 3;
+            this.numericUpDownKp.Increment = new decimal(new int[] { 1, 0, 0, 131072 });
+            this.numericUpDownKp.Location = new System.Drawing.Point(280, 45);
+            this.numericUpDownKp.Name = "numericUpDownKp";
+            this.numericUpDownKp.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDownKp.TabIndex = 4;
+            this.numericUpDownKp.Value = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            // 
+            // labelKi
+            // 
+            this.labelKi.AutoSize = true;
+            this.labelKi.Location = new System.Drawing.Point(360, 25);
+            this.labelKi.Name = "labelKi";
+            this.labelKi.Size = new System.Drawing.Size(18, 16);
+            this.labelKi.TabIndex = 5;
+            this.labelKi.Text = "Ki";
+            // 
+            // numericUpDownKi
+            // 
+            this.numericUpDownKi.DecimalPlaces = 3;
+            this.numericUpDownKi.Increment = new decimal(new int[] { 1, 0, 0, 131072 });
+            this.numericUpDownKi.Location = new System.Drawing.Point(360, 45);
+            this.numericUpDownKi.Name = "numericUpDownKi";
+            this.numericUpDownKi.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDownKi.TabIndex = 6;
+            this.numericUpDownKi.Value = new decimal(new int[] { 1, 0, 0, 131072 });
+            // 
+            // labelKd
+            // 
+            this.labelKd.AutoSize = true;
+            this.labelKd.Location = new System.Drawing.Point(440, 25);
+            this.labelKd.Name = "labelKd";
+            this.labelKd.Size = new System.Drawing.Size(23, 16);
+            this.labelKd.TabIndex = 7;
+            this.labelKd.Text = "Kd";
+            // 
+            // numericUpDownKd
+            // 
+            this.numericUpDownKd.DecimalPlaces = 3;
+            this.numericUpDownKd.Increment = new decimal(new int[] { 1, 0, 0, 131072 });
+            this.numericUpDownKd.Location = new System.Drawing.Point(440, 45);
+            this.numericUpDownKd.Name = "numericUpDownKd";
+            this.numericUpDownKd.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDownKd.TabIndex = 8;
+            this.numericUpDownKd.Value = new decimal(new int[] { 0, 0, 0, 0 });
+            // 
+            // labelMaxVelocity
+            // 
+            this.labelMaxVelocity.AutoSize = true;
+            this.labelMaxVelocity.Location = new System.Drawing.Point(520, 25);
+            this.labelMaxVelocity.Name = "labelMaxVelocity";
+            this.labelMaxVelocity.Size = new System.Drawing.Size(94, 16);
+            this.labelMaxVelocity.TabIndex = 9;
+            this.labelMaxVelocity.Text = "Max Vel (mm/s)";
+            // 
+            // numericUpDownMaxVelocity
+            // 
+            this.numericUpDownMaxVelocity.Location = new System.Drawing.Point(520, 45);
+            this.numericUpDownMaxVelocity.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.numericUpDownMaxVelocity.Maximum = new decimal(new int[] { 200, 0, 0, 0 });
+            this.numericUpDownMaxVelocity.Name = "numericUpDownMaxVelocity";
+            this.numericUpDownMaxVelocity.Size = new System.Drawing.Size(70, 22);
+            this.numericUpDownMaxVelocity.TabIndex = 10;
+            this.numericUpDownMaxVelocity.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            // 
+            // timerForceControl
+            // 
+            this.timerForceControl.Interval = 50;
+            this.timerForceControl.Tick += new System.EventHandler(this.timerForceControl_Tick);
+
             this.groupBoxRobot.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarMotionSpeed)).BeginInit();
             this.groupBoxRobotState.SuspendLayout();
@@ -112,6 +317,10 @@ namespace RobotForceIntegration
             this.groupBoxDodge.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeThreshold)).BeginInit();
             this.groupBoxLog.SuspendLayout();
+            this.groupBoxChart = new System.Windows.Forms.GroupBox();
+            this.chartForceVelocity = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            ((System.ComponentModel.ISupportInitialize)(this.chartForceVelocity)).BeginInit();
+            this.groupBoxChart.SuspendLayout();
             this.statusStripMain.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -966,7 +1175,7 @@ namespace RobotForceIntegration
             this.groupBoxLog.Margin = new System.Windows.Forms.Padding(4);
             this.groupBoxLog.Name = "groupBoxLog";
             this.groupBoxLog.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBoxLog.Size = new System.Drawing.Size(450, 457);
+            this.groupBoxLog.Size = new System.Drawing.Size(450, 200);
             this.groupBoxLog.TabIndex = 6;
             this.groupBoxLog.TabStop = false;
             this.groupBoxLog.Text = "Event Log";
@@ -994,7 +1203,7 @@ namespace RobotForceIntegration
             this.textBoxSensorLog.Name = "textBoxSensorLog";
             this.textBoxSensorLog.ReadOnly = true;
             this.textBoxSensorLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxSensorLog.Size = new System.Drawing.Size(416, 385);
+            this.textBoxSensorLog.Size = new System.Drawing.Size(430, 150);
             this.textBoxSensorLog.TabIndex = 0;
             // 
             // statusStripMain
@@ -1003,7 +1212,7 @@ namespace RobotForceIntegration
             this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabelRobot,
             this.toolStripStatusLabelSensor});
-            this.statusStripMain.Location = new System.Drawing.Point(0, 587);
+            this.statusStripMain.Location = new System.Drawing.Point(0, 704);
             this.statusStripMain.Name = "statusStripMain";
             this.statusStripMain.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
             this.statusStripMain.Size = new System.Drawing.Size(1242, 26);
@@ -1039,15 +1248,76 @@ namespace RobotForceIntegration
             // serialPortSensor
             // 
             this.serialPortSensor.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPortSensor_DataReceived);
+
+            // 
+            // groupBoxChart
+            // 
+            this.groupBoxChart.Controls.Add(this.chartForceVelocity);
+            this.groupBoxChart.Location = new System.Drawing.Point(782, 323);
+            this.groupBoxChart.Margin = new System.Windows.Forms.Padding(4);
+            this.groupBoxChart.Name = "groupBoxChart";
+            this.groupBoxChart.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBoxChart.Size = new System.Drawing.Size(450, 480);
+            this.groupBoxChart.TabIndex = 12;
+            this.groupBoxChart.TabStop = false;
+            this.groupBoxChart.Text = "Live Data (Force / Velocity)";
+            // 
+            // chartForceVelocity
+            // 
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            chartArea1.Name = "ChartArea1";
+            chartArea1.AxisX.LabelStyle.Enabled = false;
+            chartArea1.AxisX.MajorGrid.LineColor = System.Drawing.Color.LightGray;
+            chartArea1.AxisY.MajorGrid.LineColor = System.Drawing.Color.LightGray;
+            chartArea1.AxisY.Title = "Force (N)";
+            chartArea1.AxisY2.MajorGrid.Enabled = false;
+            chartArea1.AxisY2.Title = "Velocity (mm/s)";
+            
+            chartArea1.AxisY.Minimum = -100;
+            chartArea1.AxisY.Maximum = 100;
+            chartArea1.AxisY2.Minimum = -100;
+            chartArea1.AxisY2.Maximum = 100;
+
+            this.chartForceVelocity.ChartAreas.Add(chartArea1);
+            this.chartForceVelocity.Dock = System.Windows.Forms.DockStyle.Fill;
+            legend1.Name = "Legend1";
+            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            this.chartForceVelocity.Legends.Add(legend1);
+            this.chartForceVelocity.Location = new System.Drawing.Point(4, 19);
+            this.chartForceVelocity.Name = "chartForceVelocity";
+            series1.ChartArea = "ChartArea1";
+            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series1.Legend = "Legend1";
+            series1.Name = "Force (N)";
+            series1.BorderWidth = 2;
+            series1.Color = System.Drawing.Color.Red;
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            series2.Legend = "Legend1";
+            series2.Name = "Velocity Z (%)";
+            series2.BorderWidth = 2;
+            series2.Color = System.Drawing.Color.Blue;
+            series2.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
+            this.chartForceVelocity.Series.Add(series1);
+            this.chartForceVelocity.Series.Add(series2);
+            this.chartForceVelocity.Size = new System.Drawing.Size(442, 455);
+            this.chartForceVelocity.TabIndex = 0;
+            this.chartForceVelocity.Text = "chart1";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1242, 613);
+            this.ClientSize = new System.Drawing.Size(1242, 730);
             this.Controls.Add(this.statusStripMain);
             this.Controls.Add(this.groupBoxLog);
+            this.Controls.Add(this.groupBoxForceControl);
+
             this.Controls.Add(this.groupBoxDodge);
+            this.Controls.Add(this.groupBoxChart);
             this.Controls.Add(this.groupBoxAcquisition);
             this.Controls.Add(this.groupBoxSensor);
             this.Controls.Add(this.groupBoxJoints);
@@ -1055,7 +1325,7 @@ namespace RobotForceIntegration
             this.Controls.Add(this.groupBoxRobotState);
             this.Controls.Add(this.groupBoxRobot);
             this.Margin = new System.Windows.Forms.Padding(4);
-            this.MinimumSize = new System.Drawing.Size(1260, 660);
+            this.MinimumSize = new System.Drawing.Size(1260, 775);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Robot + Force Integration";
@@ -1080,8 +1350,20 @@ namespace RobotForceIntegration
             ((System.ComponentModel.ISupportInitialize)(this.trackBarDodgeThreshold)).EndInit();
             this.groupBoxLog.ResumeLayout(false);
             this.groupBoxLog.PerformLayout();
+            this.groupBoxChart.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartForceVelocity)).EndInit();
             this.statusStripMain.ResumeLayout(false);
             this.statusStripMain.PerformLayout();
+            
+            this.groupBoxForceControl.ResumeLayout(false);
+            this.groupBoxForceControl.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTargetForce)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownDeadband)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownKp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownKi)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownKd)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownMaxVelocity)).EndInit();
+
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1171,5 +1453,23 @@ namespace RobotForceIntegration
         private System.Windows.Forms.Timer timerConnection;
         private System.Windows.Forms.Timer timerDodge;
         private System.IO.Ports.SerialPort serialPortSensor;
+        private System.Windows.Forms.GroupBox groupBoxForceControl;
+        private System.Windows.Forms.CheckBox checkBoxForceControl;
+        private System.Windows.Forms.NumericUpDown numericUpDownDeadband;
+        private System.Windows.Forms.Label labelDeadband;
+        private System.Windows.Forms.Label labelTargetForce;
+        private System.Windows.Forms.NumericUpDown numericUpDownTargetForce;
+        private System.Windows.Forms.Label labelKp;
+        private System.Windows.Forms.NumericUpDown numericUpDownKp;
+        private System.Windows.Forms.Label labelKi;
+        private System.Windows.Forms.NumericUpDown numericUpDownKi;
+        private System.Windows.Forms.Label labelKd;
+        private System.Windows.Forms.NumericUpDown numericUpDownKd;
+        private System.Windows.Forms.Label labelMaxVelocity;
+        private System.Windows.Forms.NumericUpDown numericUpDownMaxVelocity;
+        private System.Windows.Forms.Timer timerForceControl;
+        private System.Windows.Forms.CheckBox checkBoxInvertForce;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartForceVelocity;
+        private System.Windows.Forms.GroupBox groupBoxChart;
     }
 }

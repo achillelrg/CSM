@@ -75,6 +75,14 @@ namespace RobotForceIntegration
         private float lastDodgeVelocityMmPerSecond;
         private bool dodgeManualMotionActive;
 
+        private float forceIntegralError = 0.0F;
+        private float forceLastError = 0.0F;
+        private bool forceControlAwaitingSample = false;
+        private bool forceControlVelocityModeActive = false;
+        private float lastForceControlVelocityMmPerSecond = 0.0F;
+        private DateTime lastForceControlRequestUtc = DateTime.MinValue;
+
+
         public Form1()
         {
             InitializeComponent();
@@ -105,8 +113,13 @@ namespace RobotForceIntegration
             timerConnection.Interval = ConnectionProbeIntervalMilliseconds;
             timerCMD.Interval = AcquisitionIntervalMilliseconds;
             timerDodge.Interval = DodgeIntervalMilliseconds;
+
+            UpdateChartDeadbandLines();
             lastForceSampleUtc = DateTime.MinValue;
             lastDodgeRequestUtc = DateTime.MinValue;
+            
+            timerForceControl.Interval = 50;
+            lastForceControlRequestUtc = DateTime.MinValue;
 
             ApplyMotionSpeedProfile();
             UpdateToolStepDisplay();
@@ -172,6 +185,7 @@ namespace RobotForceIntegration
             bool robotReady = IsRobotReady();
             bool serialReady = IsSerialReady();
             bool dodgeAvailable = robotReady && serialReady && !acquisitionRunning;
+            bool pidAvailable = dodgeAvailable;
 
             buttonToggleMotion.Enabled = robotConnected;
             buttonToggleMotion.Text = robotReady ? "Disable Motion" : "Enable Motion";
@@ -188,9 +202,17 @@ namespace RobotForceIntegration
             buttonStartAcquisition.Text = acquisitionRunning ? "Stop Test" : "Start Test";
             checkBoxDodgeEnabled.Enabled = dodgeAvailable;
             trackBarDodgeThreshold.Enabled = dodgeAvailable;
+            checkBoxForceControl.Enabled = pidAvailable;
+            numericUpDownTargetForce.Enabled = pidAvailable;
+            numericUpDownKp.Enabled = pidAvailable;
+            numericUpDownKi.Enabled = pidAvailable;
+            numericUpDownKd.Enabled = pidAvailable;
+            numericUpDownMaxVelocity.Enabled = pidAvailable;
+            checkBoxInvertForce.Enabled = pidAvailable;
 
             SetMotionControlsEnabled(robotReady);
             SyncDodgeTimerState();
+            SyncForceControlTimerState();
         }
 
         private void UpdateRobotStatus(bool connected)
@@ -513,6 +535,11 @@ namespace RobotForceIntegration
                 checkBoxDodgeEnabled.Checked = false;
             else
                 StopDodgeVelocityControl();
+                
+            if (checkBoxForceControl.Checked)
+                checkBoxForceControl.Checked = false;
+            else
+                StopForceControlVelocity();
 
             ClearRobotTelemetry();
             UpdateRobotStatus(false);
@@ -1114,6 +1141,72 @@ namespace RobotForceIntegration
             bool dodgeStopped = EvaluateDodgeImmediateStop();
             UpdateForceDisplay();
 
+            if (forceControlAwaitingSample)
+            {
+                forceControlAwaitingSample = false;
+                if (IsForceControlRunning())
+                {
+                    // --- ETAPE 1 : Lecture des consignes ---
+                    float target = (float)numericUpDownTargetForce.Value;
+                    float currentForceNewtons = currentForce * 9.81f; // Conversion Kg -> Newtons
+                    float rawError = target - currentForceNewtons;
+                    float dt = timerForceControl.Interval / 1000.0f;
+                    
+                    float Kp = (float)numericUpDownKp.Value;
+                    float Ki = (float)numericUpDownKi.Value;
+                    float Kd = (float)numericUpDownKd.Value;
+                    
+                    // --- ETAPE 2 : Traitement de la Zone Morte (Deadband) ---
+                    float deadband = (float)numericUpDownDeadband.Value;
+                    float Vz = 0.0f;
+                    
+                    if (Math.Abs(rawError) < deadband)
+                    {
+                        // Dans la zone morte : on evite la derive temporelle de l'integrateur
+                        // et on trace l'erreur brute absolue pour ne pas fausser le D au prochain mouvement.
+                        forceIntegralError = 0.0f;
+                        forceLastError = rawError;
+                        Vz = 0.0f;
+                    }
+                    else
+                    {
+                        // --- ETAPE 3 : Reprise du calcul PID decale (evite les a-coups) ---
+                        float effectiveError = rawError > 0 ? (rawError - deadband) : (rawError + deadband);
+                        
+                        forceIntegralError += effectiveError * dt;
+                        
+                        // La derivee s'appuie sur la variation reelle d'effort
+                        float derivative = (rawError - forceLastError) / dt;
+                        forceLastError = rawError;
+                        
+                        // --- ETAPE 4 : Calcul PID ---
+                        Vz = (Kp * effectiveError) + (Ki * forceIntegralError) + (Kd * derivative);
+                    }
+                    
+                    // --- ETAPE 5 : Saturation (securite) et inversion optionnelle ---
+                    float maxVel = (float)numericUpDownMaxVelocity.Value;
+                    Vz = Math.Max(-maxVel, Math.Min(maxVel, Vz));
+                    
+                    if (!checkBoxInvertForce.Checked)
+                        Vz = -Vz;
+
+                    // --- ETAPE 5 : Envoi de la commande de vitesse au robot ---
+                    SendForceControlVelocityCommand(Vz);
+                    
+                    // --- ETAPE 6 : Mise a jour du graphique en temps reel ---
+                    chartForceVelocity.Invoke((System.Windows.Forms.MethodInvoker)delegate {
+                        chartForceVelocity.Series[0].Points.AddY(currentForceNewtons);
+                        float velocityPercent = (maxVel > 0) ? (Vz / maxVel) * 100.0f : 0.0f;
+                        chartForceVelocity.Series[1].Points.AddY(velocityPercent);
+                        if (chartForceVelocity.Series[0].Points.Count > 100)
+                        {
+                            chartForceVelocity.Series[0].Points.RemoveAt(0);
+                            chartForceVelocity.Series[1].Points.RemoveAt(0);
+                        }
+                    });
+                }
+            }
+
             if (dodgeAwaitingForceSample)
             {
                 dodgeAwaitingForceSample = false;
@@ -1298,6 +1391,9 @@ namespace RobotForceIntegration
 
         private void checkBoxDodgeEnabled_CheckedChanged(object sender, EventArgs e)
         {
+            if (checkBoxDodgeEnabled.Checked && checkBoxForceControl.Checked)
+                checkBoxForceControl.Checked = false;
+                
             AppendSensorLog(checkBoxDodgeEnabled.Checked ? "[DODGE] Enabled" : "[DODGE] Disabled");
             if (checkBoxDodgeEnabled.Checked)
                 TareSensor();
@@ -1460,6 +1556,195 @@ namespace RobotForceIntegration
             textBoxSensorLog.Clear();
         }
 
+
+        /// <summary>
+        /// Verifie si l'asservissement en force (Boucle PID) doit etre actif.
+        /// </summary>
+        private bool IsForceControlRunning()
+        {
+            return checkBoxForceControl.Checked && IsRobotReady() && IsSerialReady() && !acquisitionRunning;
+        }
+
+        /// <summary>
+        /// Synchronise l'etat du timer d'acquisition dedie a l'asservissement PID.
+        /// </summary>
+        private void SyncForceControlTimerState()
+        {
+            if (IsForceControlRunning())
+            {
+                if (!timerForceControl.Enabled)
+                    timerForceControl.Start();
+            }
+            else
+            {
+                timerForceControl.Stop();
+                forceControlAwaitingSample = false;
+                StopForceControlVelocity();
+            }
+        }
+
+        /// <summary>
+        /// Interrompt le mode vitesse continue du PID et reinitialise les erreurs (integrale/derivee).
+        /// </summary>
+        private void StopForceControlVelocity()
+        {
+            if (!forceControlVelocityModeActive && Math.Abs(lastForceControlVelocityMmPerSecond) < 0.001F)
+                return;
+
+            if (IsRobotConnected())
+            {
+                xARM.SetCartesianVelocity(0.0F, 0.0F, 0.0F, isToolCoord: true, duration: DodgeVelocityWatchdogSeconds);
+                xARM.SetCartesianVelocityContinuous(false);
+                if (xARM.IsEnableMotion())
+                    xARM.PrepareMotion();
+            }
+
+            forceControlVelocityModeActive = false;
+            lastForceControlVelocityMmPerSecond = 0.0F;
+            forceIntegralError = 0.0F;
+            forceLastError = 0.0F;
+        }
+
+        /// <summary>
+        /// Bascule le controleur du robot en mode vitesse cartesienne continue si necessaire.
+        /// </summary>
+        private bool EnsureForceControlVelocityMode()
+        {
+            if (!IsRobotReady())
+                return false;
+
+            if (forceControlVelocityModeActive)
+                return true;
+
+            int code = xARM.PrepareCartesianVelocityMotion();
+            if (code == 0)
+            {
+                forceControlVelocityModeActive = true;
+                AppendSensorLog("[PID] Cartesian velocity mode active");
+                return true;
+            }
+
+            ShowRobotError("Enable PID velocity mode", code);
+            checkBoxForceControl.Checked = false;
+            return false;
+        }
+
+        /// <summary>
+        /// Envoie la consigne de vitesse calculee par le correcteur PID au controleur du bras.
+        /// </summary>
+        private bool SendForceControlVelocityCommand(float velocityMmPerSecond)
+        {
+            if (!EnsureForceControlVelocityMode())
+                return false;
+
+            int code = xARM.SetCartesianVelocity(
+                0.0F,
+                0.0F,
+                velocityMmPerSecond,
+                isToolCoord: true,
+                duration: DodgeVelocityWatchdogSeconds);
+
+            if (code == 9)
+            {
+                forceControlVelocityModeActive = false;
+                if (!EnsureForceControlVelocityMode())
+                    return false;
+
+                code = xARM.SetCartesianVelocity(0.0F, 0.0F, velocityMmPerSecond, isToolCoord: true, duration: DodgeVelocityWatchdogSeconds);
+            }
+
+            if (code != 0)
+            {
+                ShowRobotError("PID velocity control", code);
+                checkBoxForceControl.Checked = false;
+                return false;
+            }
+
+            lastForceControlVelocityMmPerSecond = velocityMmPerSecond;
+            return true;
+        }
+
+
+        private void numericUpDownDeadband_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateChartDeadbandLines();
+        }
+
+        private void UpdateChartDeadbandLines()
+        {
+            if (chartForceVelocity.InvokeRequired)
+            {
+                chartForceVelocity.Invoke((System.Windows.Forms.MethodInvoker)UpdateChartDeadbandLines);
+                return;
+            }
+
+            double deadband = (double)numericUpDownDeadband.Value;
+            chartForceVelocity.ChartAreas[0].AxisY.StripLines.Clear();
+
+            if (deadband > 0)
+            {
+                System.Windows.Forms.DataVisualization.Charting.StripLine topLine = new System.Windows.Forms.DataVisualization.Charting.StripLine();
+                topLine.IntervalOffset = deadband;
+                topLine.StripWidth = 0;
+                topLine.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+                topLine.BorderColor = System.Drawing.Color.DarkGray;
+                topLine.BorderWidth = 2;
+
+                System.Windows.Forms.DataVisualization.Charting.StripLine bottomLine = new System.Windows.Forms.DataVisualization.Charting.StripLine();
+                bottomLine.IntervalOffset = -deadband;
+                bottomLine.StripWidth = 0;
+                bottomLine.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dash;
+                bottomLine.BorderColor = System.Drawing.Color.DarkGray;
+                bottomLine.BorderWidth = 2;
+
+                chartForceVelocity.ChartAreas[0].AxisY.StripLines.Add(topLine);
+                chartForceVelocity.ChartAreas[0].AxisY.StripLines.Add(bottomLine);
+            }
+        }
+
+        private void checkBoxForceControl_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxForceControl.Checked && checkBoxDodgeEnabled.Checked)
+            {
+                checkBoxDodgeEnabled.Checked = false;
+            }
+            
+            AppendSensorLog(checkBoxForceControl.Checked ? "[PID] Enabled" : "[PID] Disabled");
+            if (checkBoxForceControl.Checked)
+            {
+                forceIntegralError = 0.0F;
+                forceLastError = 0.0F;
+                TareSensor();
+            }
+            else
+            {
+                StopForceControlVelocity();
+            }
+            SyncUiState();
+        }
+
+        private void timerForceControl_Tick(object sender, EventArgs e)
+        {
+            if (!IsForceControlRunning())
+            {
+                SyncForceControlTimerState();
+                return;
+            }
+
+            if (forceControlAwaitingSample &&
+                (DateTime.UtcNow - lastForceControlRequestUtc).TotalMilliseconds > DodgeForceSampleTimeoutMilliseconds)
+            {
+                forceControlAwaitingSample = false;
+            }
+
+            if (!forceControlAwaitingSample)
+            {
+                forceControlAwaitingSample = true;
+                lastForceControlRequestUtc = DateTime.UtcNow;
+                SendSensorCommand("M");
+            }
+        }
+
         private void timerDodge_Tick(object sender, EventArgs e)
         {
             if (!IsDodgeRunning())
@@ -1518,6 +1803,7 @@ namespace RobotForceIntegration
         {
             StopAcquisition(false);
             StopDodgeVelocityControl();
+            StopForceControlVelocity();
             timerConnection.Stop();
 
             if (serialPortSensor.IsOpen)
