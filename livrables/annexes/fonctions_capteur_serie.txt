@@ -1,0 +1,115 @@
+SOURCE PRINCIPALE
+C:\WORKSPACE\CSM\CSM\demo\csharp_studio\RobotForceIntegration\Form1.cs
+
+private void ConfigureSerialPort()
+{
+    serialPortSensor.PortName = comboBoxSerialPort.Text.Trim();
+    serialPortSensor.BaudRate = int.Parse(comboBoxBaudRate.Text, CultureInfo.InvariantCulture);
+    serialPortSensor.Parity = (Parity)Enum.Parse(typeof(Parity), comboBoxParity.Text);
+    serialPortSensor.StopBits = (StopBits)Enum.Parse(typeof(StopBits), comboBoxStopBits.Text);
+    serialPortSensor.DataBits = int.Parse(comboBoxDataBits.Text, CultureInfo.InvariantCulture);
+    serialPortSensor.NewLine = "\r\n";
+    serialPortSensor.ReadTimeout = 500;
+    serialPortSensor.WriteTimeout = 500;
+}
+
+private static bool TryParseForce(string line, out float force)
+{
+    Match match = ReadingRegex.Match(line);
+    if (!match.Success)
+        match = GenericNumberRegex.Match(line);
+
+    if (!match.Success)
+    {
+        force = 0.0F;
+        return false;
+    }
+
+    string numericText = match.Groups["value"].Value.Replace(',', '.');
+    return float.TryParse(numericText, NumberStyles.Float, CultureInfo.InvariantCulture, out force);
+}
+
+private void ProcessSerialChunk(string chunk)
+{
+    if (InvokeRequired)
+    {
+        BeginInvoke(new Action<string>(ProcessSerialChunk), chunk);
+        return;
+    }
+
+    serialBuffer.Append(chunk);
+
+    while (true)
+    {
+        string buffer = serialBuffer.ToString();
+        int lineBreakIndex = buffer.IndexOf('\n');
+        if (lineBreakIndex < 0)
+            break;
+
+        string line = buffer.Substring(0, lineBreakIndex).Trim('\r', '\n', '\t', ' ');
+        serialBuffer.Remove(0, lineBreakIndex + 1);
+
+        if (line.Length == 0)
+            continue;
+
+        HandleSensorLine(line);
+    }
+}
+
+private void HandleSensorLine(string line)
+{
+    AppendSensorLog("[RX] " + line);
+
+    float force;
+    if (!TryParseForce(line, out force))
+        return;
+
+    currentForce = force;
+    lastForceSampleUtc = DateTime.UtcNow;
+
+    if (!acquisitionRunning || !awaitingForceSample)
+        return;
+
+    measures.Add(new Measure
+    {
+        Timestamp = DateTime.Now,
+        Force = currentForce,
+        PositionZ = pendingPositionZ
+    });
+    awaitingForceSample = false;
+}
+
+SOURCE BAN DE TEST SERIE
+C:\WORKSPACE\CSM\CSM\demo\csharp_studio\RS232-PC\MainForm.cs
+
+private void acquisitionTimer_Tick(object sender, EventArgs e)
+{
+    if (!acquisitionRunning)
+    {
+        return;
+    }
+
+    if (!RS232Port.IsOpen)
+    {
+        stopAcquisition();
+        MessageBox.Show("Serial Port not opened");
+        return;
+    }
+
+    string command = string.IsNullOrWhiteSpace(MessageToTarget) ? "M" : MessageToTarget.Trim();
+    RS232Port.WriteLine(command);
+    setReceived("[TX] " + command + Environment.NewLine);
+}
+
+private static bool tryParseForce(string line, out float force)
+{
+    Match match = ReadingRegex.Match(line);
+    if (!match.Success)
+    {
+        force = 0.0F;
+        return false;
+    }
+
+    string numericText = match.Groups["value"].Value.Replace(',', '.');
+    return float.TryParse(numericText, NumberStyles.Float, CultureInfo.InvariantCulture, out force);
+}

@@ -1,0 +1,116 @@
+SOURCE
+C:\WORKSPACE\CSM\CSM\demo\csharp_studio\RobotForceIntegration\Robot.cs
+
+public bool Create(string IP)
+{
+    int ret;
+    if (arm == -1)
+    {
+        arm = SafeApiCall(() => XArmAPI.create_instance(IP, false));
+        if (arm != -1)
+        {
+            ret = SafeApiCall(() => XArmAPI.switch_xarm(arm));
+            xArmCreatedFlag = true;
+            ConnectedFlag = ret == 0 && InitializeConnectedArm();
+        }
+        else
+        {
+            xArmCreatedFlag = false;
+            ConnectedFlag = false;
+        }
+    }
+    else if (!ConnectedFlag)
+    {
+        ret = SafeApiCall(() => XArmAPI.switch_xarm(arm));
+        if (ret == 0)
+        {
+            ret = SafeApiCall(() => XArmAPI.robot_connect(IP));
+            if (ret == 0)
+            {
+                xArmCreatedFlag = true;
+                ConnectedFlag = InitializeConnectedArm();
+            }
+        }
+    }
+
+    return xArmCreatedFlag && ConnectedFlag;
+}
+
+public int EnableMotion(bool flag)
+{
+    int ret = -1;
+    if (xArmCreatedFlag && ConnectedFlag)
+    {
+        ret = SafeApiCall(() => XArmAPI.motion_enable(flag));
+        if (ret == 0)
+            EnableMotionFlag = flag;
+    }
+    return ret;
+}
+
+public int PrepareMotion()
+{
+    int ret = -1;
+    if (xArmCreatedFlag && ConnectedFlag)
+    {
+        ret = SafeApiCall(() => XArmAPI.set_mode(0));
+        if (ret == 0)
+            ret = SafeApiCall(() => XArmAPI.set_state(0));
+    }
+    return ret;
+}
+
+public int MoveToolRelative(float dx, float dy, float dz, bool wait = true, float timeout = NO_TIMEOUT)
+{
+    float[] pose = { dx, dy, dz, 0.0F, 0.0F, 0.0F };
+    return MoveTool(pose, wait, timeout);
+}
+
+public int PrepareCartesianVelocityMotion()
+{
+    int ret = -1;
+    if (xArmCreatedFlag && ConnectedFlag)
+    {
+        ret = SafeApiCall(() => XArmAPI.set_mode(5));
+        if (ret == 0)
+            ret = SafeApiCall(() => XArmAPI.set_state(0));
+        if (ret == 0)
+            SafeApiCall(() => XArmAPI.set_cartesian_velo_continuous(true));
+    }
+    return ret;
+}
+
+SOURCE BAS NIVEAU
+C:\WORKSPACE\CSM\CSM\demo\csharp_studio\RobotForceIntegration\XArmAPI.cs
+
+[DllImport("xarm.dll")]
+public static extern int create_instance(
+    string port = "",
+    bool is_radian = false,
+    bool do_not_open = false,
+    bool check_tcp_limit = true,
+    bool check_joint_limit = true,
+    bool check_cmdnum_limit = true,
+    bool check_robot_sn = false,
+    bool check_is_ready = true,
+    bool check_is_pause = true,
+    int max_callback_thread_count = -1,
+    int max_cmdnum = 512,
+    int init_axis = 7,
+    bool debug = false,
+    string report_type = "rich",
+    bool baud_checkset = true);
+
+[DllImport("xarm.dll")]
+public static extern int motion_enable(bool enable, int servo_id = 8);
+
+[DllImport("xarm.dll")]
+public static extern int set_mode(int mode, int detection_param = 0);
+
+[DllImport("xarm.dll")]
+public static extern int set_state(int state);
+
+[DllImport("xarm.dll")]
+public static extern int set_tool_position(float[] pose,
+    float speed = 0, float acc = 0, float mvtime = 0,
+    bool wait = false, float timeout = NO_TIMEOUT, float radius = -1, byte motion_type = 0);

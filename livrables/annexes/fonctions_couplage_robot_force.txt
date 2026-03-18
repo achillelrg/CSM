@@ -1,0 +1,73 @@
+SOURCE
+C:\WORKSPACE\CSM\CSM\demo\csharp_studio\RobotForceIntegration\Form1.cs
+
+private void timerCMD_Tick(object sender, EventArgs e)
+{
+    if (!IsRobotReady() || !IsSerialReady())
+    {
+        StopAcquisition(true);
+        MessageBox.Show("Robot motion or sensor serial connection is not ready.", "Acquisition", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        return;
+    }
+
+    if (!ExecuteRobotCommand(() => xARM.MoveToolRelative(0.0F, 0.0F, GetToolStep(), true), "Move Tool +Z"))
+    {
+        StopAcquisition(true);
+        return;
+    }
+
+    pendingPositionZ = xARM.GetCurrentPosition()[2];
+    awaitingForceSample = true;
+    SendSensorCommand("M");
+}
+
+private void timerDodge_Tick(object sender, EventArgs e)
+{
+    if (!IsDodgeRunning())
+    {
+        SyncDodgeTimerState();
+        return;
+    }
+
+    if (dodgeAwaitingForceSample &&
+        (DateTime.UtcNow - lastDodgeRequestUtc).TotalMilliseconds > DodgeForceSampleTimeoutMilliseconds)
+    {
+        dodgeAwaitingForceSample = false;
+    }
+
+    if (!dodgeAwaitingForceSample)
+    {
+        dodgeAwaitingForceSample = true;
+        lastDodgeRequestUtc = DateTime.UtcNow;
+        SendSensorCommand("M");
+    }
+}
+
+private void MoveToolByStep(float dx, float dy, float dz, string action)
+{
+    bool dodgeProtected = IsManualMotionProtectedByDodge();
+    if (dodgeProtected)
+        StopDodgeVelocityControl();
+
+    bool executed = ExecuteRobotCommand(() => xARM.MoveToolRelative(dx, dy, dz, !dodgeProtected), action);
+    if (!executed)
+        return;
+
+    if (dodgeProtected)
+        MarkManualMotionForDodge();
+}
+
+private void WriteMeasures(string path)
+{
+    using (StreamWriter writer = new StreamWriter(path, false, Encoding.UTF8))
+    {
+        writer.WriteLine("Timestamp,Force,PositionZ");
+        foreach (Measure measure in measures)
+        {
+            writer.WriteLine(
+                measure.Timestamp.ToString("O", CultureInfo.InvariantCulture) + "," +
+                measure.Force.ToString("G9", CultureInfo.InvariantCulture) + "," +
+                measure.PositionZ.ToString("G9", CultureInfo.InvariantCulture));
+        }
+    }
+}
