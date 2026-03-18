@@ -1,0 +1,80 @@
+Rapport CSM Robot + Force
+Fonctions pertinentes extraites du depot local
+
+1. Gestion du capteur et de la liaison serie
+
+Fichier: demo/csharp_studio/RobotForceIntegration/Form1.cs
+- ShowSensorConfigurationDialog : ouvre la boite de dialogue de configuration serie.
+- ConfigureSerialPort : applique les parametres COM, baudrate, parite, stop bits et data bits.
+- ButtonOpenSerial_Click : ouvre le port serie du capteur.
+- ButtonCloseSerial_Click : ferme le port serie et stoppe les traitements actifs.
+- SendSensorCommand : envoie une commande ASCII au capteur, notamment M ou T.
+- TareSensor : remet les variables locales a zero et envoie la commande T.
+- serialPortSensor_DataReceived : reception asynchrone des fragments de donnees serie.
+- ProcessSerialChunk : reconstitue les lignes completes a partir du buffer recu.
+- TryParseForce : extrait la valeur numerique par expression reguliere.
+- HandleSensorLine : met a jour la force courante, le filtrage Dodge et l'enregistrement des mesures.
+
+Fichier: demo/csharp_studio/RS232-PC/MainForm.cs
+- btOpen_Click / btClose_Click : ouverture et fermeture du port serie.
+- serialport_DataReceived : reception asynchrone du flux serie.
+- processReceivedChunk : gestion du buffer de reception ligne par ligne.
+- processMeasurementLine : extraction des valeurs de force et de position Z.
+- writeRecordsToCsv : export CSV pour la base RS232-PC.
+
+2. Gestion du bras robotique et du reseau
+
+Fichier: demo/csharp_studio/RobotForceIntegration/Robot.cs
+- Create : creation de l'instance xArm et connexion au robot via l'adresse IP.
+- GetLastFailureMessage : diagnostic d'echec de connexion natif ou reseau.
+- EnableMotion : activation ou desactivation des mouvements.
+- PrepareMotion : passage en mode position standard.
+- PrepareCartesianVelocityMotion : passage en mode vitesse cartesienne continue.
+- SetMotionScale : reglage des vitesses et accelerations globales.
+- GetCurrentPosition : lecture de la pose courante du robot.
+- MoveBase : deplacement cartesien dans le repere base.
+- MoveTool : deplacement cartesien dans le repere outil.
+- MoveToolRelative : deplacement relatif de l'outil sur X, Y, Z.
+- MoveJointValues : mouvement articulaire.
+- SetCartesianVelocity : envoi d'une vitesse cartesienne continue.
+- StopCurrentMotion : demande d'arret du mouvement en cours.
+
+Fichier: demo/csharp_studio/RobotForceIntegration/XArmAPI.cs
+- create_instance : creation de l'instance native xArm.
+- robot_connect : connexion reseau au controleur.
+- motion_enable : activation des mouvements.
+- set_mode / set_state : configuration de l'etat de commande.
+- set_tool_position : deplacement cartesien outil.
+- set_servo_angle : deplacement articulaire.
+- vc_set_cartesian_velocity : commande de vitesse cartesienne.
+- config_force_control / set_force_control_pid : interfaces natives de controle de force du SDK.
+
+3. Couplage Robot / Force
+
+Fichier: demo/csharp_studio/RobotForceIntegration/Form1.cs
+- timerCMD_Tick : boucle d'essai mecanique cadencee a 300 ms.
+- StartAcquisition : demarrage de l'essai mecanique et initialisation de la liste de mesures.
+- StopAcquisition : arret de l'essai mecanique.
+- WriteMeasures : export des mesures sous forme CSV.
+
+4. Comportement reactif de type effort / Dodge
+
+Fichier: demo/csharp_studio/RobotForceIntegration/Form1.cs
+- checkBoxDodgeEnabled_CheckedChanged : activation ou arret du mode Dodge.
+- timerDodge_Tick : requetes periodiques de mesure en mode Dodge.
+- EnsureDodgeVelocityMode : activation du mode vitesse cartesienne cote robot.
+- StopDodgeVelocityControl : arret controle du mode Dodge.
+- GetDodgeThresholdKg : conversion de la position du curseur en seuil en kilogrammes.
+- GetDodgeEffectiveForceKg : force utile apres logique de selection et filtrage.
+- ComputeDodgeVelocityMmPerSecond : conversion de la force en vitesse sur Z.
+- ApplyDodgeVelocityDynamics : limitation dynamique de la vitesse commandee.
+- SendDodgeVelocityCommand : envoi de la vitesse cartesienne outil.
+- EvaluateDodgeImmediateStop : arret immediat lorsque la force redescend sous le seuil.
+
+5. Fichiers de reference principaux
+
+- demo/csharp_studio/RobotForceIntegration/Form1.cs
+- demo/csharp_studio/RobotForceIntegration/Form1.Designer.cs
+- demo/csharp_studio/RobotForceIntegration/Robot.cs
+- demo/csharp_studio/RobotForceIntegration/XArmAPI.cs
+- demo/csharp_studio/RS232-PC/MainForm.cs

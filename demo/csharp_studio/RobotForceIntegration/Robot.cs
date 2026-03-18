@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading;
@@ -17,6 +18,16 @@ namespace RobotForceIntegration
         public const float NO_TIMEOUT = -1;
         public const int API_NOT_CONNECTED = -1;
 
+        private enum FailureCategory
+        {
+            None,
+            NativeLibraryMissing,
+            NativeEntryPointMissing,
+            NativeArchitectureMismatch,
+            NativeInteropFailure,
+            ApiCallFailed,
+        }
+
         protected
             int arm;
             bool xArmCreatedFlag;
@@ -26,6 +37,11 @@ namespace RobotForceIntegration
             bool SafetyFlag;
             int CollisionSensitivity;
             int TeachSensitivity;
+
+        private FailureCategory lastFailureCategory;
+        private string lastFailureMessage;
+        private string lastFailureContext;
+        private int? lastFailureCode;
 
         public
             float JointSpeed;
@@ -84,6 +100,7 @@ namespace RobotForceIntegration
             MaxJoint[5] = +360.0F;
             MinJoint[6] = 0.0F;
             MaxJoint[6] = 0.0F;
+            ClearLastFailure();
         }
 
         private void MarkDisconnected(bool resetInstance = false)
@@ -97,20 +114,106 @@ namespace RobotForceIntegration
             }
         }
 
+        private void ClearLastFailure()
+        {
+            lastFailureCategory = FailureCategory.None;
+            lastFailureMessage = string.Empty;
+            lastFailureContext = string.Empty;
+            lastFailureCode = null;
+        }
+
+        private void SetApiFailure(string context, int code, string details = null)
+        {
+            lastFailureCategory = FailureCategory.ApiCallFailed;
+            lastFailureContext = context;
+            lastFailureCode = code;
+            lastFailureMessage = context + " failed (code " + code.ToString() + ").";
+            if (!string.IsNullOrWhiteSpace(details))
+                lastFailureMessage += " " + details;
+        }
+
+        private void SetInteropFailure(FailureCategory category, string context, Exception ex)
+        {
+            lastFailureCategory = category;
+            lastFailureContext = context;
+            lastFailureCode = null;
+            lastFailureMessage = context + " failed: " + ex.Message;
+        }
+
+        private bool HasInteropFailure()
+        {
+            return lastFailureCategory == FailureCategory.NativeLibraryMissing
+                || lastFailureCategory == FailureCategory.NativeEntryPointMissing
+                || lastFailureCategory == FailureCategory.NativeArchitectureMismatch
+                || lastFailureCategory == FailureCategory.NativeInteropFailure;
+        }
+
+        private bool EnsureSuccess(int code, string context, string details = null)
+        {
+            if (code == 0)
+                return true;
+
+            SetApiFailure(context, code, details);
+            return false;
+        }
+
         [HandleProcessCorruptedStateExceptions]
         [SecurityCritical]
-        private int SafeApiCall(Func<int> apiCall)
+        private int SafeApiCall(Func<int> apiCall, string context = "xArm API call")
         {
             try
             {
                 int ret = apiCall();
                 if (ret == API_NOT_CONNECTED)
+                {
                     MarkDisconnected();
+                    SetApiFailure(context, ret, "The xArm SDK reported that the robot is not connected.");
+                }
                 return ret;
+            }
+            catch (DllNotFoundException ex)
+            {
+                MarkDisconnected(true);
+                SetInteropFailure(
+                    FailureCategory.NativeLibraryMissing,
+                    context,
+                    ex);
+                return API_NOT_CONNECTED;
+            }
+            catch (EntryPointNotFoundException ex)
+            {
+                MarkDisconnected(true);
+                SetInteropFailure(
+                    FailureCategory.NativeEntryPointMissing,
+                    context,
+                    ex);
+                return API_NOT_CONNECTED;
+            }
+            catch (BadImageFormatException ex)
+            {
+                MarkDisconnected(true);
+                SetInteropFailure(
+                    FailureCategory.NativeArchitectureMismatch,
+                    context,
+                    ex);
+                return API_NOT_CONNECTED;
+            }
+            catch (SEHException ex)
+            {
+                MarkDisconnected(true);
+                SetInteropFailure(
+                    FailureCategory.NativeInteropFailure,
+                    context,
+                    ex);
+                return API_NOT_CONNECTED;
             }
             catch
             {
                 MarkDisconnected();
+                SetInteropFailure(
+                    FailureCategory.NativeInteropFailure,
+                    context,
+                    new InvalidOperationException("Unexpected native interop failure."));
                 return API_NOT_CONNECTED;
             }
         }
@@ -148,77 +251,120 @@ namespace RobotForceIntegration
         {
             int ret;
 
-            ret = SafeApiCall(() => XArmAPI.clean_warn());
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.clean_warn(), "clean_warn");
+            if (!EnsureSuccess(ret, "Robot initialization: clean warnings")) return false;
 
-            ret = SafeApiCall(() => XArmAPI.clean_error());
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.clean_error(), "clean_error");
+            if (!EnsureSuccess(ret, "Robot initialization: clean errors")) return false;
 
-            ret = SafeApiCall(() => XArmAPI.get_world_offset(BASE));
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.get_world_offset(BASE), "get_world_offset");
+            if (!EnsureSuccess(ret, "Robot initialization: read world offset")) return false;
 
-            ret = SafeApiCall(() => XArmAPI.get_tcp_offset(TCP));
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.get_tcp_offset(TCP), "get_tcp_offset");
+            if (!EnsureSuccess(ret, "Robot initialization: read TCP offset")) return false;
 
-            ret = SafeApiCall(() => XArmAPI.get_position(CurrentPosition));
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.get_position(CurrentPosition), "get_position");
+            if (!EnsureSuccess(ret, "Robot initialization: read position")) return false;
 
-            ret = SafeApiCall(() => XArmAPI.get_servo_angle(CurrentJoint));
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.get_servo_angle(CurrentJoint), "get_servo_angle");
+            if (!EnsureSuccess(ret, "Robot initialization: read joint angles")) return false;
 
             CollisionSensitivity = 3;
-            ret = SafeApiCall(() => XArmAPI.set_collision_sensitivity(CollisionSensitivity));
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.set_collision_sensitivity(CollisionSensitivity), "set_collision_sensitivity");
+            if (!EnsureSuccess(ret, "Robot initialization: set collision sensitivity")) return false;
 
             TeachSensitivity = 3;
-            ret = SafeApiCall(() => XArmAPI.set_teach_sensitivity(TeachSensitivity));
-            if (ret != 0) return false;
+            ret = SafeApiCall(() => XArmAPI.set_teach_sensitivity(TeachSensitivity), "set_teach_sensitivity");
+            if (!EnsureSuccess(ret, "Robot initialization: set teach sensitivity")) return false;
 
             SelfCollisionFlag = false;
-            ret = SafeApiCall(() => XArmAPI.set_self_collision_detection(SelfCollisionFlag));
+            ret = SafeApiCall(() => XArmAPI.set_self_collision_detection(SelfCollisionFlag), "set_self_collision_detection");
+            if (ret != 0)
+                SetApiFailure("Robot initialization: configure self collision detection", ret);
             return ret == 0;
         }
 
         public bool Create(string IP)
         {
             int ret;
+            ClearLastFailure();
+
+            if (string.IsNullOrWhiteSpace(IP))
+            {
+                lastFailureCategory = FailureCategory.ApiCallFailed;
+                lastFailureMessage = "Robot IP is empty.";
+                return false;
+            }
+
             if (arm == -1)
             {
-                arm = SafeApiCall(() => XArmAPI.create_instance(IP, false));
+                arm = SafeApiCall(() => XArmAPI.create_instance(IP, false), "create_instance");
+                if (HasInteropFailure())
+                    return false;
+
                 if (arm != -1)
                 {
-                    ret = SafeApiCall(() => XArmAPI.switch_xarm(arm));
+                    ret = SafeApiCall(() => XArmAPI.switch_xarm(arm), "switch_xarm");
+                    if (HasInteropFailure())
+                        return false;
+
                     xArmCreatedFlag = true;
                     ConnectedFlag = ret == 0 && InitializeConnectedArm();
+                    if (ret != 0)
+                        SetApiFailure("xArm SDK switch instance", ret);
+                    else if (!ConnectedFlag && string.IsNullOrWhiteSpace(lastFailureMessage))
+                        lastFailureMessage = "The xArm SDK created an instance but failed during robot initialization.";
                 }
                 else
                 {
                     xArmCreatedFlag = false;
                     ConnectedFlag = false;
+                    if (string.IsNullOrWhiteSpace(lastFailureMessage))
+                        lastFailureMessage = "The xArm SDK could not create a robot instance. Verify that xarm.dll is present and that the robot API service is reachable.";
                 }
             }
             else if (!ConnectedFlag)
             {
-                ret = SafeApiCall(() => XArmAPI.switch_xarm(arm));
+                ret = SafeApiCall(() => XArmAPI.switch_xarm(arm), "switch_xarm");
+                if (HasInteropFailure())
+                    return false;
+
                 if (ret == 0)
                 {
-                    ret = SafeApiCall(() => XArmAPI.robot_connect(IP));
+                    ret = SafeApiCall(() => XArmAPI.robot_connect(IP), "robot_connect");
+                    if (HasInteropFailure())
+                        return false;
+
                     if (ret == 0)
                     {
                         xArmCreatedFlag = true;
                         ConnectedFlag = InitializeConnectedArm();
+                        if (!ConnectedFlag && string.IsNullOrWhiteSpace(lastFailureMessage))
+                            lastFailureMessage = "The xArm SDK reconnected to the robot but initialization failed.";
                     }
+                    else
+                        SetApiFailure("Robot network connection", ret);
                 }
+                else
+                    SetApiFailure("xArm SDK switch instance", ret);
             }
 
             return xArmCreatedFlag && ConnectedFlag;
+        }
+
+        public string GetLastFailureMessage()
+        {
+            if (!string.IsNullOrWhiteSpace(lastFailureMessage))
+                return lastFailureMessage;
+
+            return "Unknown robot connection failure.";
         }
 
         public string GetVersion()
         {
             string s = "Test";
             byte[] version = new byte[40];
-            int ret = SafeApiCall(() => XArmAPI.get_version(version));
+            int ret = SafeApiCall(() => XArmAPI.get_version(version), "get_version");
             if (ret == 0)
                 s = Encoding.ASCII.GetString(version).TrimEnd('\0');
             return s;
@@ -249,7 +395,7 @@ namespace RobotForceIntegration
                 return false;
             }
 
-            int ret = SafeApiCall(() => XArmAPI.get_state(ref state));
+            int ret = SafeApiCall(() => XArmAPI.get_state(ref state), "get_state");
             ConnectedFlag = ret == 0;
             if (!ConnectedFlag)
                 EnableMotionFlag = false;

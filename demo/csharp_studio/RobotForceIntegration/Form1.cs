@@ -1179,7 +1179,13 @@ namespace RobotForceIntegration
             {
                 robotWasConnected = false;
                 UpdateRobotStatus(false);
-                MessageBox.Show("Unable to connect to the robot.", "Robot", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                string diagnostic = xARM.GetLastFailureMessage();
+                AppendSensorLog("[ROBOT] Connection failed: " + diagnostic);
+                MessageBox.Show(
+                    diagnostic,
+                    "Robot",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
             }
 
             SyncUiState();

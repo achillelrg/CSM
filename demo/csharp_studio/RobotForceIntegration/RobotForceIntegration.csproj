@@ -122,5 +122,13 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <Target Name="CopyXArmNativeLibrary" AfterTargets="Build">
+    <PropertyGroup>
+      <XArmNativeSource>$(MSBuildProjectDirectory)\..\x64\$(Configuration)\xarm.dll</XArmNativeSource>
+      <XArmNativeTarget>$(TargetDir)xarm.dll</XArmNativeTarget>
+    </PropertyGroup>
+    <Copy SourceFiles="$(XArmNativeSource)" DestinationFiles="$(XArmNativeTarget)" SkipUnchangedFiles="true" Condition="Exists('$(XArmNativeSource)') and '$(XArmNativeSource)' != '$(XArmNativeTarget)'" />
+    <Warning Text="xarm.dll was not found at $(XArmNativeSource). Build the demo/csharp_studio/xarm project in the same solution before running RobotForceIntegration." Condition="!Exists('$(XArmNativeSource)')" />
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
