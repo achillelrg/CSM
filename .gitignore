@@ -267,3 +267,7 @@ ModelManifest.xml
 CMakeLists.txt
 *.old
 example/0000*
+*.aux
+*.toc
+*.out
+Livrable_CSM_Robot_Force.zip

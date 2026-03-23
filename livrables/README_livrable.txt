@@ -1,20 +1,16 @@
 LIVRABLE CSM ROBOT + FORCE
 ==========================
 
-Contenu attendu pour la remise :
+Le livrable final pour l'enseignant doit contenir uniquement :
+- le rapport PDF
+- le code fonctionnel
+
+Generation du livrable minimal :
+1. Ouvrir un terminal dans C:\WORKSPACE\CSM\csharp_studio
+2. Lancer : powershell -ExecutionPolicy Bypass -File .\build_livrable_prof.ps1
+3. Recuperer : Livrable_CSM_Robot_Force.zip
+
+Le zip genere contient uniquement :
 - Rapport_CSM_Robot_Force.pdf
-- annexes/exemple_test_force_position.csv
-- annexes/fonctions_capteur_serie.txt
-- annexes/fonctions_robot_reseau.txt
-- annexes/fonctions_couplage_robot_force.txt
-
-Generation automatique du PDF :
-1. Ouvrir un terminal dans C:\WORKSPACE\CSM\CSM
-2. Lancer build_rapport_pdf.bat
-3. Le PDF est genere dans C:\WORKSPACE\CSM\CSM\livrables
-
-Source unique du rapport :
-- Rapport_CSM_Robot_Force.tex
-
-Remarque :
-- Le fichier Markdown historique n'est plus necessaire pour generer le PDF.
+- code\RobotForceIntegration\...
+- README_INSTALLATION_PROF.md
